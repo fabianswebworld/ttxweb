@@ -1,5 +1,4 @@
-# ttxweb - Teletext to HTML generator
-![Logo](/ttxweb.png "ttxweb Logo")
+#  ![Logo](/ttxweb.png "ttxweb Logo") ttxweb - Teletext to HTML generator
 
 ## What is ttxweb?
 
