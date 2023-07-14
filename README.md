@@ -51,7 +51,7 @@ The following configuration options are available to configure the behavior of t
      - Other formats would have to be added to ttxweb.js.  
        Example:
       
-       `const ROW_0_CUSTOMHEADER = '<span class="bg0 fg7"><span class="fg7"> %page%.%sub% </span><span class="fg6">hr-text </span><span class="fg7">%weekday% %day%.%month%.%year% </span><span class="fg6">%hh%:%mm%:%ss%</span></span >';`
+       `const ROW_0_CUSTOMHEADER = '<span class="bg0 fg7"><span class="fg7"> %page%.%sub% </span><span class="fg6">ttxweb  </span><span class="fg7">%weekday% %day%.%month%.%year% </span><span class="fg6">%hh%:%mm%:%ss%</span></span >';`
 
 - **scripts/ttxweb_nav.php:**
    - The "quick links" to the individual teletext pages can be adjusted directly in the HTML code or, if necessary, removed entirely.
