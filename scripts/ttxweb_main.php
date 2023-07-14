@@ -6,7 +6,7 @@
 
 // configuration
 
-const TTXWEB_VERSION     = '1.1.1.556 (2023-07-14)';       // version string
+const TTXWEB_VERSION     = '1.1.1.556 (2023-07-14)';          // version string
 const EP1_PATH           = 'ep1/';                            // path to EP1 files
 const EP1_LANGUAGE       = 'de-DE';                           // teletext language (currently only 'de-DE'; 'en-GB')
 const EP1_DECODE_X26     = true;                              // decode packet X/26 (level 1.5 characters)
