@@ -2,7 +2,9 @@
 
 ## What is ttxweb?
 
-ttxweb is a web application that brings the "old-fashioned" teletext (video text) to the web in a simple way. This is mostly interesting for broadcasters. All level 1.0 teletext attributes such as flash are supported, additionally, some Level 2.5 attributes (double width and double size) are supported. Decoding of level 1.5 characters via packet X/26 is supported as well if they are carried inside the EP1 file. To use ttxweb, all you have to do is install the PHP scripts including the additional files (CSS, JS etc.) on a web server and ensure that the teletext pages are synchronized as EP1 files in a configurable folder that can be accessed from the PHP script (e.g. via FTP).
+ttxweb is a web application that brings the "old-fashioned" teletext (video text) to the web in a simple way. This is mostly interesting for broadcasters. All Level 1.0 teletext attributes such as flash and double height are supported; additionally, some Level 2.5 attributes (double width and double size) are supported. Decoding of enhanced Level 1.5 characters via packet X/26 is supported as well if they are carried inside the EP1 file. On the generated HTML pages, page numbers / references are automatically rendered as clickable hyperlinks. Similarly, "next" indicators such as ">>" and "->" are rendered as hyperlinks to the next subpage or page. Additionally, web links are rendered as hyperlinks as well.
+
+To use ttxweb, all you have to do is install the PHP scripts including the additional files (CSS, JS etc.) on a web server and ensure that the teletext pages are synchronized as EP1 files in a configurable folder that can be accessed from the PHP script (e.g. via FTP).
 
 ## Screenshots
 
