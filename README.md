@@ -6,7 +6,13 @@ ttxweb is a web application that brings the "old-fashioned" teletext (video text
 
 To use ttxweb, all you have to do is install the PHP scripts including the additional files (CSS, JS etc.) on a web server and ensure that the teletext pages are synchronized as EP1 files in a configurable folder that can be accessed from the PHP script (e.g. via FTP).
 
+## Live Demo
+
+See the live demo at http://www.fabianswebworld.de/ttxweb.
+
 ## Screenshots
+
+![Screenshot - Page 100](/demo_p100.png "Page 100")
 
 ![Screenshot - Test page](/demo_p896.png "Test page")
 
@@ -70,6 +76,9 @@ The following configuration options are available to configure the behavior of t
 
 - **templates/trailer.php:**
    - HTML template, which is output after the actual teletext output. The same variables apply as in **header.php**.
+
+- **css/ttxweb_main.css:**
+   - Customize styles of the navigation box if necessary. Avoid changing the main Teletext style classes, although you *can* carefully modify text sizes there.
 
 ## GET parameters at runtime
 
