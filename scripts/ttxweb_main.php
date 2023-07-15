@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.1.1.556 (2023-07-14)
+// version: 1.1.2.560 (2023-07-15)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 // configuration
 
-const TTXWEB_VERSION     = '1.1.1.556 (2023-07-14)';          // version string
+const TTXWEB_VERSION     = '1.1.2.560 (2023-07-15)';          // version string
 const EP1_PATH           = 'ep1/';                            // path to EP1 files
 const EP1_LANGUAGE       = 'de-DE';                           // teletext language (currently only 'de-DE'; 'en-GB')
 const EP1_DECODE_X26     = true;                              // decode packet X/26 (level 1.5 characters)
@@ -17,7 +17,7 @@ const NO_PAGE_STRING     = 'Seite nicht vorhanden';           // string for 'Pag
 // if ROW_0_CUSTOMHEADER is set and not empty, row 0 is generated locally from this
 // template string instead of displaying row 0 from the EP1 file.
 
-const ROW_0_CUSTOMHEADER = '<span class="bg0 fg7"><span class="fg7"> %page%.%sub%     </span><span class="fg6">ttxweb  </span><span class="fg7">%weekday% %day%.%month%.%year% </span><span class="fg6">%hh%:%mm%:%ss%</span></span>';
+const ROW_0_CUSTOMHEADER = '<span class="bg0 fg7"><span class="fg7"> %page%.%sub%   </span><span class="fg6">  ttxweb </span> <span class="fg7">%weekday% %day%.%month%.%year% </span><span class="fg6">%hh%:%mm%:%ss%</span></span>';
 
 // you can use classes from ttxweb_main.css (fg<n>, bg<n> etc.) for formatting
 // and the following tokens will be replaced:
