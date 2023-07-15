@@ -374,19 +374,19 @@ function decodeX26Chars($x26Data)
 
     foreach ($x26Triplets as $x26Triplet) {
 
-        // main X26 triplet decoding loop
+        // main X/26 triplet decoding loop
         $currX26Function = ord(substr($x26Triplet, 1, 1));
 
         switch (true) {
             case ($currX26Function == 0x04):
 
-                // x26 row select
+                // X/26 row select
                 $currRow = ord(substr($x26Triplet, 0, 1)) - 40;
                 break;
 
             case ($currX26Function == 0x0f):
 
-                // x26 place g2 supplementary character
+                // X/26 place G2 supplementary character
                 $currCol = ord(substr($x26Triplet, 0, 1));
                 $currX26Char = substr($x26Triplet, 2, 1);
                 if (isset($g2SupplementaryChars[ord($currX26Char)])) {
@@ -400,7 +400,7 @@ function decodeX26Chars($x26Data)
 
             case ($currX26Function == 0x10):
 
-                // x26 place non-diacritical G0 character
+                // X/26 place non-diacritical G0 character
                 $currCol = ord(substr($x26Triplet, 0, 1));
                 $currX26Char = substr($x26Triplet, 2, 1);
                 if (ord($currX26Char) == 0x2a) {
@@ -416,7 +416,7 @@ function decodeX26Chars($x26Data)
 
             case (($currX26Function >= 0x10) && ($currX26Function <= 0x1f)):
 
-                // x26 place G0 character with diacritical mark from G2
+                // X/26 place G0 character with diacritical mark from G2
                 $currCol = ord(substr($x26Triplet, 0, 1));
                 $currX26Char = substr($x26Triplet, 2, 1);
                 if (isset($g2DiacriticalMarks[$currX26Function - 0x10])) {
