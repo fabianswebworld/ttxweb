@@ -41,9 +41,7 @@ function renderNavigation($pageNum, $subpageNum, $prevPageNum, $nextPageNum, $pr
           <div id="ttxQuickLinks">
              <ul>
                 <li>&rtrif; <a href="?page=100">Seite 100</a></li>
-                <li>&rtrif; <a href="?page=112">Nachrichten</a></li>
-                <li>&rtrif; <a href="?page=170">Wetter</a></li>
-                <li>&rtrif; <a href="?page=200">Sport</a></li>
+                <li>&rtrif; <a href="?page=896">Testseite</a></li>
              </ul>
            </div>
  
