@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.1.1.556 (2023-07-14)
+// version: 1.1.2.560 (2023-07-15)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 function renderEp1File($ep1Filename)
@@ -310,7 +310,7 @@ function renderEp1File($ep1Filename)
         $htmlBuffer = preg_replace('/\b((?!155)[1-8]\d{2})\b/', '<a href="?page=${1}">${1}</a>', $htmlBuffer);
 
         // create web links
-        $htmlBuffer = preg_replace('/\b((?:[\w-]+\.)+(?:de|com|org)(?:\/[\w-]+)?)\b/', '<a href="http://${1}" target="_blank">${1}</a>', $htmlBuffer);
+        $htmlBuffer = preg_replace('/\b((?:[\w-]+\.)+(?:de|com|org)(?:[\/\w?&-.]+)?)\b/', '<a href="http://${1}" target="_blank">${1}</a>', $htmlBuffer);
 
         // create prev/next subpage links
         if ($subpageNum < $numSubpages)  {
