@@ -64,8 +64,8 @@ The following configuration options are available to configure the behavior of t
 - **scripts/ttxweb_nav.php:**
    - The "quick links" to the individual teletext pages can be adjusted directly in the HTML code or, if necessary, removed entirely.
 
-- **templates/headers.php:**
-   - HTML template, which is output before the actual teletext output. The following variables can be used in this template (in the form `<?php echo $variable; ?>`):
+- **templates/headersphp:**
+   - HTML template which is output before the actual teletext output. The following variables can be used in this template (in the form `<?php echo $variable; ?>`):
      - **$pageNum:** Current page number
      - **$nextPageNum:** Next available page
      - **$prevPageNum:** Previous available page
