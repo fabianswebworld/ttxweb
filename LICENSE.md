@@ -10,9 +10,9 @@ Mit der Nutzung des Softwareprodukts erkennt der Nutzer bzw. (wo rechtlich anwen
 
 Das Softwareprodukt wird als sog. "Freeware" für den nichtkommerziellen Gebrauch unentgeltlich zur Verfügung gestellt.
 
-Dies umfasst auch den Einsatz in nicht gewinnorientierten Institutionen wie z.B. öffentlichen Bildungseinrichtungen, Anstalten des öffentlichen Rechts (z.B. öffentlich-rechtliche Rundfunkanstalten), Landesmedienanstalten, Nicht-Regierungs-Organisationen (NGOs), staatlich anerkannte Universitäten usw.
+Dies umfasst auch den Einsatz in nicht gewinnorientierten Institutionen wie z.B. öffentlichen Bildungseinrichtungen, Anstalten des öffentlichen Rechts (z.B. öffentlich-rechtliche Rundfunkanstalten), Landesmedienanstalten, Nicht-Regierungs-Organisationen (NGOs), staatlich anerkannten Universitäten usw.
 
-Jeglicher kommerzieller Einsatz bedarf einer Vereinbarung mit dem Autor.
+Jeglicher kommerzielle Einsatz bedarf einer Vereinbarung mit dem Autor.
 
 Als kommerzieller Einsatz gilt unter anderem jedweder Einsatz in privatwirtschaftlichen Unternehmen (z.B. privatwirtschaftlich geführten Rundfunkanstalten), gleichwohl, ob der konkrete Einsatz unmittelbar zur Gewinnerzielung beiträgt oder nicht. Als kommerzieller Einsatz gilt insbesondere das gewerbliche Anbieten dieses Dienstes auf eigenen Servern.
 
