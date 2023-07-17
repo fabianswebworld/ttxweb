@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.2.0.601 (2023-07-17)
+// version: 1.2.0.604 (2023-07-17)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 // global constants
 
-const TTXWEB_VERSION     = '1.2.0.601 (2023-07-17)';          // version string
+const TTXWEB_VERSION     = '1.2.0.604 (2023-07-17)';          // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -133,7 +133,7 @@ else {
 
 // construct version string
 $versionString = TTXWEB_VERSION;
-if (!empty(TTXWEB_VERSION_EXT)) { $versionString .= '-' . TTXWEB_VERSION_EXT ; }
+if (!empty(TTXWEB_VERSION_EXT)) { $versionString = explode(' ', $versionString)[0] . '-' . TTXWEB_VERSION_EXT . ' ' . explode(' ', $versionString)[1]; }
 
 // initialize HTML output
 header('Content-type: text/html; charset=utf-8');

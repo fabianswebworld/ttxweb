@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.2.0.601 (2023-07-17)
+// version: 1.2.0.604 (2023-07-17)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 function renderEp1File($ep1Filename)
