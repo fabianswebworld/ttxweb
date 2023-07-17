@@ -1,5 +1,5 @@
 function ttxInitialize() {
-  if ((document.getElementById('ttxRow0Header').innerHTML != 1) && (document.getElementById('ttxRow0Template').innerHTML != '')) {
+  if (document.getElementById('ttxRow0Header').innerHTML != 1) {
     renderRow0();
   }
   setNumPadFocus();
@@ -10,7 +10,7 @@ function renderRow0() {
   var myPageNum = document.getElementById('ttxPageNum').innerHTML;
   var mySubpageNum = document.getElementById('ttxSubpageNum').innerHTML;
 
-  var myWeekDayDe = myDate.toLocaleString(document.getElementById('ttxLanguage').innerHTML, {weekday: 'long'}).substr(0, 2);
+  var myWeekDayDe = myDate.toLocaleString('de-DE', {weekday: 'long'}).substr(0, 2);
   var myMonth = zeroPad(myDate.getMonth() + 1);
   var myDay = zeroPad(myDate.getDate());
   var myYear = zeroPad(myDate.getFullYear().toString().substr(-2));
@@ -24,6 +24,21 @@ function renderRow0() {
   document.getElementById('row0').innerHTML = myRow0;
 
   setTimeout(renderRow0, 1000);
+}
+
+function reveal() {
+  var concealedElements = document.querySelectorAll('.co');
+  for(var i = 0; i < concealedElements.length; i++) {
+    concealedElements[i].classList.replace('co', 're');
+  }
+
+  if (concealedElements.length > 0) return false;
+
+  var revealedElements = document.querySelectorAll('.re');
+  for(var i = 0; i < revealedElements.length; i++) {
+    revealedElements[i].classList.replace('re', 'co');
+  }
+  return false;
 }
 
 function zeroPad(i) {

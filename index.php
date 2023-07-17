@@ -1,3 +1,3 @@
 <?php
-require('./scripts/ttxweb_main.php');
+require('./includes/ttxweb_main.php');
 ?>
