@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.2.0.604 (2023-07-17)
+// version: 1.2.0.606 (2023-07-17)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 function renderEp1File($ep1Filename)
@@ -332,7 +332,7 @@ function renderEp1File($ep1Filename)
 
         // create prev/next subpage links
         if ($subpageNum < $numSubpages)  {
-            $htmlBuffer = preg_replace('/(-&gt;|&gt;&gt;)/', '<a href="?page=' . $pageNum . '&sub=' . $nextSubpageNum . $queryString . '">${1}</a>', $htmlBuffer);
+            $htmlBuffer = preg_replace('/(-&gt;|&gt;&gt;)/', '<a href="?page=' . $pageNum . '&amp;sub=' . $nextSubpageNum . $queryString . '">${1}</a>', $htmlBuffer);
         }
         else {
             $htmlBuffer = preg_replace('/(-&gt;|&gt;&gt;)/', '<a href="?page=' . $nextPageNum . $queryString . '">${1}</a>', $htmlBuffer);
