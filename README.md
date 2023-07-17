@@ -1,4 +1,4 @@
-#  ![Logo](/ttxweb.png "ttxweb Logo") ttxweb - Teletext to HTML generator
+#  ![Logo](/doc/ttxweb.png "ttxweb Logo") ttxweb - Teletext to HTML generator
 
 ## What is ttxweb?
 
@@ -12,9 +12,9 @@ See the live demo at http://www.fabianswebworld.de/ttxweb.
 
 ## Screenshots
 
-![Screenshot - Page 100](/demo_p100.png "Page 100")
+![Screenshot - Page 100](/doc/demo_p100.png "Page 100")
 
-![Screenshot - Test page](/demo_p896.png "Test page")
+![Screenshot - Test page](/doc/demo_p896.png "Test page")
 
 ## Installation
 
@@ -38,12 +38,14 @@ The PHP script and all auxiliary files must be copied to the web server and conf
 
 The following configuration options are available to configure the behavior of ttxweb and adapt the output to your own website design:
 
-- **scripts/ttxweb_main.php:**
-   - const **TTXWEB_VERSION** // version string
+- **includes/ttxweb_config.php:**
+   - const **TTXWEB_TEMPLATE** // template name, i.e. folder to use for HTML templates (must be a subfolder in the **/templates** folder, default: 'default')
    - const **EP1_PATH** // Path to the EP1 files (default: 'ep1/')
    - const **EP1_LANGUAGE** // Teletext language (default: 'en-US', possible values: 'de-DE' | 'en-GB' | 'en-US')
    - const **EP1_DECODE_X26** // Decode packet X/26 (level 1.5 characters) (default: true)
    - const **NO_PAGE_STRING** // String for 'Page not found' (default: empty)
+ 
+- **templates/\<templatename\>/template_config.php:**  
    - const **ROW_0_CUSTOMHEADER** // Template for row 0 (page header). If not set or empty, row 0 from the EP1 file is displayed.
      - Format for **ROW_0_CUSTOMHEADER**:
        `<span>` elements can be used with the classes from **ttxweb_main.css** (fg*n*, bg*n*, dh etc.) to format colors etc. Furthermore, the following tokens will be replaced:
@@ -61,10 +63,10 @@ The following configuration options are available to configure the behavior of t
       
        `const ROW_0_CUSTOMHEADER = '<span class="bg0 fg7"><span class="fg7"> %page%.%sub% </span><span class="fg6">ttxweb  </span><span class="fg7">%weekday% %day%.%month%.%year% </span><span class="fg6">%hh%:%mm%:%ss%</span></span >';`
 
-- **scripts/ttxweb_nav.php:**
-   - The "quick links" to the individual teletext pages can be adjusted directly in the HTML code or, if necessary, removed entirely.
+- **templates/\<templatename\>/navigation.php:**  
+   - The "quick links" to the individual teletext pages can be adjusted directly in the HTML code or, if necessary, removed entirely. Also, the behavior and look of the navigation itself may be altered if necessary.
 
-- **templates/header.php:**
+- **templates/\<templatename\>/header.php:**
    - HTML template which is output before the actual teletext output. The following variables can be used in this template (in the form `<?php echo $variable; ?>`):
      - **$pageNum:** Current page number
      - **$nextPageNum:** Next available page
@@ -74,11 +76,11 @@ The following configuration options are available to configure the behavior of t
      - **$prevSubpageNum:** Previous subpage
      - **$numSubpages:** Number of subpages
 
-- **templates/trailer.php:**
+- **templates/\<templatename\>/trailer.php:**
    - HTML template, which is output after the actual teletext output. The same variables apply as in **header.php**.
 
-- **css/ttxweb_main.css:**
-   - Customize styles of the navigation box if necessary. Avoid changing the main Teletext style classes, although you *can* carefully modify text sizes there.
+- **templates/\<templatename\>/css/template_style.css:**
+   - Customize styles of the navigation box if necessary. Avoid changing the main Teletext style classes, although you *can* carefully modify text sizes there. Refer to **css/ttxweb_ttx.css** for details.
 
 ## GET parameters at runtime
 
@@ -88,6 +90,8 @@ The following URL parameters are supported:
 - **header** - 0 (Show locally generated header, **default**) | 1 (Show Row 0 from EP1 file)
 - **page** - 100 (**default**) .. 899 - Page number to be displayed
 - **sub** - 1 (**default**) .. 99 - Subpage to be displayed
+- **reveal** - 0 (hide concealed text, **default**) | 1 (reveal concealed text on page load)
+- **template** - override configured template name
 
 
 # Contact the author
