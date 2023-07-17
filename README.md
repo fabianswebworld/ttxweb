@@ -1,4 +1,4 @@
-#  ![Logo](/doc/ttxweb.png "ttxweb Logo") ttxweb - Teletext to HTML generator
+#  ![Logo](/doc/ttxweb.png "ttxweb Logo") ttxweb - Teletext-to-HTML generator
 
 ## What is ttxweb?
 
