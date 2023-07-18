@@ -1,54 +1,68 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.2.0.606 (2023-07-17)
+// version: 1.2.0.608 (2023-07-18)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
-function renderEp1File($ep1Filename)
+const EP1_HEADER_LENGTH = 6;
+
+function renderTeletextFile($teletextFile, $level15, $reveal) {
+
+    // render teletext file, select format/parser
+    // depending on file extension, this might be refined
+    // and extended to accommodate more formats/parsers
+
+    switch (strtolower(pathinfo($teletextFile, PATHINFO_EXTENSION))) {
+
+        case 'ep1':
+            parseEp1File($teletextFile, $level15, $level1Data, $x26Data);
+            break;
+    }
+
+    decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal);
+
+}
+
+
+function parseEp1File($ep1Filename, $level15, &$level1Data, &$x26Data)
 {
 
-    echo "<div id=\"ttxContainer\">\n<div id=\"ttxPage\">";
-
-    // read EP1 file
-    global $versionString;
-    global $level1Data, $pageBuffer, $level15, $x26Present, $reveal, $queryString;
-    global $pageNum, $subpageNum, $prevPageNum, $nextPageNum, $prevSubpageNum, $nextSubpageNum, $numSubpages;
-
-    $presBuffer = [];
+    // read and parse EP1 file, write unpacked output to
+    // by-reference variables &$level1Data and &$x26Data
 
     // handling of non-present EP1 file
     if (!file_exists($ep1Filename)) {
         $level1Data = str_pad(NO_PAGE_STRING, 600, ' ', STR_PAD_BOTH);
     }
     else {
+
         $ep1Handle = fopen($ep1Filename, 'rb');
         $ep1Contents = fread($ep1Handle, filesize($ep1Filename));
         fclose($ep1Handle);
 
         // parse EP1 header:
-        // get offset to raw level 1 teletext data
-        $level1Offset = unpack('v', substr($ep1Contents, 4, 2))[1];
+        // get offset to raw level 1.0 teletext data
 
-        if ($level1Offset == 0) {
-            // level 1.0-only page
-            $level1Offset = 6;
-        }
-        else {
-            // level 1.5 page (with packet X/26)
+        $level1Offset = unpack('v', substr($ep1Contents, 4, 2))[1] + EP1_HEADER_LENGTH;
+
+        // check if X/26 (level 1.5) data is present
+
+        $x26Indicator = ord(substr($ep1Contents, 3, 1));
+        if ($x26Indicator != 0x00) {
             $x26Present = true;
-            $level1Offset += 10;
         }
 
-        // the raw level 1 teletext data is in $level1Data
+        // Softel Cyclone TAP X/26 EP1 file format:
+        // for some reason, the offset is 4 bytes too low
+        // in comparison to Softel Flair X/26 EP1 files
+
+        if ($x26Indicator == 0xc2) {
+            $level1Offset += 4;
+        }
+
+        // the raw level 1.0 teletext data is in $level1Data
+
         $level1Data = substr($ep1Contents, $level1Offset, 960);
-    }
-
-    // read level 1 data into 2-dimensional array
-    // for better handling, especially on decoding X/26 data
-    for ($row = 0; $row <= 23; $row++) {
-        for ($col = 0; $col <= 39; $col++) {
-            $pageBuffer[$row][$col]['level1'] = substr($level1Data, 40 * $row + $col, 1);
-        }
     }
 
     // read X/26 data if present and enabled
@@ -57,13 +71,37 @@ function renderEp1File($ep1Filename)
         $x26Length = unpack('v', substr($ep1Contents, 8, 2))[1];
         $x26Offset = 0x0a;
         $x26Data = substr($ep1Contents, $x26Offset, $x26Length);
-
-        decodeX26Chars($x26Data);
     }
 
-    for ($row = 0; $row <= 23; $row++) {
+}
 
-        // main decoding loop
+
+function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
+{
+
+    global $queryString;
+    global $pageNum, $subpageNum, $prevPageNum, $nextPageNum, $prevSubpageNum, $nextSubpageNum, $numSubpages;
+
+    echo "<div id=\"ttxContainer\">\n<div id=\"ttxPage\">";
+
+    // read level 1.0 data into 2-dimensional array
+    // for better handling, especially on decoding X/26 data
+
+    for ($row = 0; $row <= 23; $row++) {
+        for ($col = 0; $col <= 39; $col++) {
+            $pageBuffer[$row][$col]['level1'] = substr($level1Data, 40 * $row + $col, 1);
+        }
+    }
+
+    // if present and enabled, decode X/26 data to page buffer
+
+    if (!empty($x26Data) && $level15) {
+        decodeX26Chars($x26Data, $pageBuffer);
+    }
+
+    // main level 1.0 decoding loop
+
+    for ($row = 0; $row <= 23; $row++) {
 
         echo '<pre class="ttxRow" id="row' . $row . '"><span class="bg0"><span class="bg0 fg7">';
 
@@ -188,7 +226,6 @@ function renderEp1File($ep1Filename)
                     if ($htmlOutChar == '') {
                         $htmlOutChar = ' ';
                     }
-
             }
 
             // char-by-char span mode for double-width / double-size
@@ -318,9 +355,7 @@ function renderEp1File($ep1Filename)
                     $ttxAttributes['g1Hold'] = false;
                     $htmlOutChar = ' ';
                     break;
-
             }
-
         }
 
         // create page links
@@ -346,8 +381,6 @@ function renderEp1File($ep1Filename)
 
     echo "</div>\n</div>\n";
 
-    echo '<!-- generated by ttxweb EP1 teletext document renderer version: ' . $versionString . ' -->' . "\n";
-
 }
 
 
@@ -366,12 +399,10 @@ function renderG1Char($g1Char, $fgColor, $g1Mode)
 }
 
 
-function decodeX26Chars($x26Data)
+function decodeX26Chars($x26Data, &$pageBuffer)
 {
     // decode level 1.5 characters from packet X/26,
-    // place the decoded HTML characters into the global page buffer
-
-    global $pageBuffer;
+    // place the decoded HTML characters into the page buffer
 
     $x26Packets = str_split($x26Data, 40);
 
@@ -442,10 +473,10 @@ function decodeX26Chars($x26Data)
                     $pageBuffer[$currRow][$currCol]['level15'] = $currX26Char;
                 }
                 break;
-
         }
     }
 }
+
 
 function g0ToHtml($ttxString, $ttxLanguage) {
 
