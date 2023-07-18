@@ -26,9 +26,9 @@ A web server with PHP >= 5.6 is required. There are no other requirements (mySQL
 
 #### Input files
 
-The teletext pages to be displayed must be in EP1 format (Softel). This file format can be processed or exported by all common teletext systems (Softel, Broadstream etc.). If required, an adaptation to other formats (TTI, TTX, ETT, etc.) is conceivable with little effort.
+The teletext pages to be displayed must be in EP1 format (Softel). This file format can be processed or exported by all common teletext systems (Softel, Broadstream etc.). If required, an adaptation to other formats (TTI, TTX, ETT, etc.) is conceivable with little effort. The ttxweb EP1 parser will automatically detect the flavor of EP1 file: plain Level 1.0 files without X/26 data as well as both flavors of Softel EP1 files with X/26 data (Flair and TAP). Note: To enable X/26 export in the TAP process, you'll have to set the (undocumented) environment variable TRA_TAP_X26 to 1 on the Transmission machine which hosts TAP.EXE.
 
-The files must be suitably synchronized in the filename format PxxxSyy.EP1 (where xxx = page number, yy = subpage number) to a folder accessible to the PHP script. The file name format can be adjusted in the script if required.
+The EP1 files must be suitably synchronized in the filename format PxxxSyy.EP1 (where xxx = page number, yy = subpage number) to a folder accessible to the PHP script. The file name format can be adjusted in the script if required.
 
 ### Deployment
 
