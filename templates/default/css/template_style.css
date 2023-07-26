@@ -24,14 +24,6 @@
     line-height: 17px;
 }
 
-#ttxNumPad a, .numPadRow a {
-    width: 320px;
-    margin-top: 10px;
-    padding: 0 0 0 10px;
-    overflow: visible;
-    font-size: 14px;
-}
-
 #ttxNumPadEnv {
     display: none !important;
 }
@@ -180,23 +172,6 @@ img {
     display: inline-block;
     margin: 0 auto;
     width: 4em;
-}
-
-.numPadRow div.reveal, div.reveal a {
-    display: inline-block;
-    margin: 0 0 0 0;
-    font-size: 12px;
-    color: #000000;
-    text-decoration: none;
-    text-align: center;
-    padding: 0.1em 0.5em;
-    box-sizing: border-box;
-}
-
-.numPadRow div.reveal a:hover {
-    color: #ffffff;
-    background-color: #000000;
-    text-decoration: none;
 }
 
 .noScript {
