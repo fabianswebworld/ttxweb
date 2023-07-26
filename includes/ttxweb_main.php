@@ -1,11 +1,11 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.2.0.608 (2023-07-18)
+// version: 1.3.0.620 (2023-07-26)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 // global definitions
-const TTXWEB_VERSION = '1.2.0.608 (2023-07-18)';       // version string
+const TTXWEB_VERSION = '1.3.0.620 (2023-07-26)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -15,6 +15,7 @@ const TTXWEB_VERSION = '1.2.0.608 (2023-07-18)';       // version string
 // page      - 100 (default) .. 899 - the page number to be displayed
 // sub       - 1 (default) .. 99 - the subpage number to be displayed
 // reveal    - 0 (hide concealed text, default) | 1 (reveal concealed text on load)
+// refresh   - seconds for auto refresh via XHR, 0 = disabled (default: set by TTXWEB_REFRESH in ttxweb_config.php)
 // template  - temporary template name (default: set by TTXWEB_TEMPLATE in ttxweb_config.php)
 
 
@@ -44,10 +45,13 @@ function getPageNumbers() {
     $ep1FileList = glob('P[1-8][0-9][0-9]S01.EP1');
     chdir($cwd);
 
-    // get next and previous page
+    // get current page's index in page list
     $currentIdx = array_search('P' . $pageNum . 'S01.EP1', $ep1FileList);
 
+    // get next and previous page index
     if ($currentIdx === false) {
+        // if the current page is not in index, look up the next existing one
+        // and calculate from there
         for ($i = $pageNum; (($i <= 899) && ($currentIdx === false)); $i++) {
             $currentIdx = array_search('P' . sprintf('%03d', $i) . 'S01.EP1', $ep1FileList);
         }
@@ -55,11 +59,16 @@ function getPageNumbers() {
         $prevIdx = $currentIdx - 1;
     }
     else {
+        // current page is in the file list, normal behavior
         $nextIdx = $currentIdx + 1;
         $prevIdx = $currentIdx - 1;
     }
 
+    // jump over 0-byte files (needed for some Sophora installations)
+    for ( ; (($nextIdx < count($ep1FileList)) && (filesize(EP1_PATH . $ep1FileList[$nextIdx]) == 0)); $nextIdx++);
+    for ( ; (($prevIdx >= 0) && (filesize(EP1_PATH . $ep1FileList[$prevIdx]) == 0)); $prevIdx--);
 
+    // extract page numbers from filenames in list
     if (isset($ep1FileList[$nextIdx])) {
         $nextPageNum = substr($ep1FileList[$nextIdx], 1, 3);
     }
@@ -72,7 +81,7 @@ function getPageNumbers() {
     $ep1SubpageFileList = glob(EP1_PATH . substr(pathinfo($currEp1Filename, PATHINFO_FILENAME), 0, 4) . 'S[0-9][0-9].EP1');
     $numSubpages = count($ep1SubpageFileList);
 
-    // calculate result values
+    // clamp result values
     if ($prevPageNum < 100) $prevPageNum = 100;
     if ($nextPageNum > 899) $nextPageNum = 899;
 
@@ -88,9 +97,17 @@ function getPageNumbers() {
 function getEp1Filename($pageNum, $subpageNum) {
 
     // generate path to EP1 file
-
-    $ep1Filename = EP1_PATH . 'P' . $pageNum . 'S' . $subpageNum . '.EP1';
+    $ep1Filename = EP1_PATH . 'P' . $pageNum . 'S' . sprintf("%02d", $subpageNum) . '.EP1';
     return $ep1Filename;
+
+}
+
+
+function pageExists($pageNum, $subpageNum) {
+
+    // return whether a given page physically exists
+    $pageFilename = getEp1Filename($pageNum, $subpageNum);
+    return (file_exists($pageFilename) && (filesize($pageFilename) > 0));
 
 }
 
@@ -98,17 +115,26 @@ function getEp1Filename($pageNum, $subpageNum) {
 // include configuration
 include('ttxweb_config.php');
 
-// read URL parameters
+// initialize some default values
+$ttxLanguage = EP1_LANGUAGE;
+if ($ttxLanguage == '') $ttxLanguage = 'en-US';
+$refresh = TTXWEB_REFRESH;
+if (!is_numeric($refresh)) $refresh = 0;
+
+// read and sanitize URL parameters
 if ($_GET['level15'] == '0') { $level15 = false; } else { $level15 = true; }
 if ($_GET['header']  == '1') { $showHeader = 1;  } else { $showHeader = 0; }
 if ($_GET['reveal']  == '1') { $reveal = true;  } else { $reveal = false; }
-if (!empty($_GET['template'])) { $templateName = $_GET['template'];  } else { $templateName = TTXWEB_TEMPLATE; }
+if ($_GET['xhr']  == '1') { $xhr = true;  } else { $xhr = false; }
+if ($_GET['refresh'] != '') { $refresh = abs(filter_var($_GET['refresh'], FILTER_SANITIZE_NUMBER_INT)); }
+if (!empty($_GET['template'])) { $templateName = $_GET['template']; } else { $templateName = TTXWEB_TEMPLATE; }
 if (empty($templateName)) { $templateName = 'default'; }
 
 // build query string to pass to the next query
 $queryArray = $_GET;
 unset($queryArray['page']);
 unset($queryArray['sub']);
+unset($queryArray['xhr']);
 if ($queryArray['level15'] == '1') { unset($queryArray['level15']); }
 if ($queryArray['header'] == '0') { unset($queryArray['header']); }
 if ($queryArray['reveal'] == '0') { unset($queryArray['reveal']); }
@@ -140,16 +166,18 @@ ini_set('default_charset', 'utf-8');
 // get the desired page numbers
 getPageNumbers();
 
-// include header template
-include($templateFolder . '/header.php');
+// include header template if not requested from XMLHttpRequest
+if (!($xhr)) include($templateFolder . '/header.php');
 
 // write environment variables for ttxweb.js scripts into HTML
 echo '<div id="ttxEnv">
-<pre id="ttxRow0Header">' . $showHeader . '</pre>
+<pre id="ttxRow0Header">'   . $showHeader        . '</pre>
 <pre id="ttxRow0Template">' . ROW_0_CUSTOMHEADER . '</pre>
-<pre id="ttxLanguage">' . EP1_LANGUAGE . '</pre>
-<pre id="ttxPageNum">' . $pageNum . '</pre>
-<pre id="ttxSubpageNum">' . $subpageNum . '</pre>
+<pre id="ttxLanguage">'     . $ttxLanguage       . '</pre>
+<pre id="ttxPageNum">'      . $pageNum           . '</pre>
+<pre id="ttxSubpageNum">'   . $subpageNum        . '</pre>
+<pre id="ttxReveal">'       . intval($reveal)    . '</pre>
+<pre id="ttxRefresh">'      . $refresh           . '</pre>
 </div>
 
 ';
@@ -161,12 +189,12 @@ include('ttxweb_decoder.php');
 renderTeletextFile(getEp1Filename($pageNum, $subpageNum), $level15, $reveal);
 
 // add version string to output
-echo '<!-- generated by ttxweb EP1 teletext document renderer version: ' . $versionString . ' -->' . "\n";
+if (!($xhr)) echo '<!-- generated by ttxweb EP1 teletext document renderer version: ' . $versionString . ' -->' . "\n";
 
 // include navigation
-include($templateFolder . '/navigation.php');
+if (!($xhr)) include($templateFolder . '/navigation.php');
 
 // include footer template
-include($templateFolder . '/trailer.php');
+if (!($xhr)) include($templateFolder . '/trailer.php');
 
 ?>
