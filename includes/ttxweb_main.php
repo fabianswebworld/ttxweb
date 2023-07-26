@@ -1,11 +1,11 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.3.0.620 (2023-07-26)
+// version: 1.3.0.623 (2023-07-26)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 // global definitions
-const TTXWEB_VERSION = '1.3.0.620 (2023-07-26)';       // version string
+const TTXWEB_VERSION = '1.3.0.623 (2023-07-26)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -170,7 +170,7 @@ getPageNumbers();
 if (!($xhr)) include($templateFolder . '/header.php');
 
 // write environment variables for ttxweb.js scripts into HTML
-echo '<div id="ttxEnv">
+if (!($xhr)) echo '<div id="ttxEnv">
 <pre id="ttxRow0Header">'   . $showHeader        . '</pre>
 <pre id="ttxRow0Template">' . ROW_0_CUSTOMHEADER . '</pre>
 <pre id="ttxLanguage">'     . $ttxLanguage       . '</pre>

@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.3.0.620 (2023-07-26)
+// version: 1.3.0.623 (2023-07-26)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
