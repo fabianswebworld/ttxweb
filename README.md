@@ -2,7 +2,9 @@
 
 ## What is ttxweb?
 
-ttxweb is a web application that brings the "old-fashioned" teletext (Videotext) to the web in a simple way. This is mostly interesting for broadcasters. All Level 1.0 teletext attributes such as flash and double height are supported; additionally, some Level 2.5 attributes (double width and double size) are supported. Decoding of enhanced Level 1.5 characters via packet X/26 is supported as well if they are carried inside the EP1 file. On the generated HTML pages, page numbers / references are automatically rendered as clickable hyperlinks. Similarly, "next" indicators such as ">>" and "->" are rendered as hyperlinks to the next subpage or page. Additionally, web links are rendered as hyperlinks as well.
+ttxweb is a web application that brings the "old-fashioned" teletext (Videotext) to the web in a simple way. This is mostly interesting for broadcasters. All Level 1.0 teletext attributes such as flash and double height are supported; additionally, some Level 2.5 attributes (double width and double size) are supported. Decoding of enhanced Level 1.5 characters via packet X/26 is supported as well if they are carried inside the EP1 file. On the generated HTML pages, page numbers (only references to existing pages) are automatically rendered as clickable hyperlinks. Similarly, "next" indicators such as ">>" and "->" are rendered as hyperlinks to the next subpage or page. Additionally, web links and email links are rendered as hyperlinks as well.
+
+Another nice feature is that the pages can update automatically at a configurable refresh interval. The update happens smoothly via XMLHttpRequest (no full page reload), so that just the teletext portion of the page is reloaded.
 
 To use ttxweb, all you have to do is install the PHP scripts including the additional files (CSS, JS etc.) on a web server and ensure that the teletext pages are synchronized as EP1 files in a configurable folder that can be accessed from the PHP script (e.g. via FTP).
 
@@ -40,10 +42,14 @@ The following configuration options are available to configure the behavior of t
 
 - **includes/ttxweb_config.php:**
    - const **TTXWEB_TEMPLATE** - template name, i.e. folder to use for HTML templates (must be a subfolder in the **templates/** folder, default: 'default')
+   - const **TTXWEB_REFRESH** - seconds for automatic refresh via XHR (default: 0 = disabled)
    - const **EP1_PATH** - Path to the EP1 files (default: 'ep1/')
    - const **EP1_LANGUAGE** - Teletext language (default: 'en-US', possible values: 'de-DE' | 'en-GB' | 'en-US')
    - const **EP1_DECODE_X26** - Decode packet X/26 (level 1.5 characters) (default: true)
+   - const **EP1_ALWAYS_REVEAL** - Always reveal concealed text on load (default: false)
    - const **NO_PAGE_STRING** - String for 'Page not found' (default: empty)
+   - const **TO_PAGE_STRING** - String for 'Jump to page' (default: empty)
+   - const **TO_SUBPAGE_STRING** - String for 'Jump to subpage' (default: empty)
  
 - **templates/\<templatename\>/template_config.php:**  
    - const **ROW_0_CUSTOMHEADER** - Template for row 0 (page header). If not set or empty, row 0 from the EP1 file is displayed.
@@ -51,7 +57,7 @@ The following configuration options are available to configure the behavior of t
        `<span>` elements can be used with the classes from **ttxweb_main.css** (fg*n*, bg*n*, dh etc.) to format colors etc. Furthermore, the following tokens will be replaced:
         - **%page%** - Current page number
         - **%sub%** - Current subpage
-        - **%weekday%** - Current day of the week short
+        - **%weekday%** - Current day of the week (2 characters) in the configured language (see EP1_LANGUAGE)
         - **%day%** - Current day (2 digits)
         - **%month%** - current month (2 digits)
         - **%year%** - Current year (2 digits)
@@ -84,15 +90,17 @@ The following configuration options are available to configure the behavior of t
 
 ## GET parameters at runtime
 
-The following URL parameters are supported:
+The following URL parameters are supported (if provided, they override the values configured in ttxweb_config.php where applicable):
 
 - **level15** - 0 (decode only level 1.0 characters) | 1 (also decode level 1.5 characters, **default**)
 - **header** - 0 (Show locally generated header, **default**) | 1 (Show Row 0 from EP1 file)
 - **page** - 100 (**default**) .. 899 - Page number to be displayed
 - **sub** - 1 (**default**) .. 99 - Subpage to be displayed
-- **reveal** - 0 (hide concealed text, **default**) | 1 (reveal concealed text on page load)
-- **template** - override configured template name
+- **reveal** - 0 (hide concealed text) | 1 (reveal concealed text on page load) (default: set by EP1_ALWAYS_REVEAL in ttxweb_config.php)
+- **refresh** - seconds for auto refresh via XHR, 0 = disabled (default: set by TTXWEB_REFRESH in ttxweb_config.php)
+- **template** - override configured template name (default: set by TTXWEB_TEMPLATE in ttxweb_config.php)
 
+The **xhr** GET parameter is used internally to implement the XMLHttpRequest refresh function. By setting it to 1 you can get only the ttxContainer part of the page if you want to embed it in your own XMLHttpRequest applications.
 
 # Contact the author
 
