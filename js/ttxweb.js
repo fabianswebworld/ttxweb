@@ -2,8 +2,8 @@ function ttxInitialize() {
   if (document.getElementById('ttxRow0Header').innerHTML != 1) {
     renderRow0();
   }
-  if (document.getElementById('ttxRefresh').innerHTML != 0) {
-    setTimeout(xhrRefresh, document.getElementById('ttxRefresh').innerHTML * 1000);
+  if (refreshState) {
+    refreshTimeoutId = setTimeout(xhrRefresh, refreshTimer);
   }
   setNumPadFocus();
 }
@@ -39,7 +39,9 @@ function xhrRefresh() {
 
   myXhr.send();
 
-  setTimeout(xhrRefresh, document.getElementById('ttxRefresh').innerHTML * 1000);
+  if (refreshState) {
+    refreshTimeoutId = setTimeout(xhrRefresh, refreshTimer);
+  }
 }
 
 function renderRow0() {
@@ -63,13 +65,34 @@ function renderRow0() {
   setTimeout(renderRow0, 1000);
 }
 
+function toggleRefresh() {
+
+  refreshState = !refreshState;
+  if (refreshState) {
+    var refreshButton = document.querySelector('#refreshButton');
+    refreshButton.classList.remove('active');
+    refreshTimeoutId = setTimeout(xhrRefresh, refreshTimer);
+  }
+  else {
+    var refreshButton = document.querySelector('#refreshButton');
+    refreshButton.classList.add('active');
+    clearTimeout(refreshTimeoutId);
+  }
+  return false;
+
+}
+
 function reveal() {
 
   if (revealState == 1) {
     revealState = 0;
+    var revealButton = document.querySelector('#revealButton');
+    revealButton.classList.remove('active');
   }
   else {
     revealState = 1;
+    var revealButton = document.querySelector('#revealButton');
+    revealButton.classList.add('active');
   }
 
   var concealedElements = document.querySelectorAll('.co');
@@ -163,6 +186,9 @@ function setNumPadFocus() {
 }
 
 var revealState = document.getElementById('ttxReveal').innerHTML;
+var refreshTimer = document.getElementById('ttxRefresh').innerHTML * 1000;
+var refreshState = (refreshTimer != 0);
+var refreshTimeoutId;
 
 ttxInitialize();
 
