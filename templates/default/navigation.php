@@ -3,7 +3,7 @@
           <div id="ttxNavigation">
             <div class="row">
               <div class="buttonarrowleft"><a href="?page=<?php echo $prevPageNum . $queryString; ?>" class="arrowleft" title="Vorherige Seite">&lt;</a></div>
-              <div class="currpage">Seite<div class="pagenum"><form id="numPadForm" action="" method="get"><input class="inputtext" id="ttxNumPadInput" value="<?php echo $pageNum; ?>" name="page" type="text" maxlength="3" onchange="checkNumPadInput();" onkeyup="checkNumPadInput();" title="Bitte dreistellige Seitennummer eingeben." /><?php if (!empty($_GET['template'])) echo '<input id="ttxNumPadEnv" value="' . $templateName . '" name="template" type="hidden" />'; ?>
+              <div class="currpage">Seite<div class="pagenum"><form id="numPadForm" action="" method="get"><input class="inputtext" id="ttxNumPadInput" value="<?php echo $pageNum; ?>" name="page" type="text" maxlength="3" onchange="checkNumPadInput();" onkeyup="checkNumPadInput(event);" title="Bitte dreistellige Seitennummer eingeben." /><?php if (!empty($_GET['template'])) echo '<input id="ttxNumPadEnv" value="' . $templateName . '" name="template" type="hidden" />'; ?>
               <noscript><div class="noScript"><input name="view" type="submit" value="Los" class="inputbutton"/></div></noscript></form></div></div>
               <div class="buttonarrowright"><a href="?page=<?php echo $nextPageNum . $queryString; ?>" class="arrowright" title="N&auml;chste Seite">&gt;</a></div>
               <div style="clear:both"></div>
