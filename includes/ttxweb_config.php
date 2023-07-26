@@ -4,7 +4,7 @@
 
 // configuration
 
-const TTXWEB_TEMPLATE    = 'hr';                              // folder to use for HTML templates, default: 'default'
+const TTXWEB_TEMPLATE    = 'default';                         // folder to use for HTML templates, default: 'default'
 const TTXWEB_REFRESH     = 30;                                // seconds for automatic refresh via XHR, default: 0 = disabled
 const EP1_PATH           = 'ep1/';                            // relative path to EP1 files
 const EP1_LANGUAGE       = 'de-DE';                           // teletext language (currently only 'de-DE'; 'en-GB')
