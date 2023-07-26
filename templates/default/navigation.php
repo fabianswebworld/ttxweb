@@ -29,7 +29,7 @@
               <div style="clear:left"></div>
             </div>
             <div class="numPadRow">
-              <div class="left"><a href="?page=100<?php echo $queryString; ?>" class="number" title="Zur &Uuml;bersicht">&#8801;</a></div><div class="middle"><a href="#" class="number" onclick="return numberButtonPressed('0');">0</a></div><div class="right"><a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;reveal=[0-9]/', '', $queryString); ?>&amp;reveal=1" class="number" onclick="return reveal();" title="Antwortfreigabe">?</a></div>
+              <div class="left"><a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;refresh=[0-9]+/', '', $queryString); ?>&amp;refresh=0" class="number" id="refreshButton" onclick="return toggleRefresh();" title="Aktualisierung deaktivieren"><svg viewBox="0 0 20 20"><use xlink:href="templates/<?php echo TTXWEB_TEMPLATE; ?>/images/pause_refresh.svg#pause_refresh"></use></svg></a></div><div class="middle"><a href="#" class="number" onclick="return numberButtonPressed('0');">0</a></div><div class="right"><a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;reveal=[0-9]/', '', $queryString); ?>&amp;reveal=1" class="number" id="revealButton" onclick="return reveal();" title="Antwortfreigabe">?</a></div>
               <div style="clear:left"></div>
             </div>
           </div>

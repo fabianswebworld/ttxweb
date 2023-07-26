@@ -134,7 +134,7 @@ img {
     color: #000000;
     text-decoration: none;
     text-align: center;
-    padding: 0.3em 0;
+    padding: 0.275em 0;
     box-sizing: border-box;
     width: 100%;
 }
@@ -142,6 +142,10 @@ img {
 #ttxNumPad a.number:hover {
     color: #ffffff;
     background-color: #000000;
+}
+
+#ttxNumPad a.number > svg {
+    width: 1.175em;
 }
 
 .numPadRow {
