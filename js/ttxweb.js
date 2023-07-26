@@ -2,7 +2,44 @@ function ttxInitialize() {
   if (document.getElementById('ttxRow0Header').innerHTML != 1) {
     renderRow0();
   }
+  if (document.getElementById('ttxRefresh').innerHTML != 0) {
+    setTimeout(xhrRefresh, document.getElementById('ttxRefresh').innerHTML * 1000);
+  }
   setNumPadFocus();
+}
+
+function xhrRefresh() {
+
+  var myXhr = new XMLHttpRequest();
+  var myXhrUrl = window.location.pathname + '?page=' + document.getElementById('ttxPageNum').innerHTML + '&sub=' + document.getElementById('ttxSubpageNum').innerHTML + '&xhr=1&reveal=' + revealState;
+
+  myXhr.open('GET', myXhrUrl);
+  
+  myXhr.onload = function () {
+    if (myXhr.readyState == 4 && myXhr.status == 200) {
+      if (new DOMParser().parseFromString(myXhr.responseText, 'text/html').querySelectorAll('.errorPage').length == 0) {
+        console.log('ttxweb: Successfully updated teletext page.');
+        document.getElementById('ttxContainer').outerHTML = myXhr.responseText;
+        if (document.getElementById('ttxRow0Header').innerHTML != 1) renderRow0();
+      }
+      else {
+        console.log('ttxweb: Teletext page has gone, refresh deferred.');
+      }
+    }
+    else {
+      console.log('ttxweb: Error fetching teletext page for XHR refresh.');
+    }
+  };
+
+  myXhr.onerror = function() {
+    console.log('ttxweb: XHR error');
+  };
+
+  console.log('ttxweb: Fetching teletext page for XHR refresh from: ' + myXhrUrl);
+
+  myXhr.send();
+
+  setTimeout(xhrRefresh, document.getElementById('ttxRefresh').innerHTML * 1000);
 }
 
 function renderRow0() {
@@ -10,7 +47,7 @@ function renderRow0() {
   var myPageNum = document.getElementById('ttxPageNum').innerHTML;
   var mySubpageNum = document.getElementById('ttxSubpageNum').innerHTML;
 
-  var myWeekDayDe = myDate.toLocaleString('de-DE', {weekday: 'long'}).substr(0, 2);
+  var myWeekDay = myDate.toLocaleString(document.getElementById('ttxLanguage').innerHTML, {weekday: 'long'}).substr(0, 2);
   var myMonth = zeroPad(myDate.getMonth() + 1);
   var myDay = zeroPad(myDate.getDate());
   var myYear = zeroPad(myDate.getFullYear().toString().substr(-2));
@@ -19,7 +56,7 @@ function renderRow0() {
   var mySeconds = zeroPad(myDate.getSeconds());
 
   var myRow0 = document.getElementById('ttxRow0Template').innerHTML;
-  myRow0 = myRow0.replace("%page%", myPageNum).replace("%sub%", mySubpageNum).replace("%weekday%", myWeekDayDe).replace("%month%", myMonth).replace("%day%", myDay).replace("%year%", myYear).replace("%hh%", myHours).replace("%mm%", myMinutes).replace("%ss%", mySeconds);
+  myRow0 = myRow0.replace("%page%", myPageNum).replace("%sub%", mySubpageNum).replace("%weekday%", myWeekDay).replace("%month%", myMonth).replace("%day%", myDay).replace("%year%", myYear).replace("%hh%", myHours).replace("%mm%", myMinutes).replace("%ss%", mySeconds);
 
   document.getElementById('row0').innerHTML = myRow0;
 
@@ -27,6 +64,14 @@ function renderRow0() {
 }
 
 function reveal() {
+
+  if (revealState == 1) {
+    revealState = 0;
+  }
+  else {
+    revealState = 1;
+  }
+
   var concealedElements = document.querySelectorAll('.co');
   for(var i = 0; i < concealedElements.length; i++) {
     concealedElements[i].classList.replace('co', 're');
@@ -74,7 +119,7 @@ function numberButtonPressed(number) {
   return false;
 }
 
-function checkNumPadInput() {
+function checkNumPadInput(event) {
   var elem;
   var oldValue;
 
@@ -93,7 +138,7 @@ function checkNumPadInput() {
     elem.value = "";
   }
 
-  if (elem.value.length > 2) {
+  if ((elem.value.length > 2) && !isNaN(event.key)) {
     gotoPage();
   }
 }
@@ -116,6 +161,8 @@ function setNumPadFocus() {
   elem.focus();
   elem.select();
 }
+
+var revealState = document.getElementById('ttxReveal').innerHTML;
 
 ttxInitialize();
 
