@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.2.0.608 (2023-07-18)
+// version: 1.3.0.620 (2023-07-26)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
@@ -30,9 +30,12 @@ function parseEp1File($ep1Filename, $level15, &$level1Data, &$x26Data)
     // read and parse EP1 file, write unpacked output to
     // by-reference variables &$level1Data and &$x26Data
 
-    // handling of non-present EP1 file
-    if (!file_exists($ep1Filename)) {
+    global $errorPageClassString;
+
+    // handling of non-present or too small / 0-byte EP1 file
+    if (!file_exists($ep1Filename) || (filesize($ep1Filename) < 512)) {
         $level1Data = str_pad(NO_PAGE_STRING, 600, ' ', STR_PAD_BOTH);
+        $errorPageClassString = ' class="errorPage"';
     }
     else {
 
@@ -80,9 +83,10 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
 {
 
     global $queryString;
+    global $errorPageClassString;
     global $pageNum, $subpageNum, $prevPageNum, $nextPageNum, $prevSubpageNum, $nextSubpageNum, $numSubpages;
 
-    echo "<div id=\"ttxContainer\">\n<div id=\"ttxPage\">";
+    echo "<div id=\"ttxContainer\">\n<div id=\"ttxPage\"" . $errorPageClassString . ">";
 
     // read level 1.0 data into 2-dimensional array
     // for better handling, especially on decoding X/26 data
@@ -358,19 +362,22 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
             }
         }
 
-        // create page links
-        $htmlBuffer = preg_replace('/\b((?!155)[1-8]\d{2})\b/', '<a href="?page=${1}' . $queryString . '">${1}</a>', $htmlBuffer);
+        // create page links (only for pages that exist)
+        $htmlBuffer = preg_replace_callback('/\b((?!155)[1-8]\d{2})\b/', 'createPageLinkIfExists', $htmlBuffer);
 
         // create web links
-        $htmlBuffer = preg_replace('/(\b((?:[\w-]+\.)+(?:de|com|org)(\/(?:[\/\w?&=#.\-]+)?)*)\b)|(\bhttps*:\/\/((?:[\w-]+\.)+(?:[\w-]+)(\/(?:[\/\w?&=#.\-]+)?)*)\b)/', '<a href="http://${1}${4}" target="_blank">${0}</a>', $htmlBuffer);
-        $htmlBuffer = preg_replace('/http:\/\/(https*):\/\//', '${1}://', $htmlBuffer);
+        $htmlBuffer = preg_replace('/((?:(?<!(?:\w|@|\)))(?=\w)|(?<=\w)(?!\w))((?:[\w-]+\.)+(?:de|com|org)(\/(?:[\/\w?&=#.\-]+)?)*)\b)|(\bhttps*:\/\/((?:[\w-]+\.)+(?:[\w-]+)(\/(?:[\/\w?&=#.\-]+)?)*)\b)/', '<a href="http://$1$4" target="_blank" title="http://$1$4">$0</a>', $htmlBuffer);
+        $htmlBuffer = preg_replace('/http:\/\/(https*):\/\//', '$1://', $htmlBuffer);
 
-        // create prev/next subpage links
+        // create e-mail links
+        $htmlBuffer = preg_replace('/\b([\w-\.]+)(?:(?:\(at{0,1}\))|@|\*)((?:[\w-]+\.)+[\w-]{2,8})/', '<a href="mailto:$1@$2" target="_blank" title="$1@$2">$0</a>', $htmlBuffer);
+
+        // create next subpage/page links
         if ($subpageNum < $numSubpages)  {
-            $htmlBuffer = preg_replace('/(-&gt;|&gt;&gt;)/', '<a href="?page=' . $pageNum . '&amp;sub=' . $nextSubpageNum . $queryString . '">${1}</a>', $htmlBuffer);
+            $htmlBuffer = preg_replace('/(-&gt;|&gt;&gt;)/', '<a href="?page=' . $pageNum . '&amp;sub=' . $nextSubpageNum . $queryString . '" title="' . TO_SUBPAGE_STRING . ' ' . $nextSubpageNum . '">$1</a>', $htmlBuffer);
         }
         else {
-            $htmlBuffer = preg_replace('/(-&gt;|&gt;&gt;)/', '<a href="?page=' . $nextPageNum . $queryString . '">${1}</a>', $htmlBuffer);
+            $htmlBuffer = preg_replace('/(-&gt;|&gt;&gt;)/', '<a href="?page=' . $nextPageNum . $queryString . '" title="' . TO_PAGE_STRING . ' ' . $nextPageNum . '">$1</a>', $htmlBuffer);
         }        
 
         // end of row
@@ -504,6 +511,23 @@ function g0ToHtml($ttxString, $ttxLanguage) {
             );
     }
         
+}
+
+
+function createPageLinkIfExists($matches) {
+
+    // create hyperlink from a page number only if the page
+    // exists physically
+
+    global $queryString;
+
+    if (pageExists($matches[1], 1)) {
+        return '<a href="?page=' . $matches[1] . $queryString . '" title="' . TO_PAGE_STRING . ' ' . $matches[1] . '">' . $matches[1] . '</a>';
+    }
+    else {
+        return $matches[1];
+    }
+
 }
 
 ?>
