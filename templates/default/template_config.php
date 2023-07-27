@@ -22,7 +22,7 @@
 // js/ttxweb.js to fit your needs.
 
 
-const ROW_0_CUSTOMHEADER = '<span class="bg0 fg7"><span class="fg7"> %page%.%sub%   </span><span class="fg3">  FWWtext</span> <span class="fg7">%weekday% %day%.%month%.%year% </span><span class="fg3">%hh%:%mm%:%ss%</span></span>';
+const ROW_0_CUSTOMHEADER = '<span class="bg0 fg7"><span class="fg7"> %page%.%sub%   </span><span class="fg6">   ttxweb</span> <span class="fg7">%weekday% %day%.%month%.%year% </span><span class="fg6">%hh%:%mm%:%ss%</span></span>';
 const TTXWEB_VERSION_EXT = '';     // build or template specific version suffix
 
 ?>
