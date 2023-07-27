@@ -1,11 +1,11 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.3.0.623 (2023-07-26)
+// version: 1.3.1.625 (2023-07-27)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 // global definitions
-const TTXWEB_VERSION = '1.3.0.623 (2023-07-26)';       // version string
+const TTXWEB_VERSION = '1.3.1.625 (2023-07-27)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 

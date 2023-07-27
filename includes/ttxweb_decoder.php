@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.3.0.623 (2023-07-26)
+// version: 1.3.1.625 (2023-07-27)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
@@ -53,6 +53,9 @@ function parseEp1File($ep1Filename, $level15, &$level1Data, &$x26Data)
         $x26Indicator = ord(substr($ep1Contents, 3, 1));
         if ($x26Indicator != 0x00) {
             $x26Present = true;
+        }
+        else {
+            $x26Present = false;
         }
 
         // Softel Cyclone TAP X/26 EP1 file format:
@@ -106,6 +109,9 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
     // main level 1.0 decoding loop
 
     for ($row = 0; $row <= 23; $row++) {
+
+        $htmlBuffer = '';
+        $attributesChanged = false;
 
         echo '<pre class="ttxRow" id="row' . $row . '"><span class="bg0"><span class="bg0 fg7">';
 
@@ -222,10 +228,10 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
 
                     // G0 character
                     if (!$isLevel15) {
-                        $htmlOutChar = filter_var(g0ToHtml($currChar, EP1_LANGUAGE), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW);
+                        $htmlOutChar = filter_var(g0ToHtml($currChar, EP1_LANGUAGE), FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW);
                     }
                     else {
-                        $htmlOutChar = filter_var($currChar, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW);
+                        $htmlOutChar = filter_var($currChar, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW);
                     }
                     if ($htmlOutChar == '') {
                         $htmlOutChar = ' ';
@@ -370,7 +376,7 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
         $htmlBuffer = preg_replace('/http:\/\/(https*):\/\//', '$1://', $htmlBuffer);
 
         // create e-mail links
-        $htmlBuffer = preg_replace('/\b([\w-\.]+)(?:(?:\(at{0,1}\))|@|\*)((?:[\w-]+\.)+[\w-]{2,8})/', '<a href="mailto:$1@$2" target="_blank" title="$1@$2">$0</a>', $htmlBuffer);
+        $htmlBuffer = preg_replace('/\b([\w\-\.]+)(?:(?:\(at{0,1}\))|@|\*)((?:[\w-]+\.)+[\w-]{2,8})/', '<a href="mailto:$1@$2" target="_blank" title="$1@$2">$0</a>', $htmlBuffer);
 
         // create next subpage/page links
         if ($subpageNum < $numSubpages)  {
@@ -382,7 +388,6 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
 
         // end of row
         echo $htmlBuffer . "</span></span></pre>\n";
-        $htmlBuffer = '';
 
     }
 
@@ -492,21 +497,21 @@ function g0ToHtml($ttxString, $ttxLanguage) {
     switch ($ttxLanguage) {
         case 'de-DE':
             return str_replace(
-                [chr(0x24), '@', '[', '\\', ']', '`', '{', '|', '}', '~', chr(0x7f), '<', '>'],
-                ['$', '&sect;', '&Auml;', '&Ouml;', '&Uuml;', '&deg;', '&auml;', '&ouml;', '&uuml;', '&szlig;', '&#9632;', '&lt;', '&gt;'],
+                ['&', chr(0x24), '@', '[', '\\', ']', '`', '{', '|', '}', '~', chr(0x7f), '<', '>', '"', '\''],
+                ['&amp;', '$', '&sect;', '&Auml;', '&Ouml;', '&Uuml;', '&deg;', '&auml;', '&ouml;', '&uuml;', '&szlig;', '&#9632;', '&lt;', '&gt;', '&quot;', '&apos;'],
                 $ttxString
             );
             break;
         case 'en-GB':
             return str_replace(
-                [chr(0x23), chr(0x24), '@', '[', '\\', ']', chr(0x5e), chr(0x5f), '`', '{', '|', '}', '~', chr(0x7f), '<', '>'],
-                ['&pound;', '$', '@', '&#8592;', '&frac12;', '&#8594;', '&#8593;', '#', '&#8212;', '&frac14;', '&#9553;', '&frac34;', '&divide;', '&#9632;', '&lt;', '&gt;'],
+                ['&', chr(0x23), chr(0x24), '@', '[', '\\', ']', chr(0x5e), chr(0x5f), '`', '{', '|', '}', '~', chr(0x7f), '<', '>', '"', '\''],
+                ['&amp;', '&pound;', '$', '@', '&#8592;', '&frac12;', '&#8594;', '&#8593;', '#', '&#8212;', '&frac14;', '&#9553;', '&frac34;', '&divide;', '&#9632;', '&lt;', '&gt;', '&quot;', '&apos;', '&amp;'],
                 $ttxString
             );
         default:
             return str_replace(
-                [chr(0x7f), '<', '>'],
-                ['&#9632;', '&lt;', '&gt;'],
+                ['&', chr(0x7f), '<', '>', '"', '\''],
+                ['&amp;', '&#9632;', '&lt;', '&gt;', '&quot;', '&apos;'],
                 $ttxString
             );
     }
