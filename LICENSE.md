@@ -2,7 +2,7 @@
 
 ## 1. Geltungsbereich
 
-Dieser Lizenztext in deutscher Sprache ist die allein gültige Lizenzvereinbarung zwischen dem Autor Fabian Schneider (im Folgenden "Autor") und dem Nutzer (im Folgenden "Nutzer") für die Nutzung des Softwareprodukts, dem dieser Lizenztext beiliegt (im Folgenden "Softwareprodukt" oder "Produkt"). Diese Lizenz ist Teil des Softwareprodukts und dieses darf nur zusammen mit einer Kopie dieses Lizenztextes weitergegeben werden (siehe auch 3.).
+Dieser Lizenztext in deutscher Sprache ist die allein gültige Lizenzvereinbarung zwischen dem Autor Fabian Schneider (im Folgenden "Autor") und dem Nutzer (im Folgenden "Nutzer") für die Nutzung des Softwareprodukts, dem dieser Lizenztext beiliegt (im Folgenden "Softwareprodukt" oder "Produkt"). Diese Lizenz ist Teil des Softwareprodukts und dieses darf nur zusammen mit einer Kopie dieses Lizenztextes weitergegeben werden (siehe auch 4.).
 
 Mit der Nutzung des Softwareprodukts erkennt der Nutzer bzw. (wo rechtlich anwendbar) die durch ihn vertretene Organisation oder Körperschaft sämtliche Lizenzbedingungen an und ist durch diese gebunden.
 
