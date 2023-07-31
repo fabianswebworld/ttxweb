@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.3.1.625 (2023-07-27)
+// version: 1.3.2.642 (2023-07-31)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
@@ -89,14 +89,14 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
     global $errorPageClassString;
     global $pageNum, $subpageNum, $prevPageNum, $nextPageNum, $prevSubpageNum, $nextSubpageNum, $numSubpages;
 
-    echo "<div id=\"ttxContainer\">\n<div id=\"ttxPage\"" . $errorPageClassString . ">";
+    echo "<div id=\"ttxContainer\">\n<div id=\"ttxPage\"" . $errorPageClassString . ">\n";
 
     // read level 1.0 data into 2-dimensional array
     // for better handling, especially on decoding X/26 data
 
     for ($row = 0; $row <= 23; $row++) {
         for ($col = 0; $col <= 39; $col++) {
-            $pageBuffer[$row][$col]['level1'] = substr($level1Data, 40 * $row + $col, 1);
+            $pageBuffer['level1'][$row][$col] = substr($level1Data, 40 * $row + $col, 1);
         }
     }
 
@@ -115,22 +115,30 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
 
         echo '<pre class="ttxRow" id="row' . $row . '"><span class="bg0"><span class="bg0 fg7">';
 
+        // detect if a row has double height/size in order to
+        // be able to copy color attributes to the next row
+        $currRow = join($pageBuffer['level1'][$row]);
+        if ((strpos($currRow, chr(0x0d)) !== false) || (strpos($currRow, chr(0x0f)) !== false)) {
+            $doubleHeightRow = true;
+        }
+        else {
+            $doubleHeightRow = false;
+        }
+
         for ($col = 0; $col <= 39; $col++) {
 
             // row decoding loop - decode each teletext character on a row
 
             $isLevel15 = false;
-            $currChar = $pageBuffer[$row][$col]['level1'];
+            $currChar = $pageBuffer['level1'][$row][$col];
 
-            if (!empty($pageBuffer[$row][$col]['level15'])) {
-                $currChar = $pageBuffer[$row][$col]['level15'];
+            if (!empty($pageBuffer['level15'][$row][$col])) {
+                $currChar = $pageBuffer['level15'][$row][$col];
                 $isLevel15 = true;
             }
 
             if ($col == 0) {
-
                 // set attributes to start-of-line defaults
-
                 $ttxAttributes['fgColor'] = 7;
                 $ttxAttributes['bgColor'] = 0;
                 $ttxAttributes['charSet'] = 'g0';
@@ -141,7 +149,28 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
                 $ttxAttributes['flash'] = '';
                 $ttxAttributes['conceal'] = '';
                 $ttxAttributes['size'] = '';
+            }
 
+            if ($col == 39) {
+                // disallow double width on last column
+                if ($ttxAttributes['size'] == 'dw') {
+                    $ttxAttributes['size'] = '';
+                    $attributesChanged = true; 
+                }
+                if ($ttxAttributes['size'] == 'ds') {
+                    $ttxAttributes['size'] = 'dh';
+                    $attributesChanged = true; 
+                }
+            }
+
+            if ($row == 23) {
+                // disallow double height on last row
+                if ($ttxAttributes['size'] == 'dh') {
+                    $ttxAttributes['size'] = '';
+                }
+                if ($ttxAttributes['size'] == 'ds') {
+                    $ttxAttributes['size'] = 'dw';
+                }
             }
 
             $htmlOutChar = ' ';
@@ -199,6 +228,9 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
                     $ttxAttributes['bgColor'] = 0;
                     $htmlOutChar = ' ';
                     $attributesChanged = true;
+                    if ($doubleHeightRow) {
+                        $pageBuffer['level1'][$row + 1][$col] = $currChar;
+                    }
                     break;
 
                 case ord($currChar) == 0x1d:
@@ -207,6 +239,9 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
                     $ttxAttributes['bgColor'] = $ttxAttributes['fgColor'];
                     $htmlOutChar = ' ';
                     $attributesChanged = true;
+                    if ($doubleHeightRow) {
+                        $pageBuffer['level1'][$row + 1][$col] = $currChar;
+                    }
                     break;
 
                 case ord($currChar) == 0x1e:
@@ -256,13 +291,17 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
                 $newFgAttributes =
                  'bg' . $ttxAttributes['bgColor'] . ' ' .
                  'fg' . $ttxAttributes['fgColor'] . ' ' .
-                 $ttxAttributes['flash'] . ' ' . $ttxAttributes['size'] . ' ' . $ttxAttributes['conceal'];
+                 $ttxAttributes['size'] . ' ' . $ttxAttributes['flash'] . ' ' . $ttxAttributes['conceal'];
 
                 $newBgAttributes =
                  'bg' . $ttxAttributes['bgColor'] . ' ' .
                  'z' . $zIndex;
  
-                $newAttributesSpan = '</span></span><span class="' . trim($newBgAttributes) . '"><span class="' . trim($newFgAttributes) . '">';
+                $newAttributesSpan = '</span><span class="' . trim($newBgAttributes) . '"><span class="' . trim($newFgAttributes) . '">';
+
+                if (!$doubleWidthMode) {
+                    $htmlBuffer .= '</span>';
+                }
 
                 $htmlBuffer .= $newAttributesSpan;
             
@@ -311,6 +350,9 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
                     $ttxAttributes['charSet'] = 'g0';
                     $ttxAttributes['conceal'] = '';
                     $htmlOutChar = ' ';
+                    if ($doubleHeightRow) {
+                        $pageBuffer['level1'][$row + 1][$col] = $currChar;
+                    }
                     $attributesChanged = true;
                     break;
 
@@ -324,6 +366,9 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
                     $ttxAttributes['charSet'] = 'g1';
                     $ttxAttributes['conceal'] = '';
                     $htmlOutChar = ' ';
+                    if ($doubleHeightRow) {
+                        $pageBuffer['level1'][$row + 1][$col] = $currChar;
+                    }
                     $attributesChanged = true;
                     break;
 
@@ -452,11 +497,11 @@ function decodeX26Chars($x26Data, &$pageBuffer)
                 $currX26Char = substr($x26Triplet, 2, 1);
                 if (isset($g2SupplementaryChars[ord($currX26Char)])) {
                     $currX26Char = $g2SupplementaryChars[ord($currX26Char)];
-                    $pageBuffer[$currRow][$currCol]['level15'] = $currX26Char;
+                    $pageBuffer['level15'][$currRow][$currCol] = $currX26Char;
                 }
 
 
-                $pageBuffer[$currRow][$currCol]['level15'] = $currX26Char;
+                $pageBuffer['level15'][$currRow][$currCol] = $currX26Char;
                 break;
 
             case ($currX26Function == 0x10):
@@ -472,7 +517,7 @@ function decodeX26Chars($x26Data, &$pageBuffer)
 
                 }
                 // place the level 1.5 character through htmlspecialchars
-                $pageBuffer[$currRow][$currCol]['level15'] = htmlspecialchars($currX26Char);
+                $pageBuffer['level15'][$currRow][$currCol] = htmlspecialchars($currX26Char);
                 break;
 
             case (($currX26Function >= 0x10) && ($currX26Function <= 0x1f)):
@@ -482,7 +527,7 @@ function decodeX26Chars($x26Data, &$pageBuffer)
                 $currX26Char = substr($x26Triplet, 2, 1);
                 if (isset($g2DiacriticalMarks[$currX26Function - 0x10])) {
                     $currX26Char = '&' . $currX26Char . $g2DiacriticalMarks[$currX26Function - 0x10] . ';';
-                    $pageBuffer[$currRow][$currCol]['level15'] = $currX26Char;
+                    $pageBuffer['level15'][$currRow][$currCol] = $currX26Char;
                 }
                 break;
         }
