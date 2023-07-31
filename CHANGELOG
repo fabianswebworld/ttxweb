@@ -1,0 +1,45 @@
+1.3.2.642
+
+- Decoder fix: improved handling of double width/size/height edge cases (disallow in last row/column)
+- Decoder fix: more standard-compliant handling of background colors in the 2nd row of a double-height row pair
+- Improved XHR refresh: Only replace HTML if the teletext page actually has changed
+- Refresh timer changed to 60 seconds in the sample/default configuration
+- Default template now has 'mobile-web-app-capable' meta tag
+
+1.3.1.625
+
+- Fix warnings with the most recent PHP versions
+
+1.3.0.623
+
+- Improved page linking (only references to existing pages are generated as hyperlinks now)
+- Improved URL linking (email addresses are correctly recognized now)
+- Better error handling in EP1 file parser, e.g. for 0-byte files potentially written by Sophora
+- New feature: automatic page refresh via XMLHttpRequest
+- Some bugfixes
+
+1.2.0.608
+
+- Automatically detect both flavors of Softel EP1 files with X/26 data (Flair and TAP)
+- Modularized parser and decoder functions for future addition of more teletext file formats
+
+1.2.0.606
+
+- Minor fix in escaping the ampersand character for prev/next subpage link generation
+
+1.2.0.604
+
+- Streamlined project folder structure
+- Support for multiple templates (CSS, HTML, configuration)
+- Support for toggle conceal/reveal via JS
+- Support for many more extended (Level 1.5) characters from the G2 Latin supplementary character set
+
+1.1.2.560
+
+- Minor improvements in generating web links from URLs
+- Improved comments in code
+- Minor tweaks in default CSS
+
+1.1.1.556
+
+- Initial release to the public
