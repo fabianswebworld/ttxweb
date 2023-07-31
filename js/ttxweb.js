@@ -11,16 +11,30 @@ function ttxInitialize() {
 function xhrRefresh() {
 
   var myXhr = new XMLHttpRequest();
-  var myXhrUrl = window.location.pathname + '?page=' + document.getElementById('ttxPageNum').innerHTML + '&sub=' + document.getElementById('ttxSubpageNum').innerHTML + '&xhr=1&reveal=' + revealState;
+  var myXhrUrl = window.location.pathname + '?xhr=1&' + window.location.search.substring(1);
+
+  var myCurrentContents = document.createElement('div');
+  myCurrentContents.innerHTML = document.getElementById('ttxContainer').outerHTML.trim();
+  myCurrentRow0 = myCurrentContents.querySelector('#row0');
+  myCurrentRow0.parentNode.removeChild(myCurrentRow0);
 
   myXhr.open('GET', myXhrUrl);
-  
-  myXhr.onload = function () {
+
+  myXhr.onload = function() {
     if (myXhr.readyState == 4 && myXhr.status == 200) {
       if (new DOMParser().parseFromString(myXhr.responseText, 'text/html').querySelectorAll('.errorPage').length == 0) {
-        console.log('ttxweb: Successfully updated teletext page.');
-        document.getElementById('ttxContainer').outerHTML = myXhr.responseText;
-        if (document.getElementById('ttxRow0Header').innerHTML != 1) renderRow0();
+        var myNewContents = document.createElement('div');
+        myNewContents.innerHTML = myXhr.responseText.trim();
+        myNewRow0 = myNewContents.querySelector('#row0');
+        myNewRow0.parentNode.removeChild(myNewRow0);
+        if (myNewContents.innerHTML.trim() != myCurrentContents.innerHTML.trim()) {
+          document.getElementById('ttxContainer').outerHTML = myXhr.responseText;
+          console.log('ttxweb: Successfully updated teletext page.');
+          if (document.getElementById('ttxRow0Header').innerHTML != 1) renderRow0();
+        }
+        else {
+          console.log('ttxweb: Teletext page has not changed since last update, refresh deferred.');
+        }
       }
       else {
         console.log('ttxweb: Teletext page has gone, refresh deferred.');
@@ -79,7 +93,6 @@ function toggleRefresh() {
     clearTimeout(refreshTimeoutId);
   }
   return false;
-
 }
 
 function reveal() {
@@ -191,4 +204,3 @@ var refreshState = (refreshTimer != 0);
 var refreshTimeoutId;
 
 ttxInitialize();
-
