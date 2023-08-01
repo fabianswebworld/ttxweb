@@ -3,11 +3,12 @@
         float: none !important;
         text-align: center;
         padding: 0;
+        margin: 1em -14px;
     }
     #ttxPage {
         width: 100%;
         margin: 0 !important;
-        padding: 2px 0px 2px 0px;
+        padding: 2px 0px 2px 0px !important;
         float: none;
         text-align: center;
         display: inline-block !important;
@@ -47,7 +48,7 @@
 .ttxRow span {
     display: inline-block;
     background-repeat: no-repeat;
-    background-size: 103% 101%;
+    background-size: 103% 102%;
     overflow: visible;
     position: relative;
 }
