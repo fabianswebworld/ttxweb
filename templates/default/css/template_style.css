@@ -1,4 +1,15 @@
 @media (max-width: 1000px) {
+    #ttxContainer {
+        margin: 0.5em 0px !important;
+    }
+    #ttxPage {
+        width: 100%;
+        margin: 0 !important;
+        padding: 4px 0px 4px 0px !important;
+        float: none;
+        text-align: center;
+        display: inline-block !important;
+    }
     #nav {
         display: block !important;
         clear: both;
