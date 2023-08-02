@@ -3,12 +3,11 @@
         float: none !important;
         text-align: center;
         padding: 0;
-        margin: 1em -14px;
     }
     #ttxPage {
         width: 100%;
         margin: 0 !important;
-        padding: 2px 0px 2px 0px !important;
+        padding: 2px 0px 2px 0px;
         float: none;
         text-align: center;
         display: inline-block !important;
