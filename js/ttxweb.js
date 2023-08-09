@@ -11,10 +11,17 @@ function ttxInitialize() {
 function xhrRefresh() {
 
   var myXhr = new XMLHttpRequest();
-  var myXhrUrl = window.location.pathname + '?xhr=1&' + window.location.search.substring(1);
+  if (turn != 1) {
+    var myXhrUrl = window.location.pathname + '?xhr=1&' + window.location.search.substring(1);
+  }
+  else {
+    var nextSubpage = subpageNum + 1;
+    if (nextSubpage > numSubpages) nextSubpage = 1;
+    var myXhrUrl = window.location.pathname + '?xhr=1&' + window.location.search.substring(1).replace('&sub=([0-9]{1,2})','') + '&sub=' + nextSubpage;
+  }
 
   var myCurrentContents = document.createElement('div');
-  myCurrentContents.innerHTML = document.getElementById('ttxContainer').outerHTML.trim();
+  myCurrentContents.innerHTML = document.getElementById('ttxStage').outerHTML.trim();
   myCurrentRow0 = myCurrentContents.querySelector('#row0');
   myCurrentRow0.parentNode.removeChild(myCurrentRow0);
 
@@ -28,7 +35,9 @@ function xhrRefresh() {
         myNewRow0 = myNewContents.querySelector('#row0');
         myNewRow0.parentNode.removeChild(myNewRow0);
         if (myNewContents.innerHTML.trim() != myCurrentContents.innerHTML.trim()) {
-          document.getElementById('ttxContainer').outerHTML = myXhr.responseText;
+          document.getElementById('ttxStage').outerHTML = myXhr.responseText;
+          subpageNum = parseInt(document.getElementById('ttxSubpageNum').innerHTML, 10);
+          numSubpages = parseInt(document.getElementById('ttxNumSubpages').innerHTML, 10);
           console.log('ttxweb: Successfully updated teletext page.');
           if (document.getElementById('ttxRow0Header').innerHTML != 1) renderRow0();
         }
@@ -60,8 +69,6 @@ function xhrRefresh() {
 
 function renderRow0() {
   var myDate = new Date();
-  var myPageNum = document.getElementById('ttxPageNum').innerHTML;
-  var mySubpageNum = document.getElementById('ttxSubpageNum').innerHTML;
 
   var myWeekDay = myDate.toLocaleString(document.getElementById('ttxLanguage').innerHTML, {weekday: 'long'}).substr(0, 2);
   var myMonth = zeroPad(myDate.getMonth() + 1);
@@ -72,7 +79,7 @@ function renderRow0() {
   var mySeconds = zeroPad(myDate.getSeconds());
 
   var myRow0 = document.getElementById('ttxRow0Template').innerHTML;
-  myRow0 = myRow0.replace("%page%", myPageNum).replace("%sub%", mySubpageNum).replace("%weekday%", myWeekDay).replace("%month%", myMonth).replace("%day%", myDay).replace("%year%", myYear).replace("%hh%", myHours).replace("%mm%", myMinutes).replace("%ss%", mySeconds);
+  myRow0 = myRow0.replace("%page%", pageNum).replace("%sub%", zeroPad(subpageNum)).replace("%weekday%", myWeekDay).replace("%month%", myMonth).replace("%day%", myDay).replace("%year%", myYear).replace("%hh%", myHours).replace("%mm%", myMinutes).replace("%ss%", mySeconds);
 
   document.getElementById('row0').innerHTML = myRow0;
 
@@ -202,5 +209,10 @@ var revealState = document.getElementById('ttxReveal').innerHTML;
 var refreshTimer = document.getElementById('ttxRefresh').innerHTML * 1000;
 var refreshState = (refreshTimer != 0);
 var refreshTimeoutId;
+var turn = document.getElementById('ttxTurn').innerHTML;
+
+var pageNum = document.getElementById('ttxPageNum').innerHTML;
+var subpageNum = parseInt(document.getElementById('ttxSubpageNum').innerHTML, 10);
+var numSubpages = parseInt(document.getElementById('ttxNumSubpages').innerHTML, 10);
 
 ttxInitialize();
