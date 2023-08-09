@@ -6,7 +6,7 @@
 
 const TTXWEB_TEMPLATE    = 'default';                         // folder to use for HTML templates, default: 'default'
 const TTXWEB_REFRESH     = 60;                                // seconds for automatic refresh via XHR, default: 0 = disabled
-const TTXWEB_TURN_RATES  = [100 => 8];                        // array of pages that should turn automatically, and how fast
+const TTXWEB_TURN_RATES  = [100 => 10];                       // array of pages that should turn automatically, and how fast
 
 const EP1_PATH           = 'ep1/';                            // relative path to EP1 files
 const EP1_PATTERN        = 'P%ppp%S%ss%.EP1';                 // pattern for the EP1 filenames (%ppp% = page, %ss% = subpage)
