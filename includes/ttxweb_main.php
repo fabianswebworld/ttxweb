@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.4.0.652 (2023-08-10)
+// version: 1.4.0.660 (2023-08-10)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 // GLOBAL DEFINITIONS
 
-const TTXWEB_VERSION = '1.4.0.652 (2023-08-10)';       // version string
+const TTXWEB_VERSION = '1.4.0.660 (2023-08-10)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -61,13 +61,20 @@ function getPageNumbers() {
         for ($i = $pageNum; (($i <= 899) && ($currentIdx === false)); $i++) {
             $currentIdx = array_search(str_replace(array('%ppp%', '%ss%'), array(sprintf('%03d', $i), '01'), EP1_PATTERN), $ep1FileList);
         }
-        $nextIdx = $currentIdx;
-        $prevIdx = $currentIdx - 1;
+        if ($currentIdx === false) {
+            $nextIdx = 0;
+            $prevIdx = sizeof($ep1FileList) - 1;
+        }
+        else {
+            $nextIdx = $currentIdx;
+            $prevIdx = $currentIdx - 1;
+        }
     }
     else {
         // current page is in the file list, normal behavior
         $nextIdx = $currentIdx + 1;
         $prevIdx = $currentIdx - 1;
+        if ($nextIdx == sizeof($ep1FileList)) $nextIdx = 0;
     }
 
     // jump over 0-byte files (needed for some Sophora installations)
@@ -76,11 +83,11 @@ function getPageNumbers() {
 
     // extract page numbers from filenames in list
     if (isset($ep1FileList[$nextIdx])) {
-        $nextPageNum = substr($ep1FileList[$nextIdx], 1, 3);
+        $nextPageNum = substr($ep1FileList[$nextIdx], strpos(EP1_PATTERN, '%ppp%'), 3);
     }
 
     if (isset($ep1FileList[$prevIdx])) {
-        $prevPageNum = substr($ep1FileList[$prevIdx], 1, 3);
+        $prevPageNum = substr($ep1FileList[$prevIdx], strpos(EP1_PATTERN, '%ppp%'), 3);
     }
 
     // get number of subpages
