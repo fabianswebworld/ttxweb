@@ -31,7 +31,7 @@ function getPageNumbers() {
     global $pageNum, $subpageNum, $prevPageNum, $nextPageNum, $prevSubpageNum, $nextSubpageNum, $numSubpages;
 
     $pageNum = isset($_GET['page']) ? $_GET['page']:'100';
-    $pageNum = sprintf("%03d", $pageNum);
+    $pageNum = sprintf('%03d', $pageNum);
     if ($pageNum < 100) $pageNum = 100;
     if ($pageNum > 899) $pageNum = 899;
 
@@ -39,7 +39,7 @@ function getPageNumbers() {
     $subpageNum = isset($_GET['sub']) ? $_GET['sub']:'01';
     if ($subpageNum < 1) $subpageNum = 1;
     if ($subpageNum > 99) $subpageNum = 99;
-    $subpageNum = sprintf("%02d", $subpageNum);
+    $subpageNum = sprintf('%02d', $subpageNum);
 
     // get current page filename
     $currEp1Filename = getEp1Filename($pageNum, $subpageNum);
@@ -86,7 +86,7 @@ function getPageNumbers() {
     // get number of subpages
     $ep1SubpageFileList = glob(EP1_PATH . str_replace(array('%ppp%', '%ss%'), array($pageNum, '[0-9][0-9]'), EP1_PATTERN));
     $numSubpages = count($ep1SubpageFileList);
-    if ($subpageNum > $numSubpages) $subpageNum = $numSubpages;
+    if ($subpageNum > $numSubpages) $subpageNum = sprintf('%02d', $numSubpages);
 
     // clamp result values
     if ($prevPageNum < 100) $prevPageNum = 100;
@@ -104,7 +104,7 @@ function getPageNumbers() {
 function getEp1Filename($pageNum, $subpageNum) {
 
     // generate path to EP1 file
-    $ep1Filename = EP1_PATH . str_replace(array('%ppp%', '%ss%'), array($pageNum, sprintf("%02d", $subpageNum)), EP1_PATTERN);
+    $ep1Filename = EP1_PATH . str_replace(array('%ppp%', '%ss%'), array($pageNum, sprintf('%02d', $subpageNum)), EP1_PATTERN);
     return $ep1Filename;
 
 }
