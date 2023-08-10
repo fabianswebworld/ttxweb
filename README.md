@@ -49,7 +49,7 @@ The following configuration options are available to configure the behavior of t
      `const TTXWEB_TURN_RATES = [100 => 8, 170 => 3, 198 => 20, 220 => 6, 280 => 6];`
 
    - const **EP1_PATH** - Path to the EP1 files (default: 'ep1/')
-   - const **EP1_PATTERN** - pattern for the EP1 filenames (where %ppp% = page, %ss% = subpage; a value for this *must* be provided, no default value)
+   - const **EP1_PATTERN** - pattern for the EP1 filenames (where %ppp% = page, %ss% = subpage; a value for this *must* be provided, no default value)  
      **Example:**
 
      `const EP1_PATTERN = 'P%ppp%S%ss%.EP1';`
