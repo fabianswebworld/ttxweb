@@ -44,13 +44,13 @@ The following configuration options are available to configure the behavior of t
    - const **TTXWEB_TEMPLATE** - template name, i.e. folder to use for HTML templates (must be a subfolder in the **templates/** folder, default: 'default')
    - const **TTXWEB_REFRESH** - seconds for automatic refresh via XHR (default: 0 = disabled)
    - const **TTXWEB_TURN_RATES** - array of pages that should turn automatically, and how fast (example see file or below)  
-     Example:
+     **Example:**
 
      `const TTXWEB_TURN_RATES = [100 => 8, 170 => 3, 198 => 20, 220 => 6, 280 => 6];`
 
    - const **EP1_PATH** - Path to the EP1 files (default: 'ep1/')
    - const **EP1_PATTERN** - pattern for the EP1 filenames (where %ppp% = page, %ss% = subpage; a value for this *must* be provided, no default value)
-     Example:
+     **Example:**
 
      `const EP1_PATTERN = 'P%ppp%S%ss%.EP1';`
 
@@ -75,7 +75,7 @@ The following configuration options are available to configure the behavior of t
         - **%mm%** - current minute (2 digits)
         - **%ss%** - current second (2 digits)
      - Other formats would have to be added to ttxweb.js.  
-       Example:
+       **Example:**
       
        `const ROW_0_CUSTOMHEADER = '<span class="bg0 fg7"><span class="fg7"> %page%.%sub% </span><span class="fg6">ttxweb  </span><span class="fg7">%weekday% %day%.%month%.%year% </span><span class="fg6">%hh%:%mm%:%ss%</span></span >';`
 
@@ -109,7 +109,7 @@ The following URL parameters are supported (if provided, they override the value
 - **reveal** - 0 (hide concealed text) | 1 (reveal concealed text on page load) (default: set by EP1_ALWAYS_REVEAL in ttxweb_config.php)
 - **refresh** - seconds for auto refresh via XHR, 0 = disabled (default: set by TTXWEB_REFRESH in ttxweb_config.php)
 - **template** - override configured template name (default: set by TTXWEB_TEMPLATE in ttxweb_config.php)
-- **turn** - 0 (do not automatically turn subpages) | 1 (turn subpage on every XHR refresh) | not set (turn according to TTXWEB_TURN_RATES in ttxweb_config.php, **default**)
+- **turn** - 0 (do not automatically turn subpages) | 1 (turn subpage on every XHR refresh) | *not set* (turn according to TTXWEB_TURN_RATES in ttxweb_config.php, **default**)
 
 The **xhr** GET parameter is used internally to implement the XMLHttpRequest refresh function. By setting it to 1 you can get only the ttxContainer part of the page if you want to embed it in your own XMLHttpRequest applications.
 
