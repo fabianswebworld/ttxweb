@@ -7,12 +7,6 @@
 - Fix for jumping over the last page when jumping backwards from a higher, but non-existent page number
 - Fix some more warnings that could occur on PHP 8.2.x or newer
 
-1.4.0.650
-
-- New: file name pattern for EP1 files is now configurable via ttxweb_config.php
-- New: automatically turn subpages for certain pages at a configurable turn-rate
-- Fix some more warnings that could occur when using PHP 8.2.x or newer
-
 1.3.2.642
 
 - Decoder fix: improved handling of double width/size/height edge cases (disallow in last row/column)
