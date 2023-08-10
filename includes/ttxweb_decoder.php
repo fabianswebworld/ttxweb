@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.4.0.650 (2023-08-09)
+// version: 1.4.0.652 (2023-08-10)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
@@ -87,7 +87,7 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
 
     global $queryString;
     global $errorPageClassString;
-    global $pageNum, $subpageNum, $prevPageNum, $nextPageNum, $prevSubpageNum, $nextSubpageNum, $numSubpages;
+    global $pageNum, $subpageNum, $prevPageNum, $nextPageNum, $prevSubpageNum, $nextSubpageNum, $numSubpages, $origNextSubpageNum;
 
     echo "<div id=\"ttxContainer\">\n<div id=\"ttxPage\"" . $errorPageClassString . ">\n";
 
@@ -315,17 +315,20 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
 
             // output G1 character
             if ($ttxAttributes['charSet'] == 'g1') {
-                if ($ttxAttributes['g1Hold'] && !isG1Char($currChar)) {
-                    // output the G1 hold character if hold mosaics is on
-                    $htmlBuffer .= renderG1Char($ttxAttributes['g1HoldChar'], $ttxAttributes['fgColor'], $ttxAttributes['g1HoldMode']);
-                }
-                if (isG1Char($currChar)) {
-                    // output the current (decoded) G1 character
-                    $htmlBuffer .= renderG1Char($currChar, $ttxAttributes['fgColor'], $ttxAttributes['g1Mode']);
+                if (isAlphaBlastChar($currChar)) {
+                    // alpha blast-through
+                    $htmlBuffer .= $htmlOutChar;
                 }
                 else {
-                    // alpha blast-through
-                    if (!$ttxAttributes['g1Hold']) {
+                    if ($ttxAttributes['g1Hold'] && !isG1Char($currChar)) {
+                        // output the G1 hold character if hold mosaics is on
+                        $htmlBuffer .= renderG1Char($ttxAttributes['g1HoldChar'], $ttxAttributes['fgColor'], $ttxAttributes['g1HoldMode']);
+                    }
+                    elseif (isG1Char($currChar)) {
+                        // output the current (decoded) G1 character
+                        $htmlBuffer .= renderG1Char($currChar, $ttxAttributes['fgColor'], $ttxAttributes['g1Mode']);
+                    }
+                    else {
                         $htmlBuffer .= $htmlOutChar;
                     }
                 }
@@ -425,7 +428,7 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
 
         // create next subpage/page links
         if ($subpageNum < $numSubpages)  {
-            $htmlBuffer = preg_replace('/(-&gt;|&gt;&gt;)/', '<a href="?page=' . $pageNum . '&amp;sub=' . $nextSubpageNum . $queryString . '" title="' . TO_SUBPAGE_STRING . ' ' . $nextSubpageNum . '">$1</a>', $htmlBuffer);
+            $htmlBuffer = preg_replace('/(-&gt;|&gt;&gt;)/', '<a href="?page=' . $pageNum . '&amp;sub=' . $origNextSubpageNum . $queryString . '" title="' . TO_SUBPAGE_STRING . ' ' . $origNextSubpageNum . '">$1</a>', $htmlBuffer);
         }
         else {
             $htmlBuffer = preg_replace('/(-&gt;|&gt;&gt;)/', '<a href="?page=' . $nextPageNum . $queryString . '" title="' . TO_PAGE_STRING . ' ' . $nextPageNum . '">$1</a>', $htmlBuffer);
@@ -441,11 +444,17 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
 }
 
 
+function isAlphaBlastChar($g1Char)
+{
+    // check if a character is from the alpha blast-through range of characters
+    return (ord($g1Char) >= 0x40 && ord($g1Char) <= 0x5f);
+}
+
+
 function isG1Char($g1Char)
 {
     // check if a character is from the G1 range of characters
-    return (ord($g1Char) >= 0x20 && ord($g1Char) <= 0x3f) ||
-        (ord($g1Char) >= 0x60 && ord($g1Char) <= 0x7f);
+    return (ord($g1Char) >= 0x20 && ord($g1Char) <= 0x3f) || (ord($g1Char) >= 0x60 && ord($g1Char) <= 0x7f);
 }
 
 

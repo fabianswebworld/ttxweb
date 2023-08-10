@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.4.0.650 (2023-08-09)
+// version: 1.4.0.652 (2023-08-10)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 // GLOBAL DEFINITIONS
 
-const TTXWEB_VERSION = '1.4.0.650 (2023-08-09)';       // version string
+const TTXWEB_VERSION = '1.4.0.652 (2023-08-10)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -18,7 +18,7 @@ const TTXWEB_VERSION = '1.4.0.650 (2023-08-09)';       // version string
 // reveal    - 0 (hide concealed text, default) | 1 (reveal concealed text on load)
 // refresh   - seconds for auto refresh via XHR, 0 = disabled (default: set by TTXWEB_REFRESH in ttxweb_config.php)
 // template  - temporary template name (default: set by TTXWEB_TEMPLATE in ttxweb_config.php)
-// turn      - 0 (do not automatically turn subpages, default) | 1 (turn subpage on every XHR refresh)
+// turn      - turn subpage on XHR refresh (default: turn according to TTXWEB_TURN_RATES in ttxweb_config.php)
 
 
 // FUNCTION DEFINITONS
@@ -35,6 +35,7 @@ function getPageNumbers() {
     if ($pageNum < 100) $pageNum = 100;
     if ($pageNum > 899) $pageNum = 899;
 
+    if (isset($_GET['sub']) && empty($_GET['sub'])) unset($_GET['sub']);
     $subpageNum = isset($_GET['sub']) ? $_GET['sub']:'01';
     if ($subpageNum < 1) $subpageNum = 1;
     if ($subpageNum > 99) $subpageNum = 99;
@@ -85,6 +86,7 @@ function getPageNumbers() {
     // get number of subpages
     $ep1SubpageFileList = glob(EP1_PATH . str_replace(array('%ppp%', '%ss%'), array($pageNum, '[0-9][0-9]'), EP1_PATTERN));
     $numSubpages = count($ep1SubpageFileList);
+    if ($subpageNum > $numSubpages) $subpageNum = $numSubpages;
 
     // clamp result values
     if ($prevPageNum < 100) $prevPageNum = 100;
@@ -152,10 +154,6 @@ if (isset($_GET['reveal'])) {
 if (isset($_GET['refresh'])) {
     if ($_GET['refresh'] != '') $refresh = abs(filter_var($_GET['refresh'], FILTER_SANITIZE_NUMBER_INT));
 }
-$turn = false;
-if (isset($_GET['turn'])) {
-    if ($_GET['turn'] == '1') $turn = true;
-}
 $xhr = false;
 if (isset($_GET['xhr'])) {
     if ($_GET['xhr'] == '1') $xhr = true;
@@ -219,9 +217,27 @@ ini_set('default_charset', 'utf-8');
 getPageNumbers();
 
 // determine turnrates
-if (isset($ttxTurnRates[$pageNum])) {
+$turn = false;
+$seqn0 = false;
+$origRefresh = $refresh;
+$origNextSubpageNum = $nextSubpageNum;
+if (isset($ttxTurnRates[$pageNum]) && !isset($_GET['sub'])) {
     $refresh = $ttxTurnRates[$pageNum];
     $turn = true;
+    $seqn0 = true;
+    $nextSubpageNum = 1;
+}
+if (isset($_GET['turn'])) {
+    if ($_GET['turn'] == '1') {
+        $turn = true;
+        $nextSubpageNum = 1;
+    }
+    if ($_GET['turn'] == '0') {
+        $turn = false;
+        $seqn0 = false;
+        $refresh = $origRefresh;
+        $nextSubpageNum = $origNextSubpageNum;
+    }
 }
 
 // include header template if not requested from XMLHttpRequest
@@ -240,7 +256,8 @@ echo ' <div id="ttxEnv">
   <pre id="ttxNumSubpages">'  . $numSubpages        . '</pre>
   <pre id="ttxReveal">'       . intval($reveal)     . '</pre>
   <pre id="ttxRefresh">'      . $refresh            . '</pre>
-  <pre id="ttxTurn">'         . $turn               . '</pre>
+  <pre id="ttxTurn">'         . intval($turn)       . '</pre>
+  <pre id="ttxSeqn0">'        . intval($seqn0)      . '</pre>
  </div>
 
 ';

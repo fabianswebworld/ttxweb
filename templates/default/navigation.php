@@ -10,7 +10,7 @@
             </div>
            <div class="row">
               <div class="buttonarrowleft"><a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $prevSubpageNum . $queryString; ?>" class="arrowleft" title="Vorherige Unterseite">&lt;&lt;</a></div>
-              <div class="currpage">Unterseite<div class="pagenum"><?php echo $subpageNum . ' / ' . sprintf('%02d', $numSubpages); ?></div></div>
+              <div class="currpage">Unterseite<div class="pagenum" id="subpagenum"><?php echo $subpageNum . ' / ' . sprintf('%02d', $numSubpages); ?></div></div>
               <div class="buttonarrowright"><a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $nextSubpageNum . $queryString; ?>" class="arrowright" title="N&auml;chste Unterseite">&gt;&gt;</a></div>
               <div style="clear:both"></div>
            </div>
@@ -29,21 +29,21 @@
               <div style="clear:left"></div>
             </div>
             <div class="numPadRow">
-              <div class="left"><a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;refresh=[0-9]+/', '', $queryString); ?>&amp;refresh=0" class="number" id="refreshButton" onclick="return toggleRefresh();" title="Aktualisierung deaktivieren"><svg viewBox="0 0 20 20"><use xlink:href="templates/<?php echo TTXWEB_TEMPLATE; ?>/images/pause_refresh.svg#pause_refresh"></use></svg></a></div><div class="middle"><a href="#" class="number" onclick="return numberButtonPressed('0');">0</a></div><div class="right"><a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;reveal=[0-9]/', '', $queryString); ?>&amp;reveal=1" class="number" id="revealButton" onclick="return reveal();" title="Antwortfreigabe">?</a></div>
+              <div class="left"><a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;refresh=[0-9]+/', '', $queryString); ?>&amp;refresh=0" class="number" id="refreshButton" onclick="return toggleRefresh();" title="Aktualisierung anhalten/fortsetzen"><svg viewBox="0 0 20 20"><use xlink:href="templates/<?php echo TTXWEB_TEMPLATE; ?>/images/pause_refresh.svg#pause_refresh"></use></svg></a></div><div class="middle"><a href="#" class="number" onclick="return numberButtonPressed('0');">0</a></div><div class="right"><a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;reveal=[0-9]/', '', $queryString); ?>&amp;reveal=1" class="number" id="revealButton" onclick="return reveal();" title="Antwortfreigabe">?</a></div>
               <div style="clear:left"></div>
             </div>
           </div>
 
           <div id="ttxQuickLinks">
              <ul>
-                <li>&rtrif; <a href="?page=100<?php echo $queryString; ?>">Seite 100</a></li>
-                <li>&rtrif; <a href="?page=896<?php echo $queryString; ?>">Testseite</a></li>
+                <li>&#9656; <a href="?page=100<?php echo $queryString; ?>">Seite 100</a></li>
+                <li>&#9656; <a href="?page=896<?php echo $queryString; ?>">Testseite</a></li>
                 <li><strong>Demo functions:</strong></li>
-                <li>&rtrif; <a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;level15=[0-9]/', '', $queryString); ?>&amp;level15=0">Show fallback characters (Level 1.0)</a></li>
-                <li>&rtrif; <a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;level15=[0-9]/', '', $queryString); ?>&amp;level15=1">Show extended characters (Level 1.5)</a></li>
-                <li>&rtrif; <a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;header=[0-9]/', '', $queryString) ?>&amp;header=1">Show Row 0 from EP1 file</a></li>
-                <li>&rtrif; <a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;header=[0-9]/', '', $queryString) ?>&amp;header=0">Generate Row 0 locally</a></li>
-                <li>&rtrif; <a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;template=[\w]+\b/', '', $queryString) ?>&amp;template=fwwtext">Switch to website template</a></li>
+                <li>&#9656; <a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;level15=[0-9]/', '', $queryString); ?>&amp;level15=0">Show fallback characters (Level 1.0)</a></li>
+                <li>&#9656; <a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;level15=[0-9]/', '', $queryString); ?>&amp;level15=1">Show extended characters (Level 1.5)</a></li>
+                <li>&#9656; <a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;header=[0-9]/', '', $queryString) ?>&amp;header=1">Show Row 0 from EP1 file</a></li>
+                <li>&#9656; <a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;header=[0-9]/', '', $queryString) ?>&amp;header=0">Generate Row 0 locally</a></li>
+                <li>&#9656; <a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;template=[\w]+\b/', '', $queryString) ?>&amp;template=fwwtext">Switch to website template</a></li>
              </ul>
            </div>
  

@@ -43,7 +43,13 @@ The following configuration options are available to configure the behavior of t
 - **includes/ttxweb_config.php:**
    - const **TTXWEB_TEMPLATE** - template name, i.e. folder to use for HTML templates (must be a subfolder in the **templates/** folder, default: 'default')
    - const **TTXWEB_REFRESH** - seconds for automatic refresh via XHR (default: 0 = disabled)
+   - const **TTXWEB_TURN_RATES** - array of pages that should turn automatically, and how fast (example see file or below)
+     Example:
+
+     `const TTXWEB_TURN_RATES  = [100 => 8, 170 => 3, 198 => 20, 220 => 6, 280 => 6];`
+
    - const **EP1_PATH** - Path to the EP1 files (default: 'ep1/')
+   - const **EP1_PATTERN** - pattern for the EP1 filenames (where %ppp% = page, %ss% = subpage; example: 'P%ppp%S%ss%.EP1'; a value for this *must* be provided, no default value)
    - const **EP1_LANGUAGE** - Teletext language (default: 'en-US', possible values: 'de-DE' | 'en-GB' | 'en-US')
    - const **EP1_DECODE_X26** - Decode packet X/26 (level 1.5 characters) (default: true)
    - const **EP1_ALWAYS_REVEAL** - Always reveal concealed text on load (default: false)

@@ -78,8 +78,12 @@ function renderRow0() {
   var myMinutes = zeroPad(myDate.getMinutes());
   var mySeconds = zeroPad(myDate.getSeconds());
 
+  var mySubpageNum = 0;
+
+  if (!seqn0) mySubpageNum = subpageNum;
+
   var myRow0 = document.getElementById('ttxRow0Template').innerHTML;
-  myRow0 = myRow0.replace("%page%", pageNum).replace("%sub%", zeroPad(subpageNum)).replace("%weekday%", myWeekDay).replace("%month%", myMonth).replace("%day%", myDay).replace("%year%", myYear).replace("%hh%", myHours).replace("%mm%", myMinutes).replace("%ss%", mySeconds);
+  myRow0 = myRow0.replace("%page%", pageNum).replace("%sub%", zeroPad(mySubpageNum)).replace("%weekday%", myWeekDay).replace("%month%", myMonth).replace("%day%", myDay).replace("%year%", myYear).replace("%hh%", myHours).replace("%mm%", myMinutes).replace("%ss%", mySeconds);
 
   document.getElementById('row0').innerHTML = myRow0;
 
@@ -210,6 +214,12 @@ var refreshTimer = document.getElementById('ttxRefresh').innerHTML * 1000;
 var refreshState = (refreshTimer != 0);
 var refreshTimeoutId;
 var turn = document.getElementById('ttxTurn').innerHTML;
+var seqn0 = (document.getElementById('ttxSeqn0').innerHTML == 1);
+
+var subpageIndicator = document.getElementById('subpagenum');
+if (subpageIndicator !== null) {
+  if (turn == 1) subpageIndicator.innerHTML = 'auto';
+}
 
 var pageNum = document.getElementById('ttxPageNum').innerHTML;
 var subpageNum = parseInt(document.getElementById('ttxSubpageNum').innerHTML, 10);

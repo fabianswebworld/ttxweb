@@ -1,3 +1,11 @@
+1.4.0.652
+
+- New: file name pattern for EP1 files is now configurable via ttxweb_config.php
+- New: automatically turn subpages for certain pages at a configurable turn-rate
+- New: thumbnail sample template, displaying a tiny live teletext page without navigation
+- Decoder fix: alpha blast-through not working if hold graphics was engaged
+- Fix some more warnings that could occur on PHP 8.2.x or newer
+
 1.4.0.650
 
 - New: file name pattern for EP1 files is now configurable via ttxweb_config.php
