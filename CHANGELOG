@@ -1,3 +1,11 @@
+1.4.1.661
+
+- JS fix: fix for possible errorneous leading zero before year number in custom header
+- JS fix: Some browser compatibility fixes in ttxweb.js
+- Some more browser compatibility improvements
+- Added seqn0 URL parameter to control display of subpage sequence number (debug use)
+- Clearer comments in code and documentation regarding turn rates
+
 1.4.0.660
 
 - New: file name pattern for EP1 files is now configurable via ttxweb_config.php

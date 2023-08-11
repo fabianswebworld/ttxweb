@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.4.0.660 (2023-08-10)
+// version: 1.4.1.661 (2023-08-11)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
@@ -552,20 +552,20 @@ function g0ToHtml($ttxString, $ttxLanguage) {
         case 'de-DE':
             return str_replace(
                 ['&', chr(0x24), '@', '[', '\\', ']', '`', '{', '|', '}', '~', chr(0x7f), '<', '>', '"', '\''],
-                ['&amp;', '$', '&sect;', '&Auml;', '&Ouml;', '&Uuml;', '&deg;', '&auml;', '&ouml;', '&uuml;', '&szlig;', '&#9632;', '&lt;', '&gt;', '&quot;', '&apos;'],
+                ['&amp;', '$', '&sect;', '&Auml;', '&Ouml;', '&Uuml;', '&deg;', '&auml;', '&ouml;', '&uuml;', '&szlig;', '&#9632;', '&lt;', '&gt;', '&quot;', '&#39;'],
                 $ttxString
             );
             break;
         case 'en-GB':
             return str_replace(
                 ['&', chr(0x23), chr(0x24), '@', '[', '\\', ']', chr(0x5e), chr(0x5f), '`', '{', '|', '}', '~', chr(0x7f), '<', '>', '"', '\''],
-                ['&amp;', '&pound;', '$', '@', '&#8592;', '&frac12;', '&#8594;', '&#8593;', '#', '&#8212;', '&frac14;', '&#9553;', '&frac34;', '&divide;', '&#9632;', '&lt;', '&gt;', '&quot;', '&apos;', '&amp;'],
+                ['&amp;', '&pound;', '$', '@', '&#8592;', '&frac12;', '&#8594;', '&#8593;', '#', '&#8212;', '&frac14;', '&#9553;', '&frac34;', '&divide;', '&#9632;', '&lt;', '&gt;', '&quot;', '&#39;', '&amp;'],
                 $ttxString
             );
         default:
             return str_replace(
                 ['&', chr(0x7f), '<', '>', '"', '\''],
-                ['&amp;', '&#9632;', '&lt;', '&gt;', '&quot;', '&apos;'],
+                ['&amp;', '&#9632;', '&lt;', '&gt;', '&quot;', '&#39;'],
                 $ttxString
             );
     }

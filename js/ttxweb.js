@@ -17,7 +17,7 @@ function xhrRefresh() {
   else {
     var nextSubpage = subpageNum + 1;
     if (nextSubpage > numSubpages) nextSubpage = 1;
-    var myXhrUrl = window.location.pathname + '?xhr=1&' + window.location.search.substring(1).replace('&sub=([0-9]{1,2})','') + '&sub=' + nextSubpage;
+    var myXhrUrl = window.location.pathname + ('?xhr=1&' + window.location.search.substring(1).replace('&sub=([0-9]{1,2})', '') + '&sub=' + nextSubpage).replace('&&', '&');
   }
 
   var myCurrentContents = document.createElement('div');
@@ -70,10 +70,10 @@ function xhrRefresh() {
 function renderRow0() {
   var myDate = new Date();
 
-  var myWeekDay = myDate.toLocaleString(document.getElementById('ttxLanguage').innerHTML, {weekday: 'long'}).substr(0, 2);
+  var myWeekDay = myDate.toLocaleString(document.getElementById('ttxLanguage').innerHTML, {weekday: 'long'}).substring(0, 2);
   var myMonth = zeroPad(myDate.getMonth() + 1);
   var myDay = zeroPad(myDate.getDate());
-  var myYear = zeroPad(myDate.getFullYear().toString().substr(-2));
+  var myYear = myDate.getFullYear().toString().substring(2, 4);
   var myHours = zeroPad(myDate.getHours());
   var myMinutes = zeroPad(myDate.getMinutes());
   var mySeconds = zeroPad(myDate.getSeconds());
@@ -207,6 +207,10 @@ function setNumPadFocus() {
   }
   elem.focus();
   elem.select();
+}
+
+String.prototype.trim = function() {
+  return this.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 }
 
 var revealState = document.getElementById('ttxReveal').innerHTML;

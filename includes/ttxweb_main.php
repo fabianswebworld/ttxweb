@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.4.0.660 (2023-08-10)
+// version: 1.4.1.661 (2023-08-11)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 // GLOBAL DEFINITIONS
 
-const TTXWEB_VERSION = '1.4.0.660 (2023-08-10)';       // version string
+const TTXWEB_VERSION = '1.4.1.661 (2023-08-11)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -18,7 +18,9 @@ const TTXWEB_VERSION = '1.4.0.660 (2023-08-10)';       // version string
 // reveal    - 0 (hide concealed text, default) | 1 (reveal concealed text on load)
 // refresh   - seconds for auto refresh via XHR, 0 = disabled (default: set by TTXWEB_REFRESH in ttxweb_config.php)
 // template  - temporary template name (default: set by TTXWEB_TEMPLATE in ttxweb_config.php)
-// turn      - turn subpage on XHR refresh (default: turn according to TTXWEB_TURN_RATES in ttxweb_config.php)
+// turn      - 1 = turn subpage on XHR refresh (default: turn according to TTXWEB_TURN_RATES in ttxweb_config.php)
+// seqn0     - 1 = always display subpage 00 in custom header (default: only if page is in TTXWEB_TURN_RATES)
+// xhr       - 1 = output ttxStage only (only used internally for XMLHttpRefresh via ttxweb.js)
 
 
 // FUNCTION DEFINITONS
@@ -174,10 +176,12 @@ else {
 if (empty($templateName)) { $templateName = 'default'; }
 
 // build query string to pass to the next query
+// with some more sanitizations
 $queryArray = $_GET;
 unset($queryArray['page']);
 unset($queryArray['sub']);
 unset($queryArray['xhr']);
+unset($queryArray['seqn0']);
 if (isset($queryArray['level15'])) {
     if ($queryArray['level15'] == '1') {
         unset($queryArray['level15']);
@@ -191,6 +195,14 @@ if (isset($queryArray['header'])) {
 if (isset($queryArray['reveal'])) {
     if ($queryArray['reveal'] == '0') {
         unset($queryArray['reveal']);
+    }
+}
+if (isset($queryArray['refresh'])) {
+    $queryArray['refresh'] = abs(filter_var($queryArray['refresh'], FILTER_SANITIZE_NUMBER_INT));
+}
+if (isset($queryArray['turn'])) {
+    if (!(($queryArray['turn'] == '1') || ($queryArray['turn'] == '0'))) {
+        unset($queryArray['turn']);
     }
 }
 $queryString = htmlspecialchars(http_build_query($queryArray));
@@ -229,6 +241,8 @@ $seqn0 = false;
 $origRefresh = $refresh;
 $origNextSubpageNum = $nextSubpageNum;
 if (isset($ttxTurnRates[$pageNum]) && !isset($_GET['sub'])) {
+    // page has a turnrate set in TTXWEB_TURN_RATES, so always
+    // display 00 as subpage number by default
     $refresh = $ttxTurnRates[$pageNum];
     $turn = true;
     $seqn0 = true;
@@ -244,6 +258,20 @@ if (isset($_GET['turn'])) {
         $seqn0 = false;
         $refresh = $origRefresh;
         $nextSubpageNum = $origNextSubpageNum;
+    }
+}
+if (isset($_GET['refresh'])) {
+        $refresh = $origRefresh;
+}
+
+// overwrite pages with turnrate if seqn0 URL parameter is set
+// 1 = always show subpage number 00
+if (isset($_GET['seqn0'])) {
+    if ($_GET['seqn0'] == '1') {
+        $seqn0 = true;
+    }
+    if ($_GET['seqn0'] == '0') {
+        $seqn0 = false;
     }
 }
 

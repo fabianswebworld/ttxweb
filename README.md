@@ -110,8 +110,8 @@ The following URL parameters are supported (if provided, they override the value
 - **refresh** - seconds for auto refresh via XHR, 0 = disabled (default: set by TTXWEB_REFRESH in ttxweb_config.php)
 - **template** - override configured template name (default: set by TTXWEB_TEMPLATE in ttxweb_config.php)
 - **turn** - 0 (do not automatically turn subpages) | 1 (turn subpage on every XHR refresh) | *not set* (turn according to TTXWEB_TURN_RATES in ttxweb_config.php, **default**)
-
-The **xhr** GET parameter is used internally to implement the XMLHttpRequest refresh function. By setting it to 1 you can get only the ttxContainer part of the page if you want to embed it in your own XMLHttpRequest applications.
+- **seqn0** - 0 (display actual subpage number in header) | 1 (display subpage number in header as *00*; useful for "animated" pages that otherwise have no multi-page content and would be transmitted with 0000 instead of SEQN in linear transmission) | *not set* (show subpage number as 00 only for pages defined in TTXWEB_TURN_RATES)
+- **xhr** - this parameter is used internally to implement the XMLHttpRequest refresh function. By setting it to 1 you can get only the ttxStage part of the page if you want to embed it in your own XMLHttpRequest applications.
 
 # Contact the author
 
