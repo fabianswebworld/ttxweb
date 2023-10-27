@@ -1,3 +1,8 @@
+1.4.2.662
+
+- More sanity checks to avoid PHP warnings in some rare cases
+- Added example .htaccess file to prohibit direct access to the .EP1 files
+
 1.4.1.661
 
 - JS fix: fix for possible errorneous leading zero before year number in custom header
