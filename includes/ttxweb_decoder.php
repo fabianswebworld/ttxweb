@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.4.1.661 (2023-08-11)
+// version: 1.4.2.662 (2023-10-23)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
@@ -35,6 +35,7 @@ function parseEp1File($ep1Filename, $level15, &$level1Data, &$x26Data)
     // handling of non-present or too small / 0-byte EP1 file
     if (!file_exists($ep1Filename) || (filesize($ep1Filename) < 512)) {
         $level1Data = str_pad(NO_PAGE_STRING, 600, ' ', STR_PAD_BOTH);
+        $x26Present = false;
         $errorPageClassString = ' class="errorPage"';
     }
     else {

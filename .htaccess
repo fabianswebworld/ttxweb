@@ -1,0 +1,7 @@
+# uncomment the lines below to prohibit direct access to the EP1 files (recommended),
+# please edit if the EP1 files reside in a different folder than ttxweb/ep1.
+
+# RewriteEngine On
+# RewriteBase /ttxweb/
+# RewriteCond %{REQUEST_URI} \/ep1(.*)
+# RewriteRule ^.*$ / [QSD,L,R=301]
