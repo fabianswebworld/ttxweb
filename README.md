@@ -34,7 +34,7 @@ The EP1 files must be suitably synchronized in the filename format PxxxSyy.EP1 (
 
 ### Deployment
 
-The PHP script and all auxiliary files must be copied to the web server and configured according to the section below. The **g1.zip** file in the **g1** folder needs to be unzipped on the server (faster deployment than transferring 1024 separate files). The transfer of the EP1 files must be set up.
+The PHP script and all auxiliary files must be copied to the web server and configured according to the section below. The **g1.zip** file in the **g1** folder needs to be unzipped on the server (faster deployment than transferring 1024 separate files). The transfer of the EP1 files must be set up. In order to prevent users from directly accessing the EP1 files via the web server, the commented lines of the supplied .htaccess file in the ttxweb folder should be uncommented (as long as the server supports Rewrite Rules).
 
 ## Configuration and customizations
 
