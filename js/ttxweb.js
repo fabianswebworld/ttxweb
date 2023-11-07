@@ -142,8 +142,8 @@ function numberButtonPressed(number) {
   var elem;
   var oldValue;
 
-  if (document.getElementById("numPadInput")) {
-    elem = document.getElementById("numPadInput");
+  if (document.getElementById("ttxNumPadInput")) {
+    elem = document.getElementById("ttxNumPadInput");
   } else {
     elem = document.forms[0].page;
   }
@@ -170,8 +170,8 @@ function checkNumPadInput(event) {
   var elem;
   var oldValue;
 
-  if (document.getElementById("numPadInput")) {
-    elem = document.getElementById("numPadInput");
+  if (document.getElementById("ttxNumPadInput")) {
+    elem = document.getElementById("ttxNumPadInput");
   } else {
     elem = document.forms[0].page;
   }
@@ -200,8 +200,8 @@ function gotoPage() {
 
 function setNumPadFocus() {
   var elem;
-  if (document.getElementById("numPadInput")) {
-    elem = document.getElementById("numPadInput");
+  if (document.getElementById("ttxNumPadInput")) {
+    elem = document.getElementById("ttxNumPadInput");
   } else {
     elem = document.forms[0].page;
   }
