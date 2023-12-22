@@ -32,6 +32,8 @@ The teletext pages to be displayed must be in EP1 format (Softel). This file for
 
 The EP1 files must be suitably synchronized in the filename format PxxxSyy.EP1 (where xxx = page number, yy = subpage number) to a folder accessible to the PHP script. The file name format can be adjusted in the script if required.
 
+Files with a size of 0 bytes (e.g. used as "deletion files" in some Sophora installations) are considered non-existent; corresponding pages are treated as non-existent pages, i.e. skipped.
+
 ### Deployment
 
 The PHP script and all auxiliary files must be copied to the web server and configured according to the section below. The **g1.zip** file in the **g1** folder needs to be unzipped on the server (faster deployment than transferring 1024 separate files). The transfer of the EP1 files must be set up. In order to prevent users from directly accessing the EP1 files via the web server, the commented lines of the supplied .htaccess file in the ttxweb folder should be uncommented (as long as the server supports Rewrite Rules).

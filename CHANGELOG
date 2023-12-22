@@ -1,3 +1,9 @@
+1.4.4.664
+
+- Further improved handling of 0-byte files when used to de-publish only specific subpages of a page
+- Using the "Previous Page" button on page 100 now wraps around, back to the highest page number of the service
+- Added ttxPrevPageNum and ttxNextPageNum to the ttxEnv section to facilitate implementation in certain mobile apps
+
 1.4.2.662
 
 - More sanity checks to avoid PHP warnings in some rare cases

@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.4.2.662 (2023-10-23)
+// version: 1.4.4.664 (2023-12-22)
 // (c) 2023 Fabian Schneider - @fabianswebworld
 
 // GLOBAL DEFINITIONS
 
-const TTXWEB_VERSION = '1.4.2.662 (2023-10-23)';       // version string
+const TTXWEB_VERSION = '1.4.4.664 (2023-12-22)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -77,10 +77,11 @@ function getPageNumbers() {
         $nextIdx = $currentIdx + 1;
         $prevIdx = $currentIdx - 1;
         if ($nextIdx == sizeof($ep1FileList)) $nextIdx = 0;
+        if ($prevIdx == -1) $prevIdx = sizeof($ep1FileList) - 1;
     }
 
     // jump over 0-byte files (needed for some Sophora installations)
-    for ( ; (($nextIdx < count($ep1FileList)) && (filesize(EP1_PATH . $ep1FileList[$nextIdx]) == 0)); $nextIdx++);
+    for ( ; (($nextIdx <= count($ep1FileList)) && (filesize(EP1_PATH . $ep1FileList[$nextIdx]) == 0)); $nextIdx++);
     for ( ; (($prevIdx >= 0) && (filesize(EP1_PATH . $ep1FileList[$prevIdx]) == 0)); $prevIdx--);
 
     // extract page numbers from filenames in list
@@ -94,6 +95,9 @@ function getPageNumbers() {
 
     // get number of subpages
     $ep1SubpageFileList = glob(EP1_PATH . str_replace(array('%ppp%', '%ss%'), array($pageNum, '[0-9][0-9]'), EP1_PATTERN));
+    for ($subpageIdx = 0; $subpageIdx <= count($ep1SubpageFileList); $subpageIdx++) {
+        if (filesize($ep1SubpageFileList[$subpageIdx]) == 0) unset($ep1SubpageFileList[$subpageIdx]);
+    }
     $numSubpages = count($ep1SubpageFileList);
     if ($subpageNum > $numSubpages) $subpageNum = sprintf('%02d', $numSubpages);
 
@@ -287,6 +291,8 @@ echo ' <div id="ttxEnv">
   <pre id="ttxRow0Template">' . ROW_0_CUSTOMHEADER  . '</pre>
   <pre id="ttxLanguage">'     . $ttxLanguage        . '</pre>
   <pre id="ttxPageNum">'      . $pageNum            . '</pre>
+  <pre id="ttxPrevPageNum">'  . $prevPageNum        . '</pre>
+  <pre id="ttxNextPageNum">'  . $nextPageNum        . '</pre>
   <pre id="ttxSubpageNum">'   . intval($subpageNum) . '</pre>
   <pre id="ttxNumSubpages">'  . $numSubpages        . '</pre>
   <pre id="ttxReveal">'       . intval($reveal)     . '</pre>
