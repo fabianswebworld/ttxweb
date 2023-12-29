@@ -10,7 +10,9 @@ To use ttxweb, all you have to do is install the PHP scripts including the addit
 
 ## Live Demo
 
-See the live demo at http://www.fabianswebworld.de/ttxweb.
+See the live demo at https://www.fabianswebworld.de/ttxweb.
+
+See it in production use at https://www.hr-text.hr-fernsehen.de.
 
 ## Screenshots
 
