@@ -610,9 +610,14 @@ function renderRow0() {
 
     $myDate = new DateTime();
 
-    $formatter = new IntlDateFormatter($ttxLanguage, IntlDateFormatter::FULL, IntlDateFormatter::FULL);
-    $formatter->setPattern('EEEEEE');
-    $myWeekDay = substr($formatter->format($myDate), 0, 2);
+    if (class_exists('IntlDateFormatter')) {
+        $formatter = new IntlDateFormatter($ttxLanguage, IntlDateFormatter::FULL, IntlDateFormatter::FULL);
+        $formatter->setPattern('EEEEEE');
+        $myWeekDay = substr($formatter->format($myDate), 0, 2);
+    }
+    else {
+        $myWeekDay = substr($myDate->format('D'), 0, 2);
+    }
 
     $myMonth = str_pad($myDate->format('m'), 2, '0', STR_PAD_LEFT);
     $myDay = str_pad($myDate->format('d'), 2, '0', STR_PAD_LEFT);
