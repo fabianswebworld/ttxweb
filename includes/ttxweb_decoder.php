@@ -1,8 +1,8 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.4.4.664 (2023-12-22)
-// (c) 2023 Fabian Schneider - @fabianswebworld
+// version: 1.5.1.678 (2024-01-27)
+// (c) 2023, 2024 Fabian Schneider - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
 
@@ -88,6 +88,7 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
 
     global $queryString;
     global $errorPageClassString;
+    global $showHeader;
     global $pageNum, $subpageNum, $prevPageNum, $nextPageNum, $prevSubpageNum, $nextSubpageNum, $numSubpages, $origNextSubpageNum;
 
     echo "<div id=\"ttxContainer\">\n<div id=\"ttxPage\"" . $errorPageClassString . ">\n";
@@ -115,6 +116,15 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
         $attributesChanged = false;
 
         echo '<pre class="ttxRow" id="row' . $row . '"><span class="bg0"><span class="bg0 fg7">';
+
+        // write custom header and skip decoding for row 0,
+        // preventing EP1 row 0 data from being visible
+        // if JavaScript is turned off
+        if ($row == 0 && !$showHeader) {
+            $htmlBuffer = renderRow0();
+            echo $htmlBuffer . "</span></span></pre>\n";
+            continue;
+        }
 
         // detect if a row has double height/size in order to
         // be able to copy color attributes to the next row
@@ -587,6 +597,45 @@ function createPageLinkIfExists($matches) {
     else {
         return $matches[1];
     }
+
+}
+
+
+function renderRow0() {
+
+    // render header row from pattern set by ROW_0_CUSTOMHEADER
+    // for static display if JavaScript is disabled
+
+    global $pageNum, $subpageNum, $seqn0, $ttxLanguage, $ttxRow0Pattern;
+
+    $myDate = new DateTime();
+
+    $formatter = new IntlDateFormatter($ttxLanguage, IntlDateFormatter::FULL, IntlDateFormatter::FULL);
+    $formatter->setPattern('EEEEEE');
+    $myWeekDay = substr($formatter->format($myDate), 0, 2);
+
+    $myMonth = str_pad($myDate->format('m'), 2, '0', STR_PAD_LEFT);
+    $myDay = str_pad($myDate->format('d'), 2, '0', STR_PAD_LEFT);
+    $myYear = str_pad($myDate->format('y'), 2, '0', STR_PAD_LEFT);
+    $myHours = str_pad($myDate->format('H'), 2, '0', STR_PAD_LEFT);
+    $myMinutes = str_pad($myDate->format('i'), 2, '0', STR_PAD_LEFT);
+    $mySeconds = str_pad($myDate->format('s'), 2, '0', STR_PAD_LEFT);
+
+    $mySubpageNum = 0;
+    if (!$seqn0) $mySubpageNum = $subpageNum;
+
+    $myRow0 = $ttxRow0Pattern;
+    $myRow0 = str_replace("%page%", $pageNum, $myRow0);
+    $myRow0 = str_replace("%sub%", str_pad($mySubpageNum, 2, '0', STR_PAD_LEFT), $myRow0);
+    $myRow0 = str_replace("%weekday%", $myWeekDay, $myRow0);
+    $myRow0 = str_replace("%month%", $myMonth, $myRow0);
+    $myRow0 = str_replace("%day%", $myDay, $myRow0);
+    $myRow0 = str_replace("%year%", $myYear, $myRow0);
+    $myRow0 = str_replace("%hh%", $myHours, $myRow0);
+    $myRow0 = str_replace("%mm%", $myMinutes, $myRow0);
+    $myRow0 = str_replace("%ss%", $mySeconds, $myRow0);
+
+    return $myRow0;
 
 }
 

@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php EP1 teletext document renderer
-// version: 1.4.4.664 (2023-12-22)
-// (c) 2023 Fabian Schneider - @fabianswebworld
+// version: 1.5.1.678 (2024-01-27)
+// (c) 2023, 2024 Fabian Schneider - @fabianswebworld
 
 // GLOBAL DEFINITIONS
 
-const TTXWEB_VERSION = '1.4.4.664 (2023-12-22)';       // version string
+const TTXWEB_VERSION = '1.5.1.678 (2024-01-27)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -81,7 +81,7 @@ function getPageNumbers() {
     }
 
     // jump over 0-byte files (needed for some Sophora installations)
-    for ( ; (($nextIdx <= count($ep1FileList)) && (filesize(EP1_PATH . $ep1FileList[$nextIdx]) == 0)); $nextIdx++);
+    for ( ; (($nextIdx < count($ep1FileList)) && (filesize(EP1_PATH . $ep1FileList[$nextIdx]) == 0)); $nextIdx++);
     for ( ; (($prevIdx >= 0) && (filesize(EP1_PATH . $ep1FileList[$prevIdx]) == 0)); $prevIdx--);
 
     // extract page numbers from filenames in list
@@ -95,7 +95,7 @@ function getPageNumbers() {
 
     // get number of subpages
     $ep1SubpageFileList = glob(EP1_PATH . str_replace(array('%ppp%', '%ss%'), array($pageNum, '[0-9][0-9]'), EP1_PATTERN));
-    for ($subpageIdx = 0; $subpageIdx <= count($ep1SubpageFileList); $subpageIdx++) {
+    for ($subpageIdx = 0; $subpageIdx < count($ep1SubpageFileList); $subpageIdx++) {
         if (filesize($ep1SubpageFileList[$subpageIdx]) == 0) unset($ep1SubpageFileList[$subpageIdx]);
     }
     $numSubpages = count($ep1SubpageFileList);
@@ -228,6 +228,16 @@ else {
     die('Cannot access template configuration. ttxweb cannot continue.');
 }
 
+// read pattern for custom header row, template-specific configuration
+$ttxRow0Pattern = '';
+if (defined('ROW_0_CUSTOMHEADER')) {
+    $ttxRow0Pattern = ROW_0_CUSTOMHEADER;
+}
+else {
+    // if ROW_0_CUSTOMHEADER not set, show header from EP1 file by default
+    $showHeader = true;
+}
+
 // construct version string
 $versionString = TTXWEB_VERSION;
 if (!empty(TTXWEB_VERSION_EXT)) { $versionString = explode(' ', $versionString)[0] . '-' . TTXWEB_VERSION_EXT . ' ' . explode(' ', $versionString)[1]; }
@@ -288,7 +298,7 @@ echo '<div id="ttxStage">' . "\n\n";
 // write environment variables for ttxweb.js scripts into HTML
 echo ' <div id="ttxEnv">
   <pre id="ttxRow0Header">'   . intval($showHeader) . '</pre>
-  <pre id="ttxRow0Template">' . ROW_0_CUSTOMHEADER  . '</pre>
+  <pre id="ttxRow0Template">' . $ttxRow0Pattern     . '</pre>
   <pre id="ttxLanguage">'     . $ttxLanguage        . '</pre>
   <pre id="ttxPageNum">'      . $pageNum            . '</pre>
   <pre id="ttxPrevPageNum">'  . $prevPageNum        . '</pre>
