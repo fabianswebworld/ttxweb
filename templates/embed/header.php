@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
 
-    <title>Videotext-Seite <?php echo $pageNum . '.' . $subpageNum ?> | ttxweb</title>
+    <title><?php echo $pageTitle; ?></title>
 
     <link rel="start" title="Seite 100" href="?page=100" />
     <link rel="next" title="N&auml;chste Videotext-Seite" href="?page=<?php echo $nextPageNum ?>" />
