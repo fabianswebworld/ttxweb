@@ -89,6 +89,8 @@ The following configuration options are available to configure the behavior of t
  
   - const **TTXWEB_PAGE_TITLE** - Template for page title, i.e. browser window title (a value for this *must* be provided, no default value)
     - Format for **TTXWEB_PAGE_TITLE**:
+   
+      Arbitrary string. The following tokens will be replaced:
       - **%page%** - Current page number
       - **%sub%** - Current subpage
     - **Example:**
@@ -132,7 +134,7 @@ The following URL parameters are supported (if provided, they override the value
 - **turn** - 0 (do not automatically turn subpages) | 1 (turn subpage on every XHR refresh) | *not set* (turn according to TTXWEB_TURN_RATES in ttxweb_config.php, **default**)
 - **seqn0** - 0 (display actual subpage number in header) | 1 (display subpage number in header as *00*; useful for "animated" pages that otherwise have no multi-page content and would be transmitted with 0000 instead of SEQN in linear transmission) | *not set* (show subpage number as *00* only for pages defined in TTXWEB_TURN_RATES, **default**)
 - **xhr** - this parameter is used internally to implement the XMLHttpRequest refresh function. By setting it to 1 you can get only the ttxStage part of the page if you want to embed it in your own XMLHttpRequest applications.
-- **stream** - present an alternate teletext stream by loading a different config file *ttxweb_config-\<stream\>.php*, possibly pointing to a different input file folder and/or using a different input filename pattern
+- **stream** - present an alternate teletext stream by loading a different config file, *ttxweb_config-**\<stream\>**.php*, possibly pointing to a different input file folder and/or using a different input filename pattern
 
 # Contact the author
 
