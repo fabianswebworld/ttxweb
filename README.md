@@ -6,7 +6,7 @@ ttxweb is a web application that brings the "old-fashioned" teletext (Videotext)
 
 Another nice feature is that the pages can update automatically at a configurable refresh interval. The update happens smoothly via XMLHttpRequest (no full page reload), so that just the teletext portion of the page is reloaded.
 
-To use ttxweb, all you have to do is install the PHP scripts including the additional files (CSS, JS etc.) on a web server and ensure that the teletext pages are synchronized as EP1 files in a configurable folder that can be accessed from the PHP script (e.g. via FTP).
+To use ttxweb, all you have to do is install the PHP scripts including the additional files (CSS, JS etc.) on a web server and ensure that the teletext pages are synchronized as EP1 or AST files in a configurable folder that can be accessed from the PHP script (e.g. via FTP).
 
 ## Live Demo
 
@@ -30,77 +30,93 @@ A web server with PHP >= 5.6 is required. There are no other requirements (mySQL
 
 #### Input files
 
-The teletext pages to be displayed must be in EP1 format (Softel). This file format can be processed or exported by all common teletext systems (Softel, Broadstream etc.). If required, an adaptation to other formats (TTI, TTX, ETT, etc.) is conceivable with little effort. The ttxweb EP1 parser will automatically detect the flavor of EP1 file: plain Level 1.0 files without X/26 data as well as both flavors of Softel EP1 files with X/26 data (Flair and TAP). Note: To enable X/26 export in the TAP process, you'll have to set the (undocumented) environment variable TRA_TAP_X26 to 1 on the Transmission machine which hosts TAP.EXE.
+The teletext pages to be displayed must be in EP1 format (Softel) or AST format (ASTET). These file formats can be processed or exported by all common teletext systems (Softel, Broadstream etc.). If required, an adaptation to other formats (TTI, TTX, ETT, etc.) is conceivable with little effort. The ttxweb EP1 parser will automatically detect the flavor of EP1 file: plain Level 1.0 files without X/26 data as well as both flavors of Softel EP1 files with X/26 data (Flair and TAP). Note: To enable X/26 export in the TAP process, you'll have to set the (undocumented) environment variable TRA_TAP_X26 to 1 on the Transmission machine which hosts TAP.EXE. For AST files, X/26 data is detected and decoded automatically as well, if it is included as a regular packet 26 inside the file (any packet/row order is possible).
 
-The EP1 files must be suitably synchronized in the filename format PxxxSyy.EP1 (where xxx = page number, yy = subpage number) to a folder accessible to the PHP script. The file name format can be adjusted in the script if required.
+The input files must be suitably synchronized to a folder accessible to the PHP script in the filename format PxxxSyy.EP1 by default (where xxx = page number, yy = subpage number). The file name format can be adjusted in the script if required.
 
 Files with a size of 0 bytes (e.g. used as "deletion files" in some Sophora installations) are considered non-existent; corresponding pages are treated as non-existent pages, i.e. skipped.
 
+##### Important note
+
+Historically, only the EP1 file format was supported by ttxweb, so the term "EP1 file" is used synonymously with "input file" throughout this documentation and also throughout the code. This explains function names such as "getEp1Filename()" which is used to get the input filename. The same applies to some configuration parameters named "EP1_*", which apply to all input file formats as well.
+
 ### Deployment
 
-The PHP script and all auxiliary files must be copied to the web server and configured according to the section below. The **g1.zip** file in the **g1** folder needs to be unzipped on the server (faster deployment than transferring 1024 separate files). The transfer of the EP1 files must be set up. In order to prevent users from directly accessing the EP1 files via the web server, the commented lines of the supplied .htaccess file in the ttxweb folder should be uncommented (as long as the server supports Rewrite Rules).
+The PHP script and all auxiliary files must be copied to the web server and configured according to the section below. The **g1.zip** file in the **g1** folder needs to be unzipped on the server (faster deployment than transferring 1024 separate files). The transfer of the EP1/AST/etc. input files must be set up. In order to prevent users from directly accessing the input files via the web server, the commented lines of the supplied .htaccess file in the ttxweb folder should be uncommented (as long as the server supports Rewrite Rules).
 
 ## Configuration and customizations
 
 The following configuration options are available to configure the behavior of ttxweb and adapt the output to your own website design:
 
 - **includes/ttxweb_config.php:**
-   - const **TTXWEB_TEMPLATE** - template name, i.e. folder to use for HTML templates (must be a subfolder in the **templates/** folder, default: 'default')
-   - const **TTXWEB_REFRESH** - seconds for automatic refresh via XHR (default: 0 = disabled)
-   - const **TTXWEB_TURN_RATES** - array of pages that should turn automatically, and how fast (example see file or below)  
-     **Example:**
+  - const **TTXWEB_TEMPLATE** - template name, i.e. folder to use for HTML templates (must be a subfolder in the **templates/** folder, default: 'default')
+  - const **TTXWEB_REFRESH** - seconds for automatic refresh via XHR (default: 0 = disabled)
+  - const **TTXWEB_TURN_RATES** - array of pages that should turn automatically, and how fast (example see file or below)  
+    **Example:**
 
-     `const TTXWEB_TURN_RATES = [100 => 8, 170 => 3, 198 => 20, 220 => 6, 280 => 6];`
+    `const TTXWEB_TURN_RATES = [100 => 8, 170 => 3, 198 => 20, 220 => 6, 280 => 6];`
 
-   - const **EP1_PATH** - Path to the EP1 files (default: 'ep1/')
-   - const **EP1_PATTERN** - pattern for the EP1 filenames (where %ppp% = page, %ss% = subpage; a value for this *must* be provided, no default value)  
-     **Example:**
+  - const **EP1_PATH** - Path to the input files (default: 'ep1/')
+  - const **EP1_PATTERN** - pattern for the input filenames (where %ppp% = page, %ss% = subpage; a value for this *must* be provided, no default value)  
+    **Example:**
 
-     `const EP1_PATTERN = 'P%ppp%S%ss%.EP1';`
+    `const EP1_PATTERN = 'P%ppp%S%ss%.EP1';`
 
-   - const **EP1_LANGUAGE** - Teletext language (default: 'en-US', possible values: 'de-DE' | 'en-GB' | 'en-US')
-   - const **EP1_DECODE_X26** - Decode packet X/26 (level 1.5 characters) (default: true)
-   - const **EP1_ALWAYS_REVEAL** - Always reveal concealed text on load (default: false)
-   - const **NO_PAGE_STRING** - String for 'Page not found' (default: empty)
-   - const **TO_PAGE_STRING** - String for 'Jump to page' (default: empty)
-   - const **TO_SUBPAGE_STRING** - String for 'Jump to subpage' (default: empty)
- 
-- **templates/\<templatename\>/template_config.php:**  
-   - const **ROW_0_CUSTOMHEADER** - Template for row 0 (page header). If not set or empty, row 0 from the EP1 file is displayed.
-     - Format for **ROW_0_CUSTOMHEADER**:
-       `<span>` elements can be used with the classes from **ttxweb_main.css** (fg*n*, bg*n*, dh etc.) to format colors etc. Furthermore, the following tokens will be replaced:
-        - **%page%** - Current page number
-        - **%sub%** - Current subpage
-        - **%weekday%** - Current day of the week (2 characters) in the configured language (see EP1_LANGUAGE)
-        - **%day%** - Current day (2 digits)
-        - **%month%** - current month (2 digits)
-        - **%year%** - Current year (2 digits)
-        - **%hh%** - Current hour (2 digits)
-        - **%mm%** - current minute (2 digits)
-        - **%ss%** - current second (2 digits)
-     - Other formats would have to be added to ttxweb.js.  
-       **Example:**
+  - const **EP1_LANGUAGE** - Teletext language (default: 'en-US', possible values: 'de-DE' | 'en-GB' | 'en-US')
+  - const **EP1_DECODE_X26** - Decode packet X/26 (level 1.5 characters) (default: true)
+  - const **EP1_ALWAYS_REVEAL** - Always reveal concealed text on load (default: false)
+  - const **NO_PAGE_STRING** - String for 'Page not found' (default: empty)
+  - const **TO_PAGE_STRING** - String for 'Jump to page' (default: empty)
+  - const **TO_SUBPAGE_STRING** - String for 'Jump to subpage' (default: empty)
+
+  - const **ROW_0_CUSTOMHEADER** - Template for row 0 (page header). If not set or empty, row 0 from the EP1 file is displayed.
+    - Format for **ROW_0_CUSTOMHEADER**:
+
+      `<span>` elements can be used with the classes from **ttxweb_main.css** (fg*n*, bg*n*, dh etc.) to format colors etc. Furthermore, the following tokens will be replaced:
+      - **%page%** - Current page number
+      - **%sub%** - Current subpage
+      - **%weekday%** - Current day of the week (2 characters) in the configured language (see EP1_LANGUAGE)
+      - **%day%** - Current day (2 digits)
+      - **%month%** - current month (2 digits)
+      - **%year%** - Current year (2 digits)
+      - **%hh%** - Current hour (2 digits)
+      - **%mm%** - current minute (2 digits)
+      - **%ss%** - current second (2 digits)
+    - Other formats would have to be added to ttxweb.js.  
+      **Example:**
       
-       `const ROW_0_CUSTOMHEADER = '<span class="bg0 fg7"><span class="fg7"> %page%.%sub% </span><span class="fg6">ttxweb  </span><span class="fg7">%weekday% %day%.%month%.%year% </span><span class="fg6">%hh%:%mm%:%ss%</span></span >';`
+      `const ROW_0_CUSTOMHEADER = '<span class="bg0 fg7"><span class="fg7"> %page%.%sub% </span><span class="fg6">ttxweb  </span><span class="fg7">%weekday% %day%.%month%.%year% </span><span class="fg6">%hh%:%mm%:%ss%</span></span >';`
+ 
+  - const **TTXWEB_PAGE_TITLE** - Template for page title, i.e. browser window title (a value for this *must* be provided, no default value)
+    - Format for **TTXWEB_PAGE_TITLE**:
+      - **%page%** - Current page number
+      - **%sub%** - Current subpage
+    - **Example:**
+      
+      `const TTXWEB_PAGE_TITLE  = 'Videotext-Seite %page%.%sub% | ttxweb';`
+
+- **templates/\<templatename\>/template_config.php:**
+  - Template configuration file. Any configuration definitions (const) from ttxweb_config.php may be moved to this file if template-specific configuration is desired. Note that no configuration definition may exist in both configuration files at the same time.
 
 - **templates/\<templatename\>/navigation.php:**  
-   - The "quick links" to the individual teletext pages can be adjusted directly in the HTML code or, if necessary, removed entirely. Also, the behavior and look of the navigation itself may be altered if necessary.
+  - The "quick links" to the individual teletext pages can be adjusted directly in the HTML code or, if necessary, removed entirely. Also, the behavior and look of the navigation itself may be altered if necessary.
 
 - **templates/\<templatename\>/header.php:**
-   - HTML template which is output before the actual teletext output. The following variables can be used in this template (in the form `<?php echo $variable; ?>`):
-     - **$pageNum** - Current page number
-     - **$nextPageNum** - Next available page
-     - **$prevPageNum** - Previous available page
-     - **$subpageNum** - Current subpage
-     - **$nextSubpageNum** - Next subpage
-     - **$prevSubpageNum** - Previous subpage
-     - **$numSubpages** - Number of subpages
+  - HTML template which is output before the actual teletext output. The following variables can be used in this template (in the form `<?php echo $variable; ?>`):
+    - **$pageNum** - Current page number
+    - **$nextPageNum** - Next available page
+    - **$prevPageNum** - Previous available page
+    - **$subpageNum** - Current subpage
+    - **$nextSubpageNum** - Next subpage
+    - **$prevSubpageNum** - Previous subpage
+    - **$numSubpages** - Number of subpages
+    - **$pageTitle** - Page title as defined via TTXWEB_PAGE_TITLE
 
 - **templates/\<templatename\>/trailer.php:**
-   - HTML template, which is output after the actual teletext output. The same variables apply as in **header.php**.
+  - HTML template, which is output after the actual teletext output. The same variables apply as in **header.php**.
 
 - **templates/\<templatename\>/css/template_style.css:**
-   - Customize styles of the navigation box if necessary. Avoid changing the main Teletext style classes, although you *can* carefully modify text sizes there. Refer to **css/ttxweb_ttx.css** for details.
+  - Customize styles of the navigation box if necessary. Avoid changing the main Teletext style classes, although you *can* carefully modify text sizes there. Refer to **css/ttxweb_ttx.css** for details.
 
 ## GET parameters at runtime
 
@@ -116,6 +132,7 @@ The following URL parameters are supported (if provided, they override the value
 - **turn** - 0 (do not automatically turn subpages) | 1 (turn subpage on every XHR refresh) | *not set* (turn according to TTXWEB_TURN_RATES in ttxweb_config.php, **default**)
 - **seqn0** - 0 (display actual subpage number in header) | 1 (display subpage number in header as *00*; useful for "animated" pages that otherwise have no multi-page content and would be transmitted with 0000 instead of SEQN in linear transmission) | *not set* (show subpage number as *00* only for pages defined in TTXWEB_TURN_RATES, **default**)
 - **xhr** - this parameter is used internally to implement the XMLHttpRequest refresh function. By setting it to 1 you can get only the ttxStage part of the page if you want to embed it in your own XMLHttpRequest applications.
+- **stream** - alternate teletext stream by loading a different config file *ttxweb_config-<stream>.php*
 
 # Contact the author
 
