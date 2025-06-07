@@ -1,6 +1,6 @@
-
+<?php echo '
     </div>
 
   </body>
 
-</html>
+</html>'; ?>
