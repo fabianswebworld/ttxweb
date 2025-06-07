@@ -6,7 +6,7 @@
 - New: added 'embed' and 'embed-flex' example templates, the latter one displaying the teletext page maximized flexibly to fit its container (responsive design)
 - New: added possibility to configure custom page title pattern
 - Moved custom row 0 pattern configuration back to main configuration file by default, but it can still be moved to the template-specific configuration files if desired
-- Added keyboard navigation via arrow keys (up/down = page, left/right = subpage) is now possible
+- Added keyboard navigation via arrow keys (up/down = page, left/right = subpage)
 - More navigation improvements (pressing a number key automatically focuses input box, and selecting the page number input box on a mobile device now brings up a number keypad instead of the full on-screen keyboard)
 
 1.5.1.678
