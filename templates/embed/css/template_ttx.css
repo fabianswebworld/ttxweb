@@ -1,0 +1,297 @@
+#ttxContainer {
+    margin: 8px 0 30px 0;
+    display: block;
+    float: left;
+}
+
+#ttxPage {
+    background: #000000;
+    padding: 7px 8px 8px 8px;
+    float: left;
+}
+
+.ttxRow {
+    font-family: 'Consolas', ui-monospace, monospace;
+    font-size: 18px;
+    line-height: 20px;
+    letter-spacing: 3px;
+    margin: 0px;
+    padding: 0px 0px 0px 0px;
+    white-space: pre;
+    background-color: #000000;
+    position: relative;
+}
+
+.ttxRow span {
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-size: 103% 102% !important;
+    overflow: visible;
+    position: relative;
+}
+
+.ttxRow a {
+    text-decoration: none;
+    color: inherit !important;
+}
+
+.ttxRow a:hover {
+    background-color: #bbbbbb !important;
+    color: #333333 !important;
+}
+
+#ttxEnv, #ttxRow0Template {
+    display: none !important;
+}
+
+#row0 {
+    z-index: 100;
+}
+
+#row1 {
+    z-index: 99;
+}
+
+#row2 {
+    z-index: 98;
+}
+
+#row3 {
+    z-index: 97;
+}
+
+#row4 {
+    z-index: 96;
+}
+
+#row5 {
+    z-index: 95;
+}
+
+#row6 {
+    z-index: 94;
+}
+
+#row7 {
+    z-index: 93;
+}
+
+#row8 {
+    z-index: 92;
+}
+
+#row9 {
+    z-index: 91;
+}
+
+#row10 {
+    z-index: 90;
+}
+
+#row11 {
+    z-index: 89;
+}
+
+#row12 {
+    z-index: 88;
+}
+
+#row13 {
+    z-index: 87;
+}
+
+#row14 {
+    z-index: 86;
+}
+
+#row15 {
+    z-index: 85;
+}
+
+#row16 {
+    z-index: 84;
+}
+
+#row17 {
+    z-index: 83;
+}
+
+#row18 {
+    z-index: 82;
+}
+
+#row19 {
+    z-index: 81;
+}
+
+#row20 {
+    z-index: 80;
+}
+
+#row21 {
+    z-index: 79;
+}
+
+#row22 {
+    z-index: 78;
+}
+
+#row23 {
+    z-index: 77;
+}
+
+#row24 {
+    z-index: 76;
+}
+
+.z100 {
+    z-index: 100;
+}
+
+.z0 {
+    z-index: 0;
+}
+
+.flash {
+  animation: flash 1s linear infinite;
+}
+
+@keyframes flash {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  63% {
+    opacity: 0.5;
+  }
+  77% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.dh {
+    display: inline-block;
+    overflow: visible;
+    z-index: 101;
+    position: relative;
+    -webkit-transform:scale(1,2); /* Safari and Chrome */
+    -moz-transform:scale(1,2); /* Firefox */
+    -ms-transform:scale(1,2); /* IE 9 */
+    -o-transform:scale(1,2); /* Opera */
+    transform:scale(1,2); /* W3C */
+    -webkit-transform-origin: top left;
+    -moz-transform-origin: top left;
+    -ms-transform-origin: top left;
+    -o-transform-origin: top left;
+    transform-origin: top left;
+}
+
+.dw {
+    display: inline-block;
+    overflow: visible;
+    z-index: 100;
+    position: relative;
+    -webkit-transform:scale(2,1); /* Safari and Chrome */
+    -moz-transform:scale(2,1); /* Firefox */
+    -ms-transform:scale(2,1); /* IE 9 */
+    -o-transform:scale(2,1); /* Opera */
+    transform:scale(2,1); /* W3C */
+    -webkit-transform-origin: top left;
+    -moz-transform-origin: top left;
+    -ms-transform-origin: top left;
+    -o-transform-origin: top left;
+    transform-origin: top left;
+}
+
+.ds {
+    display: inline-block;
+    overflow: visible;
+    z-index: 100;
+    position: relative;
+    -webkit-transform:scale(2,2); /* Safari and Chrome */
+    -moz-transform:scale(2,2); /* Firefox */
+    -ms-transform:scale(2,2); /* IE 9 */
+    -o-transform:scale(2,2); /* Opera */
+    transform:scale(2,2); /* W3C */
+    -webkit-transform-origin: top left;
+    -moz-transform-origin: top left;
+    -ms-transform-origin: top left;
+    -o-transform-origin: top left;
+    transform-origin: top left;
+}
+
+.co {
+    opacity: 0 !important;
+}
+
+.fg0, .fg0 a {
+    color: #000000;
+}
+
+.fg1, .fg1 a {
+    color: #ff0000;
+}
+
+.fg2, .fg2 a {
+    color: #00ff00;
+}
+
+.fg3, .fg3 a {
+    color: #ffff00;
+}
+
+.fg4, .fg4 a {
+    color: #0000ff;
+}
+
+.fg5, .fg5 a {
+    color: #ff00ff;
+}
+
+.fg6, .fg6 a {
+    color: #00ffff;
+}
+
+.fg7, .fg7 a {
+    color: #ffffff;
+}
+
+.bg0 {
+    background-color: #000000;
+}
+
+.bg1 {
+    background-color: #ff0000;
+}
+
+.bg2 {
+    background-color: #00ff00;
+}
+
+.bg3 {
+    background-color: #ffff00;
+}
+
+.bg4 {
+    background-color: #0000ff;
+}
+
+.bg5 {
+    background-color: #ff00ff;
+}
+
+.bg6 {
+    background-color: #00ffff;
+}
+
+.bg7 {
+    background-color: #ffffff;
+}

@@ -1,3 +1,14 @@
+1.6.0.702
+
+- New: added support for parsing/decoding .AST (ASTET) files, with support for packet X/26 (Level 1.5)
+- New: support for multiple teletext services ("streams") via a 'stream' URL parameter, loading a different configuration file
+- New: ttxweb now behaves as a single-page application whenever possible, avoiding full page reloads when using the navigation controls (note that some changes in the template files are necessary for this to work, see diff of navigation.php in the provided 'default' example template)
+- New: added 'embed' and 'embed-flex' example templates, the latter one displaying the teletext page maximized flexibly to fit its container (responsive design)
+- New: added possibility to configure custom page title pattern
+- Moved custom row 0 pattern configuration back to main configuration file by default, but it can still be moved to the template-specific configuration files if desired
+- Added keyboard navigation via arrow keys (up/down = page, left/right = subpage) is now possible
+- More navigation improvements (pressing a number key automatically focuses input box, and selecting the page number input box on a mobile device now brings up a number keypad instead of the full on-screen keyboard)
+
 1.5.1.678
 
 - New: server-side replacement of row 0 with custom header to prevent row 0 content from the EP1 file from being displayed, e.g. if JavaScript is turned off

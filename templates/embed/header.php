@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
 
-    <title><?php echo $pageTitle; ?></title>
+    <title>Videotext-Seite <?php echo $pageNum . '.' . $subpageNum ?> | ttxweb</title>
 
     <link rel="start" title="Seite 100" href="?page=100" />
     <link rel="next" title="N&auml;chste Videotext-Seite" href="?page=<?php echo $nextPageNum ?>" />
@@ -17,9 +17,9 @@
 
     <?php // ----------- do not modify header.php below this line ----------- ?>
 
-    <link rel="stylesheet" href="css/ttxweb_ttx.css" />
     <link rel="stylesheet" href="css/ttxweb_g1.css" />
-    <link rel="stylesheet" href="<?php echo $templateFolder; ?>/css/template_style.css"  />
+    <link rel="stylesheet" href="<?php echo $templateFolder; ?>/css/template_ttx.css" />
+    <link rel="stylesheet" href="<?php echo $templateFolder; ?>/css/template_style.css" />
     <script type="text/javascript" src="js/ttxweb.js" defer></script>
 
     <?php // ----------- do not modify header.php above this line ----------- ?>

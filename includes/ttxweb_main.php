@@ -1,12 +1,12 @@
 <?php
 
-// ttxweb.php EP1 teletext document renderer
-// version: 1.5.1.678 (2024-01-27)
-// (c) 2023, 2024 Fabian Schneider - @fabianswebworld
+// ttxweb.php teletext document renderer
+// version: 1.6.0.702 (2025-06-07)
+// (c) 2023, 2024, 2025 Fabian Schneider - @fabianswebworld
 
 // GLOBAL DEFINITIONS
 
-const TTXWEB_VERSION = '1.5.1.678 (2024-01-27)';       // version string
+const TTXWEB_VERSION = '1.6.0.702 (2025-06-07)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -21,6 +21,7 @@ const TTXWEB_VERSION = '1.5.1.678 (2024-01-27)';       // version string
 // turn      - 1 = turn subpage on XHR refresh (default: turn according to TTXWEB_TURN_RATES in ttxweb_config.php)
 // seqn0     - 1 = always display subpage 00 in custom header (default: only if page is in TTXWEB_TURN_RATES)
 // xhr       - 1 = output ttxStage only (only used internally for XMLHttpRefresh via ttxweb.js)
+// stream    - alternate teletext stream by loading a different config file ttxweb_config-<stream>.php
 
 
 // FUNCTION DEFINITONS
@@ -80,9 +81,9 @@ function getPageNumbers() {
         if ($prevIdx == -1) $prevIdx = sizeof($ep1FileList) - 1;
     }
 
-    // jump over 0-byte files (needed for some Sophora installations)
-    for ( ; (($nextIdx < count($ep1FileList)) && (filesize(EP1_PATH . $ep1FileList[$nextIdx]) == 0)); $nextIdx++);
-    for ( ; (($prevIdx >= 0) && (filesize(EP1_PATH . $ep1FileList[$prevIdx]) == 0)); $prevIdx--);
+    // jump over 0-byte files (needed for some Sophora installations) or corrupt (too small) files
+    for ( ; (($nextIdx < count($ep1FileList)) && (filesize(EP1_PATH . $ep1FileList[$nextIdx]) < 96)); $nextIdx++);
+    for ( ; (($prevIdx >= 0) && (filesize(EP1_PATH . $ep1FileList[$prevIdx]) < 96)); $prevIdx--);
 
     // extract page numbers from filenames in list
     if (isset($ep1FileList[$nextIdx])) {
@@ -134,8 +135,25 @@ function pageExists($pageNum, $subpageNum) {
 
 // MAIN CODE STARTS HERE
 
+// determine configuration file
+if (!empty($_GET['stream'])) {
+    $streamName = str_replace('/', '', filter_var(strip_tags($_GET['stream']), FILTER_SANITIZE_SPECIAL_CHARS));
+    $configFileName = 'ttxweb_config-' . $streamName . '.php';
+    if (!file_exists('includes/' . $configFileName)) {
+        $configFileName = 'ttxweb_config.php';
+    }
+}
+else {
+    $configFileName = 'ttxweb_config.php';
+}
+
 // include configuration
-include('ttxweb_config.php');
+if (file_exists('includes/' . $configFileName)) {
+    include($configFileName);
+}
+else {
+    die('Cannot access configuration file. ttxweb cannot continue.');
+}
 
 // initialize some default values
 $ttxLanguage = 'en-US';
@@ -172,7 +190,7 @@ if (isset($_GET['xhr'])) {
     if ($_GET['xhr'] == '1') $xhr = true;
 }
 if (!empty($_GET['template'])) {
-    $templateName = $_GET['template'];
+    $templateName = str_replace('/', '', filter_var(strip_tags($_GET['template']), FILTER_SANITIZE_SPECIAL_CHARS));
 }
 else {
     $templateName = TTXWEB_TEMPLATE;
@@ -238,6 +256,12 @@ else {
     $showHeader = true;
 }
 
+// read pattern for page title
+$ttxPageTitle = '';
+if (defined('TTXWEB_PAGE_TITLE')) {
+    $ttxPageTitle = TTXWEB_PAGE_TITLE;
+}
+
 // construct version string
 $versionString = TTXWEB_VERSION;
 if (!empty(TTXWEB_VERSION_EXT)) { $versionString = explode(' ', $versionString)[0] . '-' . TTXWEB_VERSION_EXT . ' ' . explode(' ', $versionString)[1]; }
@@ -289,6 +313,10 @@ if (isset($_GET['seqn0'])) {
     }
 }
 
+// construct page title for static display (if js is disabled)
+$pageTitle = str_replace('%page%', $pageNum, $ttxPageTitle);
+$pageTitle = str_replace('%sub%', $subpageNum, $pageTitle);
+
 // include header template if not requested from XMLHttpRequest
 if (!($xhr)) include($templateFolder . '/header.php');
 
@@ -296,19 +324,20 @@ if (!($xhr)) include($templateFolder . '/header.php');
 echo '<div id="ttxStage">' . "\n\n";
 
 // write environment variables for ttxweb.js scripts into HTML
-echo ' <div id="ttxEnv">
-  <pre id="ttxRow0Header">'   . intval($showHeader) . '</pre>
-  <pre id="ttxRow0Template">' . $ttxRow0Pattern     . '</pre>
-  <pre id="ttxLanguage">'     . $ttxLanguage        . '</pre>
-  <pre id="ttxPageNum">'      . $pageNum            . '</pre>
-  <pre id="ttxPrevPageNum">'  . $prevPageNum        . '</pre>
-  <pre id="ttxNextPageNum">'  . $nextPageNum        . '</pre>
-  <pre id="ttxSubpageNum">'   . intval($subpageNum) . '</pre>
-  <pre id="ttxNumSubpages">'  . $numSubpages        . '</pre>
-  <pre id="ttxReveal">'       . intval($reveal)     . '</pre>
-  <pre id="ttxRefresh">'      . $refresh            . '</pre>
-  <pre id="ttxTurn">'         . intval($turn)       . '</pre>
-  <pre id="ttxSeqn0">'        . intval($seqn0)      . '</pre>
+echo ' <div id="ttxEnv" style="display: none;">
+  <pre id="ttxRow0Header">'     . intval($showHeader) . '</pre>
+  <pre id="ttxRow0Template">'   . $ttxRow0Pattern     . '</pre>
+  <pre id="ttxPageTitle">'      . $ttxPageTitle       . '</pre>
+  <pre id="ttxLanguage">'       . $ttxLanguage        . '</pre>
+  <pre id="ttxPageNum">'        . $pageNum            . '</pre>
+  <pre id="ttxPrevPageNum">'    . $prevPageNum        . '</pre>
+  <pre id="ttxNextPageNum">'    . $nextPageNum        . '</pre>
+  <pre id="ttxSubpageNum">'     . intval($subpageNum) . '</pre>
+  <pre id="ttxNumSubpages">'    . $numSubpages        . '</pre>
+  <pre id="ttxReveal">'         . intval($reveal)     . '</pre>
+  <pre id="ttxRefresh">'        . $refresh            . '</pre>
+  <pre id="ttxTurn">'           . intval($turn)       . '</pre>
+  <pre id="ttxSeqn0">'          . intval($seqn0)      . '</pre>
  </div>
 
 ';
@@ -316,14 +345,14 @@ echo ' <div id="ttxEnv">
 // include teletext decoder functions
 include('ttxweb_decoder.php');
 
-// now, render the given EP1 file
+// now, render the given EP1 (or AST etc.) file
 renderTeletextFile(getEp1Filename($pageNum, $subpageNum), $level15, $reveal);
 
 // end ttxStage
 echo "</div>\n\n";
 
 // add version string to output
-if (!($xhr)) echo '<!-- generated by ttxweb EP1 teletext document renderer version: ' . $versionString . ' -->' . "\n";
+if (!($xhr)) echo '<!-- generated by ttxweb teletext document renderer version: ' . $versionString . ' -->' . "\n";
 
 // include navigation
 if (!($xhr)) include($templateFolder . '/navigation.php');

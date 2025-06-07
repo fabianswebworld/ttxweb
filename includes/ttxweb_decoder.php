@@ -1,8 +1,8 @@
 <?php
 
-// ttxweb.php EP1 teletext document renderer
-// version: 1.5.1.678 (2024-01-27)
-// (c) 2023, 2024 Fabian Schneider - @fabianswebworld
+// ttxweb.php teletext document renderer
+// version: 1.6.0.702 (2025-06-07)
+// (c) 2023, 2024, 2025 Fabian Schneider - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
 
@@ -17,6 +17,10 @@ function renderTeletextFile($teletextFile, $level15, $reveal) {
         case 'ep1':
             parseEp1File($teletextFile, $level15, $level1Data, $x26Data);
             break;
+        case 'ast':
+            parseAstFile($teletextFile, $level15, $level1Data, $x26Data);
+            break;
+
     }
 
     decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal);
@@ -24,8 +28,7 @@ function renderTeletextFile($teletextFile, $level15, $reveal) {
 }
 
 
-function parseEp1File($ep1Filename, $level15, &$level1Data, &$x26Data)
-{
+function parseEp1File($ep1Filename, $level15, &$level1Data, &$x26Data) {
 
     // read and parse EP1 file, write unpacked output to
     // by-reference variables &$level1Data and &$x26Data
@@ -83,8 +86,81 @@ function parseEp1File($ep1Filename, $level15, &$level1Data, &$x26Data)
 }
 
 
-function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
-{
+function parseAstFile($astFilename, $level15, &$level1Data, &$x26Data) {
+
+    // read and parse ASTET file, write unpacked output to
+    // by-reference variables &$level1Data and &$x26Data
+
+    global $errorPageClassString;
+
+    // handling of non-present or too small / 0-byte AST file
+    if (!file_exists($astFilename) || (filesize($astFilename) < 96)) {
+        $level1Data = str_pad(NO_PAGE_STRING, 600, ' ', STR_PAD_BOTH);
+        $x26Present = false;
+        $errorPageClassString = ' class="errorPage"';
+    }
+    else {
+
+        $astHandle = fopen($astFilename, 'rb');
+        $astFileLength = filesize($astFilename);
+        $astContents = fread($astHandle, $astFileLength);
+        fclose($astHandle);
+
+        // create and sanitize level 1.0 row array
+
+        for ($row = 0; $row < 25; $row++) {
+            $astRowBuffer[$row] = str_repeat(' ', 40);
+        }
+
+        // parse ASTET file: populate row array's corresponding row keys
+        // as rows are encountered in the ASTET data, last row with a given
+        // row number overwrites any previous data with the same row number
+        // (as in a real decoder), except for row 26 which will just be
+        // concatenated in the array's row 26 key, accumulating all packet
+        // X/26 data for later decoding
+
+        $rowCount = floor($astFileLength / 42);
+
+        for ($rowPtr = 0; $rowPtr < $rowCount; $rowPtr++) {
+
+            $rowNumber = ord(substr($astContents, 42 * $rowPtr + 1, 1));
+            $rowBytes = substr($astContents, 42 * $rowPtr + 2, 40);
+
+            if ($rowNumber != 26) {
+                $astRowBuffer[$rowNumber] = $rowBytes & str_repeat(chr(127), 40);
+            }
+            else {
+                if (isset($astRowBuffer[26])) {
+                    $astRowBuffer[$rowNumber] .= $rowBytes;
+                }
+                else {
+                    $astRowBuffer[$rowNumber] = $rowBytes;
+                }
+            }
+        }
+
+        ksort($astRowBuffer);
+
+        // check if X/26 (level 1.5) data is present
+
+        $x26Present = isset($astRowBuffer[26]);
+
+        // the raw level 1.0 teletext data is in $level1Data
+
+        $level1Data = implode(array_slice($astRowBuffer, 0, 24));
+
+    }
+
+    // Hamming-decode and read X/26 data if present and enabled
+
+    if ($x26Present && EP1_DECODE_X26 && $level15) {
+        $x26Data = decodeHamming2418($astRowBuffer[26]);
+    }
+
+}
+
+
+function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal) {
 
     global $queryString;
     global $errorPageClassString;
@@ -439,11 +515,14 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
 
         // create next subpage/page links
         if ($subpageNum < $numSubpages)  {
-            $htmlBuffer = preg_replace('/(-&gt;|&gt;&gt;)/', '<a href="?page=' . $pageNum . '&amp;sub=' . $origNextSubpageNum . $queryString . '" title="' . TO_SUBPAGE_STRING . ' ' . $origNextSubpageNum . '">$1</a>', $htmlBuffer);
+            $htmlBuffer = preg_replace('/(-&gt;|(?<!SWR )&gt;&gt;)/', '<a href="?page=' . $pageNum . '&amp;sub=' . $origNextSubpageNum . $queryString . '" title="' . TO_SUBPAGE_STRING . ' ' . $origNextSubpageNum . '">$1</a>', $htmlBuffer);
+        }
+        elseif ($numSubpages == 1) {
+            $htmlBuffer = preg_replace('/(-&gt;|(?<!SWR )&gt;&gt;)/', '<a href="?page=' . $nextPageNum . $queryString . '" title="' . TO_PAGE_STRING . ' ' . $nextPageNum . '">$1</a>', $htmlBuffer);
         }
         else {
-            $htmlBuffer = preg_replace('/(-&gt;|&gt;&gt;)/', '<a href="?page=' . $nextPageNum . $queryString . '" title="' . TO_PAGE_STRING . ' ' . $nextPageNum . '">$1</a>', $htmlBuffer);
-        }        
+            $htmlBuffer = preg_replace('/(-&gt;|(?<!SWR )&gt;&gt;)/', '<a href="?page=' . $pageNum . '&amp;sub=1' . $queryString . '" title="' . TO_SUBPAGE_STRING . ' 1">$1</a>', $htmlBuffer);
+        }
 
         // end of row
         echo $htmlBuffer . "</span></span></pre>\n";
@@ -455,35 +534,39 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal)
 }
 
 
-function isAlphaBlastChar($g1Char)
-{
+function isAlphaBlastChar($g1Char) {
+
     // check if a character is from the alpha blast-through range of characters
     return (ord($g1Char) >= 0x40 && ord($g1Char) <= 0x5f);
+
 }
 
 
-function isG1Char($g1Char)
-{
+function isG1Char($g1Char) {
+
     // check if a character is from the G1 range of characters
     return (ord($g1Char) >= 0x20 && ord($g1Char) <= 0x3f) || (ord($g1Char) >= 0x60 && ord($g1Char) <= 0x7f);
+
 }
 
 
-function renderG1Char($g1Char, $fgColor, $g1Mode)
-{
+function renderG1Char($g1Char, $fgColor, $g1Mode) {
+
     // render a G1 character via CSS class
     return '<span class="g1' . $g1Mode . $fgColor . dechex(ord($g1Char)) . '">&nbsp;</span>';
+
 }
 
 
-function decodeX26Chars($x26Data, &$pageBuffer)
-{
+function decodeX26Chars($x26Data, &$pageBuffer) {
+
     // decode level 1.5 characters from packet X/26,
     // place the decoded HTML characters into the page buffer
 
     $x26Packets = str_split($x26Data, 40);
 
     $x26Triplets = [];
+    $currRow = 0;
 
     // relevant characters from the latin G2 supplementary set
     $g2SupplementaryChars = array(0x50 => '&#8212;', 0x52 => '&#174;', 0x53 => '&#x00a9;', 0x54 => '&#8482;', 0x55 => '&#9834;', 0x56 => '&#8364;', 0x69 => '&Oslash;', 0x75 => '&#x00131;', 0x79 => '&oslash;');
@@ -552,6 +635,65 @@ function decodeX26Chars($x26Data, &$pageBuffer)
                 break;
         }
     }
+}
+
+
+function decodeHamming2418($x26Data) {
+
+    // decode Hamming 24/18 parity coding from X/26 triplets
+    // and return decoded packet X/26
+
+    $x26Packets = str_split($x26Data, 40);
+
+    $x26Triplets = [];
+
+    foreach ($x26Packets as $x26Packet) {
+        $x26Triplets = array_merge(
+            $x26Triplets,
+            str_split(substr($x26Packet, 1), 3)
+        );
+    }
+
+    $x26TripletsDecoded = [];
+
+    foreach ($x26Triplets as $x26Triplet) {
+
+        $x26BytesDecoded = [];
+
+        // insane bit-juggling to remove parity bits
+
+        $x26BytesDecoded[0] = chr(((ord(substr($x26Triplet, 0, 1)) & 4) >> 2) |
+                                 ((ord(substr($x26Triplet, 0, 1)) & 16) >> 3) |
+                                 ((ord(substr($x26Triplet, 0, 1)) & 32) >> 3) |
+                                 ((ord(substr($x26Triplet, 0, 1)) & 64) >> 3) |
+                                 ((ord(substr($x26Triplet, 1, 1)) & 3) << 4));
+        $x26BytesDecoded[1] = chr((ord(substr($x26Triplet, 1, 1)) & 127) >> 2);
+        $x26BytesDecoded[2] = chr((ord(substr($x26Triplet, 2, 1)) & 127));
+
+        $x26TripletsDecoded = array_merge(
+            $x26TripletsDecoded,
+            $x26BytesDecoded
+        );
+
+    }
+
+    $x26PacketCount = 1;
+    $pos = 0;
+
+    $x26TripletsDecoded = implode($x26TripletsDecoded);
+
+    while ($pos < strlen($x26TripletsDecoded)) {
+
+        $x26TripletsDecoded = substr_replace($x26TripletsDecoded, chr($x26PacketCount), $pos, 0);
+
+        $x26PacketCount += 1;
+        $pos += 40;
+    }
+
+    $x26DataDecoded = $x26TripletsDecoded;
+
+    return $x26DataDecoded;
+
 }
 
 

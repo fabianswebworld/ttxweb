@@ -17,9 +17,9 @@
 
     <?php // ----------- do not modify header.php below this line ----------- ?>
 
-    <link rel="stylesheet" href="css/ttxweb_ttx.css" />
     <link rel="stylesheet" href="css/ttxweb_g1.css" />
-    <link rel="stylesheet" href="<?php echo $templateFolder; ?>/css/template_style.css"  />
+    <link rel="stylesheet" href="<?php echo $templateFolder; ?>/css/template_ttx.css" />
+    <link rel="stylesheet" href="<?php echo $templateFolder; ?>/css/template_style.css" />
     <script type="text/javascript" src="js/ttxweb.js" defer></script>
 
     <?php // ----------- do not modify header.php above this line ----------- ?>
