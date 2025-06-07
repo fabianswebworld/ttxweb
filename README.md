@@ -2,7 +2,7 @@
 
 ## What is ttxweb?
 
-ttxweb is a web application that brings the "old-fashioned" teletext (Videotext) to the web in a simple way. This is mostly interesting for broadcasters. All Level 1.0 teletext attributes such as flash and double height are supported; additionally, some Level 2.5 attributes (double width and double size) are supported. Decoding of enhanced Level 1.5 characters via packet X/26 is supported as well if they are carried inside the EP1 file. On the generated HTML pages, page numbers (only references to existing pages) are automatically rendered as clickable hyperlinks. Similarly, "next" indicators such as ">>" and "->" are rendered as hyperlinks to the next subpage or page. Additionally, web links and email links are rendered as hyperlinks as well.
+ttxweb is a web application that brings the "old-fashioned" teletext (Videotext) to the web in a simple way. This is mostly interesting for broadcasters. All Level 1.0 teletext attributes such as flash and double height are supported; additionally, some Level 2.5 attributes (double width and double size) are supported. Decoding of enhanced Level 1.5 characters via packet X/26 is supported as well if they are carried inside the input file. On the generated HTML pages, page numbers (only references to existing pages) are automatically rendered as clickable hyperlinks. Similarly, "next" indicators such as ">>" and "->" are rendered as hyperlinks to the next subpage or page. Additionally, web links and email links are rendered as hyperlinks as well.
 
 Another nice feature is that the pages can update automatically at a configurable refresh interval. The update happens smoothly via XMLHttpRequest (no full page reload), so that just the teletext portion of the page is reloaded.
 
