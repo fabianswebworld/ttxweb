@@ -95,7 +95,7 @@ The following configuration options are available to configure the behavior of t
       - **%sub%** - Current subpage
     - **Example:**
       
-      `const TTXWEB_PAGE_TITLE  = 'Videotext-Seite %page%.%sub% | ttxweb';`
+      `const TTXWEB_PAGE_TITLE  = 'Teletext Page %page%.%sub% | ttxweb';`
 
 - **templates/\<templatename\>/template_config.php:**
   - Template configuration file. Any configuration definitions (const) from ttxweb_config.php may be moved to this file if template-specific configuration is desired. Note that no configuration definition may exist in both configuration files at the same time.
