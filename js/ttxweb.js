@@ -33,7 +33,7 @@ function ttxReadEnv(fromXhrRefresh) {
   }
 
   pageIndicator = document.getElementById('ttxNumPadInput');
-  if (pageIndicator !== null) {
+  if ((pageIndicator !== null) && (!fromXhrRefresh)) {
     pageIndicator.value = pageNum;
   }
 
@@ -98,7 +98,6 @@ function ttxInitialize() {
   if (refreshState) {
     refreshTimeoutId = setTimeout(xhrRefresh, refreshTimer);
   }
-  setNumPadFocus();
 
 }
 
@@ -284,17 +283,26 @@ function zeroPad(i) {
 }
 
 
-function numberButtonPressed(number) {
+function getNumPadInput() {
 
   var elem;
-  var oldValue;
-
   if (document.getElementById('ttxNumPadInput')) {
     elem = document.getElementById('ttxNumPadInput');
   }
   else {
     elem = document.forms[0].page;
   }
+  return elem;
+
+}
+
+
+function numberButtonPressed(number) {
+
+  var elem;
+  var oldValue;
+
+  elem = getNumPadInput();
 
   if (elem && elem.value) {
     oldValue = elem.value;
@@ -322,18 +330,19 @@ function checkNumPadInput(event) {
   var elem;
   var oldValue;
 
-  if (document.getElementById('ttxNumPadInput')) {
-    elem = document.getElementById('ttxNumPadInput');
-  } else {
-    elem = document.forms[0].page;
+  if (event == undefined) {
+    event = 'dummy';
+    event.key = 'dummy';
   }
+
+  elem = getNumPadInput();
 
   if (elem && elem.value) {
     oldValue = elem.value;
   }
 
   if (oldValue && oldValue.match(/[^0-9]/gi)) {
-    alert("Bitte geben Sie in dieses Feld nur Zahlen ein.");
+    alert('Bitte geben Sie in dieses Feld nur Zahlen ein.');
     elem.value = "";
   }
 
@@ -360,12 +369,9 @@ function gotoPage() {
 function setNumPadFocus() {
 
   var elem;
-  if (document.getElementById('ttxNumPadInput')) {
-    elem = document.getElementById('ttxNumPadInput');
-  }
-  else {
-    elem = document.forms[0].page;
-  }
+
+  elem = getNumPadInput();
+
   elem.focus();
   elem.select();
 
@@ -388,9 +394,11 @@ function updateLocation(replace, subpageSet) {
 
 }
 
+
 String.prototype.trim = function() {
   return this.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 }
+
 
 var revealState, refreshTimer, refreshState, refreshTimeoutId, updateLocationTimeoutId;
 var turn, seqn0, subpageIndicator, pageTitle, pageNum, subpageNum, numSubpages;
@@ -433,8 +441,29 @@ document.addEventListener('keydown', (event) => {
     updateLocationTimeoutId = setTimeout(function() { updateLocation(false, false); }, 1000);
     event.preventDefault();
   }
-  if (event.key >= 0 && event.key <= 9 && !event.target.matches('[id="ttxNumPadInput"]')) setNumPadFocus();
+
+  if (event.key >= 0 && event.key <= 9 && event.key != ' ') {
+    if (event.target.matches('[id="ttxNumPadInput"]')) {
+      var elem;
+      elem = getNumPadInput();
+      if ((elem.value.length == 3) && !isNaN(event.key)) {
+        elem.value = '';
+        return false;
+      }
+    }
+    else {
+      setNumPadFocus();
+    }
+  }
+
   return false;
+});
+
+var elem;
+elem = getNumPadInput();
+
+elem.addEventListener("focus", (event) => {
+  elem.select();
 });
 
 ttxInitialize();
