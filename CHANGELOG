@@ -1,3 +1,12 @@
+1.6.1.704
+
+- The page number input box now automatically clears and accepts a new page number when typing into it
+- JS fix: XHR refresh no longer interferes with typing into the page number input box (stealing focus)
+- JS fix: Pressing the spacebar doesn't focus the input box anymore, only number keys do
+- JS fix: catch an error on leaving page number input box
+- Minor CSS tweaks on some templates
+- The auto-generated link for '>>', if present on the last subpage of a page with more than one suppage, now jumps back to the first subpage (since v1.6.0)
+
 1.6.0.702
 
 - New: added support for parsing/decoding .AST (ASTET) files, with support for packet X/26 (Level 1.5)
