@@ -3,8 +3,8 @@
           <div id="ttxNavigation">
             <div class="row">
               <div class="buttonarrowleft"><a href="?page=<?php echo $prevPageNum . $queryString; ?>" class="arrowleft" title="Vorherige Seite (Tastatur: &#8595;)" id="prevPageButton">&lt;</a></div>
-              <div class="currpage">Seite<div class="pagenum"><form id="numPadForm" action="" method="get"><input class="inputtext" id="ttxNumPadInput" value="<?php echo $pageNum; ?>" name="page" type="text" maxlength="3" pattern="[0-9]*" onchange="checkNumPadInput(event);" onkeyup="checkNumPadInput(event);" title="Bitte dreistellige Seitennummer eingeben." /><?php if (!empty($_GET['template'])) echo '<input id="ttxNumPadEnv" value="' . $templateName . '" name="template" type="hidden" />'; ?>
-              <noscript><div class="noScript"><?php if (isset($streamName) && trim($streamName) != '') echo '<input type="hidden" name="stream" value="' . $streamName . '" />'; ?><input type="submit" value="Los" class="inputbutton" /></div></noscript></form></div></div>
+              <div class="currpage">Seite<div class="pagenum"><form id="numPadForm" action="" method="get"><input class="inputtext" id="ttxNumPadInput" value="<?php echo $pageNum; ?>" name="page" type="text" maxlength="3" pattern="[0-9]*" onchange="checkNumPadInput(event);" onkeyup="checkNumPadInput(event);" title="Bitte dreistellige Seitennummer eingeben." /><?php if (!empty($_GET['template'])) echo '<input id="ttxNumPadEnv" value="' . $templateName . '" name="template" type="hidden" />'; ?><?php if (isset($streamName) && trim($streamName) != '') echo '<input type="hidden" name="stream" value="' . $streamName . '" />'; ?>
+              <noscript><div class="noScript"><input type="submit" value="Los" class="inputbutton" /></div></noscript></form></div></div>
               <div class="buttonarrowright"><a href="?page=<?php echo $nextPageNum . $queryString; ?>" class="arrowright" title="N&auml;chste Seite (Tastatur: &#8593;)" id="nextPageButton">&gt;</a></div>
               <div style="clear:both"></div>
             </div>
