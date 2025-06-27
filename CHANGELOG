@@ -5,7 +5,7 @@
 - New: on the last subpage of a page, attempting to navigate to the next subpage now wraps around, back to the first subpage of the page, or to the 'auto' mode for auto-turning pages
 - Some CSS tweaks and clean-ups in the included templates, including a fix for the text size in the 'embed' and 'embed-flex' templates sometimes being inconsistent on mobile Safari
 - JS fix: improved handling of browser history when using the keyboard to quickly navigate between pages, e.g. by holding down an arrow or +/- key (a new history entry is created only after a delay of 1 s)
-- JS fix: avoid the occasional off-by-one behavior regarding page titles and URLs in browser history (only affecting Firefox and Edge)
+- JS fix: avoid the occasional off-by-one behavior regarding page titles and URLs in browser history (affecting Firefox and Edge)
 - Some more frontend tweaks
 
 1.6.1.704
