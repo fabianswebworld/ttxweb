@@ -14,16 +14,18 @@
 .ttxRow {
     font-family: 'Consolas', ui-monospace, monospace;
     font-size: 18px;
-    font-size: 3.7vmin;
+    font-size: 3.6vmin;
     line-height: 20px;
     line-height: 3.6vmin;
     letter-spacing: 2px;
-    letter-spacing: 0.4vmin;
+    letter-spacing: 0.3vmin;
     margin: 0px;
     padding: 0px 0px 0px 0px;
     white-space: pre;
     background-color: #000000;
     position: relative;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 .ttxRow span {

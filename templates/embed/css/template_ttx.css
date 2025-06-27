@@ -20,6 +20,8 @@
     white-space: pre;
     background-color: #000000;
     position: relative;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 .ttxRow span {
