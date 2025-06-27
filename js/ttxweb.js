@@ -1,7 +1,11 @@
+// ttxweb client-side scripts
+// version: 1.6.2.708 (2025-06-27)
+// documentation: https://github.com/fabianswebworld/ttxweb
+
 function ttxReadEnv(fromXhrRefresh) {
 
   if (!fromXhrRefresh) {
-    turn = document.getElementById('ttxTurn').innerHTML;
+    turn = (document.getElementById('ttxTurn').innerHTML == 1);
     seqn0 = (document.getElementById('ttxSeqn0').innerHTML == 1);
     refreshTimer = document.getElementById('ttxRefresh').innerHTML * 1000;
     refreshState = (refreshTimer != 0);
@@ -17,15 +21,19 @@ function ttxReadEnv(fromXhrRefresh) {
   numSubpages = parseInt(document.getElementById('ttxNumSubpages').innerHTML, 10);
 
   prevSubpageNum = subpageNum - 1;
-  if (prevSubpageNum < 0) prevSubpageNum = 0;
   nextSubpageNum = subpageNum + 1;
-  if (nextSubpageNum > numSubpages) nextSubpageNum = numSubpages;
+  if (prevSubpageNum <= 0) prevSubpageNum = 0;
+  if (nextSubpageNum > numSubpages) nextSubpageNum = 0;
+
+  if (turn) {
+    prevSubpageNum = numSubpages;
+    nextSubpageNum = 1;
+  }
 
   subpageIndicator = document.getElementById('subpagenum');
   if (subpageIndicator !== null) {
-    if (turn == 1) {
+    if (turn) {
       subpageIndicator.innerHTML = 'auto';
-      nextSubpageNum = 1;
     }
     else {
       subpageIndicator.innerHTML = zeroPad(subpageNum) + ' / ' + zeroPad(numSubpages);
@@ -35,11 +43,6 @@ function ttxReadEnv(fromXhrRefresh) {
   pageIndicator = document.getElementById('ttxNumPadInput');
   if ((pageIndicator !== null) && (!fromXhrRefresh)) {
     pageIndicator.value = pageNum;
-  }
-
-  pageTitle = document.getElementById('ttxPageTitle').innerHTML;
-  if ((pageTitle !== null) && (!fromXhrRefresh)) {
-    document.title = pageTitle.replace("%page%", pageNum).replace("%sub%", zeroPad(subpageNum));
   }
 
   prevPageButton = document.getElementById('prevPageButton');
@@ -65,22 +68,22 @@ function ttxReadEnv(fromXhrRefresh) {
   nextSubpageUrl.searchParams.set('page', pageNum);
 
   if (prevPageButton != null) {
-    prevPageButton.onclick = function() { xhrLoadPage(prevPageNum, 0, true, false, true); return false; };
+    prevPageButton.onclick = function() { xhrLoadPage(prevPageNum, 0, 'add', false, true); return false; };
     prevPageButton.href = prevPageUrl.toString();
   }
 
   if (nextPageButton != null) {
-    nextPageButton.onclick = function() { xhrLoadPage(nextPageNum, 0, true, false, true); return false; };
+    nextPageButton.onclick = function() { xhrLoadPage(nextPageNum, 0, 'add', false, true); return false; };
     nextPageButton.href = nextPageUrl.toString();
   }
 
   if (prevSubpageButton != null) {
-    prevSubpageButton.onclick = function() { xhrLoadPage(pageNum, prevSubpageNum, true, false, true); return false; };
+    prevSubpageButton.onclick = function() { xhrLoadPage(pageNum, prevSubpageNum, 'add', false, true); return false; };
     prevSubpageButton.href = prevSubpageUrl.toString();
   }
 
   if (nextSubpageButton != null) {
-    nextSubpageButton.onclick = function() { xhrLoadPage(pageNum, nextSubpageNum, true, false, true); return false; };
+    nextSubpageButton.onclick = function() { xhrLoadPage(pageNum, nextSubpageNum, 'add', false, true); return false; };
     nextSubpageButton.href = nextSubpageUrl.toString();
   }
 
@@ -94,6 +97,8 @@ function ttxReadEnv(fromXhrRefresh) {
 function ttxInitialize() {
 
   ttxReadEnv();
+  updateLocation(true, false);
+  refreshPageTitle();
 
   if (refreshState) {
     refreshTimeoutId = setTimeout(xhrRefresh, refreshTimer);
@@ -106,7 +111,7 @@ function xhrRefresh() {
 
   var myPage = pageNum;
 
-  if (turn != 1) {
+  if (!turn) {
     var mySubpage = subpageNum;
   }
   else {
@@ -114,12 +119,12 @@ function xhrRefresh() {
     if (mySubpage > numSubpages) mySubpage = 1;
   }
 
-  xhrLoadPage(myPage, mySubpage, false, false, false);
+  xhrLoadPage(myPage, mySubpage, 'none', false, false);
 
 }
 
 
-function xhrLoadPageFromUrl(xhrUrl, addHistoryEntry, focusNumPad, rereadSeqn0) {
+function xhrLoadPageFromUrl(xhrUrl, historyMode, focusNumPad, rereadSeqn0) {
 
   var myXhr = new XMLHttpRequest();
   var myXhrUrl = new URL(xhrUrl);
@@ -136,7 +141,7 @@ function xhrLoadPageFromUrl(xhrUrl, addHistoryEntry, focusNumPad, rereadSeqn0) {
 
   myXhr.onload = function() {
     if (myXhr.readyState == 4 && myXhr.status == 200) {
-      if ((new DOMParser().parseFromString(myXhr.responseText, 'text/html').querySelectorAll('.errorPage').length == 0) || addHistoryEntry) {
+      if ((new DOMParser().parseFromString(myXhr.responseText, 'text/html').querySelectorAll('.errorPage').length == 0) || (historyMode == 'add') || (historyMode == 'replace')) {
         var myNewContents = document.createElement('div');
         myNewContents.innerHTML = myXhr.responseText.trim();
         myNewRow0 = myNewContents.querySelector('#row0');
@@ -155,16 +160,17 @@ function xhrLoadPageFromUrl(xhrUrl, addHistoryEntry, focusNumPad, rereadSeqn0) {
         console.log('ttxweb: Teletext page has gone, refresh deferred.');
       }
 
-      ttxReadEnv(!(addHistoryEntry || focusNumPad || rereadSeqn0));
+      ttxReadEnv(!(historyMode == 'add' || historyMode == 'replace' || focusNumPad || rereadSeqn0));
 
-      if (addHistoryEntry) {
-        updateLocation(false, subpageSet);
+      if (historyMode == 'add' || historyMode == 'replace') {
+        updateLocation((historyMode == 'replace'), subpageSet);
       }
-
+      if (historyMode == 'pop' || focusNumPad || rereadSeqn0) {
+        refreshPageTitle();
+      }
       if (focusNumPad) {
         setNumPadFocus();
       }
-
       if (refreshState) {
         refreshTimeoutId = setTimeout(xhrRefresh, refreshTimer);
       }
@@ -186,7 +192,7 @@ function xhrLoadPageFromUrl(xhrUrl, addHistoryEntry, focusNumPad, rereadSeqn0) {
 }
 
 
-function xhrLoadPage(page, subpage, addHistoryEntry, focusNumPad, rereadSeqn0) {
+function xhrLoadPage(page, subpage, historyMode, focusNumPad, rereadSeqn0) {
 
   clearTimeout(refreshTimeoutId);
 
@@ -197,7 +203,7 @@ function xhrLoadPage(page, subpage, addHistoryEntry, focusNumPad, rereadSeqn0) {
   if (subpage > 0) currentUrl.searchParams.set('sub', subpage);
   var myXhrUrl = currentUrl.toString();          
 
-  xhrLoadPageFromUrl(myXhrUrl, addHistoryEntry, focusNumPad, rereadSeqn0);
+  xhrLoadPageFromUrl(myXhrUrl, historyMode, focusNumPad, rereadSeqn0);
 
 }
 
@@ -224,6 +230,16 @@ function renderRow0() {
   document.getElementById('row0').innerHTML = myRow0;
 
   setTimeout(renderRow0, 1000);
+
+}
+
+
+function refreshPageTitle() {
+
+  pageTitle = document.getElementById('ttxPageTitle').innerHTML;
+  if (pageTitle !== null) {
+    document.title = pageTitle.replace("%page%", pageNum).replace("%sub%", zeroPad(subpageNum));
+  }
 
 }
 
@@ -357,7 +373,7 @@ function gotoPage() {
 
   if (document.getElementById('ttxNumPadInput')) {
     elem = document.getElementById('ttxNumPadInput');
-    xhrLoadPage(elem.value, 0, true, true, true);
+    xhrLoadPage(elem.value, 0, 'add', true, true);
   }
   else {
     document.forms[0].submit();
@@ -408,46 +424,48 @@ var prevPageButton, nextPageButton, prevSubpageButton, nextSubpageButton;
 window.addEventListener('popstate', (event) => {
   if(event.state) {
     document.getElementById('ttxEnv').innerHTML = event.state.ttxEnv;
-    document.title = event.state.pageTitle;
     ttxReadEnv(false);
-    xhrLoadPage(pageNum, subpageNum, false, false, false);
+    xhrLoadPage(pageNum, subpageNum, 'pop', false, false);
   }
 });
 
 document.addEventListener('keydown', (event) => {
   if (updateLocationTimeoutId != null) clearTimeout(updateLocationTimeoutId);
   const key = event.key;
-  if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)) {
+  if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','PageUp','PageDown'].includes(event.key) && !event.ctrlKey) {
     switch (event.key) {
-      case "ArrowLeft":
+      case 'ArrowLeft': case 'PageUp':
         if (event.target.matches('[id="ttxNumPadInput"]')) {
+          if (!((event.target.selectionStart == event.target.selectionEnd) && (event.target.selectionStart == 0) && (event.target.value.length == 3))) {
             return;
+          }
         }
-        xhrLoadPage(pageNum, prevSubpageNum, false, false, true);
+        xhrLoadPage(pageNum, prevSubpageNum, 'none', false, true);
         break;
-      case "ArrowRight":
+      case 'ArrowRight': case 'PageDown':
         if (event.target.matches('[id="ttxNumPadInput"]')) {
+          if (!(event.target.selectionStart == 3)) {
             return;
+          }
         }
-        xhrLoadPage(pageNum, nextSubpageNum, false, false, true);
+        xhrLoadPage(pageNum, nextSubpageNum, 'none', false, true);
         break;
-      case "ArrowUp":
-        xhrLoadPage(nextPageNum, 0, false, false, true);
+      case 'ArrowUp': case '+':
+        xhrLoadPage(nextPageNum, 0, 'none', false, true);
         break;
-      case "ArrowDown":
-        xhrLoadPage(prevPageNum, 0, false, false, true);
+      case 'ArrowDown': case '-':
+        xhrLoadPage(prevPageNum, 0, 'none', false, true);
         break;
     }
     updateLocationTimeoutId = setTimeout(function() { updateLocation(false, false); }, 1000);
     event.preventDefault();
   }
-
   if (event.key >= 0 && event.key <= 9 && event.key != ' ') {
     if (event.target.matches('[id="ttxNumPadInput"]')) {
-      var elem;
-      elem = getNumPadInput();
-      if ((elem.value.length == 3) && !isNaN(event.key)) {
-        elem.value = '';
+      var selLength;
+      selLength = event.target.selectionEnd - event.target.selectionStart;
+      if ((event.target.value.length == 3) && (!(selLength > 0 && selLength < 3)) && !isNaN(event.key)) {
+        event.target.value = '';
         return false;
       }
     }
@@ -455,7 +473,6 @@ document.addEventListener('keydown', (event) => {
       setNumPadFocus();
     }
   }
-
   return false;
 });
 
