@@ -12,7 +12,10 @@ To use ttxweb, all you have to do is install the PHP scripts including the addit
 
 See the live demo at https://www.fabianswebworld.de/ttxweb.
 
-See it in production use at https://www.hr-text.hr-fernsehen.de.
+See it in production use at:
+
+- https://www.hr-text.hr-fernsehen.de (Hessischer Rundfunk, hr-text)
+- https://www.swrfernsehen.de/videotext/ (Südwestrundfunk, SWR-Text)
 
 ## Screenshots
 
