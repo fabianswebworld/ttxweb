@@ -29,7 +29,7 @@ See it in production use at:
 
 #### System requirements
 
-A web server with PHP >= 5.6 is required. There are no other requirements (mySQL etc.).
+A web server with PHP >= 5.6 is required. The PHP intl extension is recommended, but not required (English date formats are used as a fallback). There are no other requirements (like mySQL etc.).
 
 #### Input files
 
@@ -116,6 +116,7 @@ The following configuration options are available to configure the behavior of t
     - **$prevSubpageNum** - Previous subpage
     - **$numSubpages** - Number of subpages
     - **$pageTitle** - Page title as defined via TTXWEB_PAGE_TITLE
+    - **$fileTimestamp** - Timestamp (modification time) of the EP1/AST file currently rendered
 
 - **templates/\<templatename\>/trailer.php:**
   - HTML template, which is output after the actual teletext output. The same variables apply as in **header.php**.
