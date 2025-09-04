@@ -2,7 +2,7 @@
 
 - New: added file timestamp (modification time) of the currently rendered teletext file to the 'ttxEnv' div block, which can be helpful for debugging and health monitoring of the underlying teletext system, as well as for statistical and archival purposes
 - New: added 'retro-tv' sample template based on the existing 'embed-flex' template using the open-source 'Teletext' font by jffry101 (incomplete due to missing glyphs)
-- Some CSS tweaks and clean-ups in the included templates, including a fix for devices without a proper monospace font installed, using the open-source 'Fira Mono' font instead
+- Some CSS tweaks and clean-ups in the included templates, including a fix for devices without a proper monospace font installed, using the open-source 'Source Code Pro' font instead
 - Fixed character substitution list for British teletext character set
 - Some more frontend tweaks
 
