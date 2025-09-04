@@ -1,10 +1,6 @@
 @font-face{
-    font-family: 'Fira Mono';
-    src: url('../fonts/FiraMono-Regular.eot');
-    src: url('../fonts/FiraMono-Regular.eot') format('embedded-opentype'),
-         url('../fonts/FiraMono-Regular.woff2') format('woff2'),
-         url('../fonts/FiraMono-Regular.woff') format('woff'),
-         url('../fonts/FiraMono-Regular.ttf') format('truetype');
+    font-family: 'Retro TV Teletext';
+    src: url('../fonts/teletext.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
 }
@@ -39,14 +35,14 @@ body {
 
 #ttxNumPadInput, #ttxNumPadInput:focus {
     position: absolute;
-    font-family: 'Fira Mono', 'Consolas', ui-monospace, monospace;
+    font-family: 'Retro TV Teletext', monospace;
     font-size: 18px;
     font-size: 3.2vmin;
     line-height: 20px;
     line-height: 3.6vmin;
-    letter-spacing: 2px;
-    letter-spacing: 0.3vmin;
-    width: 2.2em;
+    letter-spacing: 1px;
+    letter-spacing: 0.1vmin;
+    width: 2.8em;
     text-align: left;
     margin: 0px;
     padding: 0px 0px 0px 0px;

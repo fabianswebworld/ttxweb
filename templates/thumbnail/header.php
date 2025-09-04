@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=0.3, maximum-scale=0.3, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="generator" content="ttxweb <?php echo $versionString ?>" />
 
     <title><?php echo $pageTitle; ?></title>
 

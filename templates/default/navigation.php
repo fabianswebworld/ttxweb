@@ -44,6 +44,7 @@
                 <li>&#9656; <a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;header=[0-9]/', '', $queryString) ?>&amp;header=1">Show Row 0 from EP1 file</a></li>
                 <li>&#9656; <a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;header=[0-9]/', '', $queryString) ?>&amp;header=0">Generate Row 0 locally</a></li>
                 <li>&#9656; <a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;template=[\w]+\b/', '', $queryString) ?>&amp;template=embed-flex">Switch to fullscreen (embed-flex) template</a></li>
+                <li>&#9656; <a href="?page=<?php echo $pageNum; ?>&amp;sub=<?php echo $subpageNum . preg_replace('/&amp;template=[\w]+\b/', '', $queryString) ?>&amp;template=retro-tv">Switch to fullscreen (retro-tv) template</a></li>
              </ul>
            </div>
  
