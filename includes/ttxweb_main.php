@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.6.2.708 (2025-06-27)
+// version: 1.6.3.720 (2025-09-04)
 // (c) 2023, 2024, 2025 Fabian Schneider - @fabianswebworld
 
 // GLOBAL DEFINITIONS
 
-const TTXWEB_VERSION = '1.6.2.708 (2025-06-27)';       // version string
+const TTXWEB_VERSION = '1.6.3.720 (2025-09-04)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -31,7 +31,7 @@ function getPageNumbers() {
     // get page number and infer EP1 filename
     // also get existing pages and prev and next page
 
-    global $pageNum, $subpageNum, $prevPageNum, $nextPageNum, $prevSubpageNum, $nextSubpageNum, $numSubpages;
+    global $pageNum, $subpageNum, $prevPageNum, $nextPageNum, $prevSubpageNum, $nextSubpageNum, $numSubpages, $currEp1Filename;
 
     $pageNum = isset($_GET['page']) ? $_GET['page']:'100';
     $pageNum = sprintf('%03d', $pageNum);
@@ -273,6 +273,10 @@ ini_set('default_charset', 'utf-8');
 // get the desired page numbers
 getPageNumbers();
 
+// check if file exists and get file timestamp
+$fileTimestamp = '';
+if (pageExists($pageNum, $subpageNum)) { $fileTimestamp = date(DATE_ATOM, filemtime($currEp1Filename)); }
+
 // determine turnrates
 $turn = false;
 $seqn0 = false;
@@ -338,6 +342,7 @@ echo ' <div id="ttxEnv" style="display: none;">
   <pre id="ttxRefresh">'        . $refresh            . '</pre>
   <pre id="ttxTurn">'           . intval($turn)       . '</pre>
   <pre id="ttxSeqn0">'          . intval($seqn0)      . '</pre>
+  <pre id="ttxFileTimestamp">'  . $fileTimestamp      . '</pre>
  </div>
 
 ';
