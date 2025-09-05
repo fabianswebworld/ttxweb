@@ -1,10 +1,10 @@
 @font-face{
-    font-family: 'Source Code Pro';
-    src: url('../fonts/SourceCodePro-Regular.eot');
-    src: url('../fonts/SourceCodePro-Regular.eot') format('embedded-opentype'),
-         url('../fonts/SourceCodePro-Regular.woff2') format('woff2'),
-         url('../fonts/SourceCodePro-Regular.woff') format('woff'),
-         url('../fonts/SourceCodePro-Regular.ttf') format('truetype');
+    font-family: 'DejaVu Sans Mono';
+    src: url('../fonts/DejaVuSansMono.eot');
+    src: url('../fonts/DejaVuSansMono.eot') format('embedded-opentype'),
+         url('../fonts/DejaVuSansMono.woff2') format('woff2'),
+         url('../fonts/DejaVuSansMono.woff') format('woff'),
+         url('../fonts/DejaVuSansMono.ttf') format('truetype');
     font-weight: 400;
     font-style: normal;
 }
@@ -39,9 +39,9 @@ body {
 
 #ttxNumPadInput, #ttxNumPadInput:focus {
     position: absolute;
-    font-family: ui-monospace, 'Source Code Pro', 'Consolas', monospace;
+    font-family: 'DejaVu Sans Mono', 'Consolas', ui-monospace, monospace;
     font-size: 18px;
-    font-size: 3.2vmin;
+    font-size: 3.1vmin;
     line-height: 20px;
     line-height: 3.6vmin;
     letter-spacing: 2px;
