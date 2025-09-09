@@ -10,11 +10,18 @@ To use ttxweb, all you have to do is install the PHP scripts including the addit
 
 ## Live Demo
 
-See the live demo at https://www.fabianswebworld.de/ttxweb (English) or try it out on my blog at https://www.fabianswebworld.de/fwwtext (German).
+See the **live demo** at:
 
-See and try out the nice 'retro-tv' template at https://www.fabianswebworld.de/fwwtext/?template=retro-tv. Just use the number keys to enter a page number, or the arrow keys to browse through pages (up/down=page numbers, left/right=subpages).
+- https://www.fabianswebworld.de/ttxweb (English)
+- https://www.fabianswebworld.de/fwwtext (German, as part of my blog)
 
-See it in production use at:
+See and try out the nice **'retro-tv'** template at:
+
+- https://www.fabianswebworld.de/fwwtext/?template=retro-tv
+
+Use the number keys to enter a page number, or the arrow keys to browse through pages (up/down=page numbers, left/right=subpages).
+
+See it in **production use** at:
 
 - https://www.hr-text.hr-fernsehen.de (Hessischer Rundfunk, hr-text)
 - https://www.swrfernsehen.de/videotext/ (Südwestrundfunk, SWR-Text)
