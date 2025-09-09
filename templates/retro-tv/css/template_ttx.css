@@ -1,8 +1,13 @@
-@font-face{
-    font-family: 'Retro TV Teletext';
-    src: url('../fonts/teletext.woff2') format('woff2');
+@font-face {
+    font-family: 'Teletext Decoder';
+    src: url('../fonts/teletext-decoder.eot');
+    src: url('../fonts/teletext-decoder.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/teletext-decoder.woff2') format('woff2'),
+         url('../fonts/teletext-decoder.woff') format('woff'),
+         url('../fonts/teletext-decoder.ttf') format('truetype');
     font-weight: 400;
     font-style: normal;
+    font-display: swap;
 }
 
 #ttxContainer {
@@ -19,13 +24,10 @@
 }
 
 .ttxRow {
-    font-family: 'Retro TV Teletext', monospace;
+    font-family: 'Teletext Decoder', monospace;
     font-size: 18px;
-    font-size: 3.2vmin;
-    line-height: 20px;
-    line-height: 3.6vmin;
-    letter-spacing: 1px;
-    letter-spacing: 0.1vmin;
+    font-size: 3.4vmin;
+    line-height: 3.5vmin;
     margin: 0px;
     padding: 0px 0px 0px 0px;
     white-space: pre;
@@ -33,6 +35,22 @@
     position: relative;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+}
+
+@media (orientation: portrait) {
+  .ttxRow {
+      font-family: 'Teletext Decoder', monospace;
+      font-size: 18px;
+      font-size: 2.9vmin;
+      line-height: 3.0vmin;
+      margin: 0px;
+      padding: 0px 0px 0px 0px;
+      white-space: pre;
+      background-color: #000000;
+       position: relative;
+      -webkit-text-size-adjust: 100%;
+     text-size-adjust: 100%;
+  } 
 }
 
 .ttxRow span {

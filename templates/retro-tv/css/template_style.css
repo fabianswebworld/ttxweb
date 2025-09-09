@@ -1,8 +1,13 @@
-@font-face{
-    font-family: 'Retro TV Teletext';
-    src: url('../fonts/teletext.woff2') format('woff2');
+@font-face {
+    font-family: 'Teletext Decoder';
+    src: url('../fonts/teletext-decoder.eot');
+    src: url('../fonts/teletext-decoder.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/teletext-decoder.woff2') format('woff2'),
+         url('../fonts/teletext-decoder.woff') format('woff'),
+         url('../fonts/teletext-decoder.ttf') format('truetype');
     font-weight: 400;
     font-style: normal;
+    font-display: swap;
 }
 
 html {
@@ -35,14 +40,12 @@ body {
 
 #ttxNumPadInput, #ttxNumPadInput:focus {
     position: absolute;
-    font-family: 'Retro TV Teletext', monospace;
+    font-family: 'Teletext Decoder', monospace;
     font-size: 18px;
-    font-size: 3.2vmin;
-    line-height: 20px;
-    line-height: 3.6vmin;
-    letter-spacing: 1px;
-    letter-spacing: 0.1vmin;
-    width: 2.8em;
+    font-size: 3.4vmin;
+    line-height: 3.5vmin;
+    width: 2.3em;
+    height: 1.0em !important;
     text-align: left;
     margin: 0px;
     padding: 0px 0px 0px 0px;
@@ -53,6 +56,32 @@ body {
     border-style: none;
     caret-color: transparent;
     outline: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+@media (orientation: portrait) {
+  #ttxNumPadInput, #ttxNumPadInput:focus {
+      position: absolute;
+      font-family: 'Teletext Decoder', monospace;
+      font-size: 18px;
+      font-size: 2.9vmin;
+      line-height: 3.0vmin;
+      width: 2.3em;
+      height: 1.05em !important;
+      text-align: left;
+      margin: 0px;
+      padding: 0px 0px 0px 0px;
+      white-space: pre;
+      background-color: transparent;
+      color: transparent;
+      border: none;
+      border-style: none;
+      caret-color: transparent;
+      outline: none;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+  }
 }
 
 #ttxNumPadInput::selection {

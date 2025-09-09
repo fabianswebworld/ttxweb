@@ -13,8 +13,8 @@
     <title><?php echo $pageTitle; ?></title>
 
     <link rel="start" title="Seite 100" href="?page=100" />
-    <link rel="next" title="N&auml;chste Videotext-Seite" href="?page=<?php echo $nextPageNum ?>" />
-    <link rel="prev" title="Vorherige Videotext-Seite" href="?page=<?php echo $prevPageNum ?>" />
+    <link rel="next" title="N&auml;chste Videotext-Seite" href="?page=<?php echo $nextPageNum . $queryString; ?>" />
+    <link rel="prev" title="Vorherige Videotext-Seite" href="?page=<?php echo $prevPageNum . $queryString; ?>" />
 
     <?php // ----------- do not modify header.php below this line ----------- ?>
 

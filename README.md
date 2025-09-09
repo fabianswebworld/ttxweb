@@ -23,6 +23,8 @@ See it in production use at:
 
 ![Screenshot - Test page](/doc/demo_p896.png "Test page")
 
+![Screenshot - Output of 'retro-tv' template](/doc/demo_retro_tv.png "Output of 'retro-tv' template")
+
 ## Installation
 
 ### Preparation
