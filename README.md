@@ -10,7 +10,7 @@ To use ttxweb, all you have to do is install the PHP scripts including the addit
 
 ## Live Demo
 
-See the live demo at https://www.fabianswebworld.de/ttxweb.
+See the live demo at https://www.fabianswebworld.de/ttxweb (English) or try it out on my blog at https://www.fabianswebworld.de/fwwtext (German).
 
 See and try out the nice 'retro-tv' template at https://www.fabianswebworld.de/fwwtext/?template=retro-tv. Just use the number keys to enter a page number, or the arrow keys to browse through pages (up/down=page numbers, left/right=subpages).
 

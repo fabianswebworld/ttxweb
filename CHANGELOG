@@ -1,7 +1,7 @@
 1.6.4.724
 
 - New: added file timestamp (modification time) of the currently rendered teletext file to the 'ttxEnv' div block, which can be helpful for debugging and health monitoring of the underlying teletext system, as well as for statistical and archival purposes
-- New: added 'retro-tv' template mimicking the look-and-feel of old TV's teletext decoders (using a custom-built font based on the teletext font freely distributed in the 'tv-fonts' package as a part of the openSUSE project, which itself is loosely based on the character depictions found in the ETSI standards and on the font found in many old TV character generator ROMs)
+- New: added 'retro-tv' template, recreating the look-and-feel of old TV's teletext decoders (using a custom font, based on the teletext font freely distributed in the 'tv-fonts' package as a part of the openSUSE project, which itself is loosely based on the character depictions found in the ETSI standards and on the font found in many old TV character generator ROMs). Note that the previous experimental release of the 'retro-tv' template contained a different font, missing many glyphs and also otherwise unsuitable and was thus replaced by this release
 - Some CSS tweaks and clean-ups in the included templates, including fixes for devices without a proper monospace font installed
 - Fixed character substitution list for British teletext character set
 - Added query string to the prev/next rel links in header.php of the included example templates
