@@ -12,6 +12,8 @@ To use ttxweb, all you have to do is install the PHP scripts including the addit
 
 See the live demo at https://www.fabianswebworld.de/ttxweb.
 
+See and try out the 'retro-tv' template at https://www.fabianswebworld.de/fwwtext/?template=retro-tv. Just use the number keys to enter a page number, or the arrow keys to browse to pages.
+
 See it in production use at:
 
 - https://www.hr-text.hr-fernsehen.de (Hessischer Rundfunk, hr-text)
