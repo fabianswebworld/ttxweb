@@ -12,7 +12,7 @@
 
     <title><?php echo $pageTitle; ?></title>
 
-    <link rel="start" title="Seite 100" href="?page=100" />
+    <link rel="start" title="Seite 100" href="?page=100<?php echo $queryString; ?>" />
     <link rel="next" title="N&auml;chste Videotext-Seite" href="?page=<?php echo $nextPageNum . $queryString; ?>" />
     <link rel="prev" title="Vorherige Videotext-Seite" href="?page=<?php echo $prevPageNum . $queryString; ?>" />
 

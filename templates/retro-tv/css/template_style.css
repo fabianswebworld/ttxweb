@@ -22,6 +22,29 @@ body {
     background: #000000;
 }
 
+#navhint {
+    visibility: hidden;
+    opacity: 0;
+    border: 8px solid #fff;
+    border: 1vmin solid #fff;
+    background-color: #555;
+    box-shadow: 16px 16px #222;
+    box-shadow: 2vmin 2vmin #222;
+    font-family: monospace;
+    color: #fff;
+    padding: 8px;
+    padding: 1vmin;
+    width: 60em;
+    width: 80vmin;
+    max-width: 90%;
+    text-align: center;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
 #ttxContainer {
     margin: 0px !important;
     overflow: hidden !important;
