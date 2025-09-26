@@ -1,3 +1,8 @@
+1.6.6.726
+
+- Security fix: improved parameter validation to make 'stream' parameter resilient against XSS vulnerabilities
+- Updated font file in 'embed-flex' template for smaller file size
+
 1.6.4.724
 
 - New: added file timestamp (modification time) of the currently rendered teletext file to the 'ttxEnv' div block, which can be helpful for debugging and health monitoring of the underlying teletext system, as well as for statistical and archival purposes
