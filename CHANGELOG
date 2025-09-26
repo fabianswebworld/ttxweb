@@ -2,6 +2,7 @@
 
 - Security fix: improved parameter validation to make 'stream' parameter resilient against XSS vulnerabilities
 - JS fix: improved parameter handling to prevent URL parameters from changing their order upon XHR refresh (somewhat cosmetic, but for the sake of consistency)
+- Updated 'retro-tv' example template to display navigation hints on first page load (in German, translatable via templates/retro-tv/navigation.php)
 - Updated font file in 'embed-flex' template for smaller file size
 
 1.6.4.724
