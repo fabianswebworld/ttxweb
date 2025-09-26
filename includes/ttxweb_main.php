@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.6.4.724 (2025-09-09)
+// version: 1.6.6.726 (2025-09-25)
 // (c) 2023, 2024, 2025 Fabian Schneider - @fabianswebworld
 
 // GLOBAL DEFINITIONS
 
-const TTXWEB_VERSION = '1.6.4.724 (2025-09-09)';       // version string
+const TTXWEB_VERSION = '1.6.6.726 (2025-09-25)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -141,10 +141,12 @@ if (!empty($_GET['stream'])) {
     $configFileName = 'ttxweb_config-' . $streamName . '.php';
     if (!file_exists('includes/' . $configFileName)) {
         $configFileName = 'ttxweb_config.php';
+        $streamName = '';
     }
 }
 else {
     $configFileName = 'ttxweb_config.php';
+    $streamName = '';
 }
 
 // include configuration
@@ -183,7 +185,7 @@ if (isset($_GET['reveal'])) {
     if ($_GET['reveal'] == '1') $reveal = true;
 }
 if (isset($_GET['refresh'])) {
-    if ($_GET['refresh'] != '') $refresh = abs(filter_var($_GET['refresh'], FILTER_SANITIZE_NUMBER_INT));
+    if ($_GET['refresh'] != '') $refresh = abs(intval(filter_var($_GET['refresh'], FILTER_SANITIZE_NUMBER_INT)));
 }
 $xhr = false;
 if (isset($_GET['xhr'])) {
@@ -199,34 +201,17 @@ if (empty($templateName)) { $templateName = 'default'; }
 
 // build query string to pass to the next query
 // with some more sanitizations
-$queryArray = $_GET;
-unset($queryArray['page']);
-unset($queryArray['sub']);
-unset($queryArray['xhr']);
-unset($queryArray['seqn0']);
-if (isset($queryArray['level15'])) {
-    if ($queryArray['level15'] == '1') {
-        unset($queryArray['level15']);
-    }
+$queryArray = array();
+if (!empty($streamName)) $queryArray['stream'] = $streamName;
+if (!$level15) $queryArray['level15'] = 0;
+if ($showHeader) $queryArray['header'] = 1;
+if ($reveal) $queryArray['reveal'] = 1;
+if (isset($_GET['refresh'])) $queryArray['refresh'] = $refresh;
+if (isset($_GET['turn'])) {
+    if (($_GET['turn'] == '1') || ($_GET['turn'] == '0')) $queryArray['turn'] = $_GET['turn'];
 }
-if (isset($queryArray['header'])) {
-    if ($queryArray['header'] == '0') {
-        unset($queryArray['header']);
-    }
-}
-if (isset($queryArray['reveal'])) {
-    if ($queryArray['reveal'] == '0') {
-        unset($queryArray['reveal']);
-    }
-}
-if (isset($queryArray['refresh'])) {
-    $queryArray['refresh'] = abs(filter_var($queryArray['refresh'], FILTER_SANITIZE_NUMBER_INT));
-}
-if (isset($queryArray['turn'])) {
-    if (!(($queryArray['turn'] == '1') || ($queryArray['turn'] == '0'))) {
-        unset($queryArray['turn']);
-    }
-}
+if (!empty($_GET['template'])) $queryArray['template'] = $templateName;
+
 $queryString = htmlspecialchars(http_build_query($queryArray));
 if (!empty($queryString)) {
     $queryString = '&amp;' . $queryString;
@@ -332,6 +317,7 @@ echo ' <div id="ttxEnv" style="display: none;">
   <pre id="ttxRow0Header">'     . intval($showHeader) . '</pre>
   <pre id="ttxRow0Template">'   . $ttxRow0Pattern     . '</pre>
   <pre id="ttxPageTitle">'      . $ttxPageTitle       . '</pre>
+  <pre id="ttxQuery">'          . $queryString        . '</pre>
   <pre id="ttxLanguage">'       . $ttxLanguage        . '</pre>
   <pre id="ttxPageNum">'        . $pageNum            . '</pre>
   <pre id="ttxPrevPageNum">'    . $prevPageNum        . '</pre>
