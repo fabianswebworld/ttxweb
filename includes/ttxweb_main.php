@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.7 (2026-07-06)
-// (c) 2023, 2024, 2025 Fabian Schneider - @fabianswebworld
+// version: 1.7.0.770 (2026-07-07)
+// (c) 2023-2026 Fabian Schneider and Contributors - @fabianswebworld
 
 // GLOBAL DEFINITIONS
 
-const TTXWEB_VERSION = '1.7 (2026-07-06)';       // version string
+const TTXWEB_VERSION = '1.7.0.770 (2026-07-07)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -197,8 +197,8 @@ function resolveActiveSource() {
         $ttxSourcePath    = defined('TTI_PATH')    ? TTI_PATH    : 'tti/';
         $ttxSourcePattern = defined('TTI_PATTERN') ? TTI_PATTERN : 'P%ppp%.tti';
     } else {
-        $ttxSourcePath    = EP1_PATH;
-        $ttxSourcePattern = EP1_PATTERN;
+        $ttxSourcePath    = defined('EP1_PATH')    ? EP1_PATH    : 'ep1/';
+        $ttxSourcePattern = defined('EP1_PATTERN') ? EP1_PATTERN : 'P%ppp%S%ss%.EP1';
     }
 
 }
