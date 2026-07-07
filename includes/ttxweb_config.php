@@ -1,6 +1,6 @@
 <?php
 
-// ttxweb.php EP1 teletext document renderer
+// ttxweb.php teletext document renderer
 
 // configuration
 
@@ -14,10 +14,10 @@ const EP1_PATH           = 'ep1/';                            // relative path t
 const EP1_PATTERN        = 'P%ppp%S%ss%.EP1';                 // pattern for the EP1 filenames (%ppp% = page, %ss% = subpage)
 
 // --- TTI files (used instead of EP1/AST when TTXWEB_FORMAT is set to 'tti') ---
-// TTI files store all subpages of a page inside a single
-// .tti file, so there is no separate filename per subpage and therefore
+// TTI files store all subpages of a page inside a single .tti file, 
+// so there is no separate filename per subpage and therefore
 // no %ss% placeholder in TTI_PATTERN below. Subpages are instead detected
-// by counting the PN, records inside the file.
+// by counting the 'PN,' records inside the file.
 
 const TTI_PATH           = 'tti/';                            // relative path to TTI files
 const TTI_PATTERN        = 'P%ppp%.tti';                      // pattern for the TTI filenames (%ppp% = page) - no %ss%, subpages are inside the file
