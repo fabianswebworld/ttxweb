@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.6.6.726 (2025-09-25)
+// version: 1.7 (2026-07-06)
 // (c) 2023, 2024, 2025 Fabian Schneider - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
@@ -19,6 +19,9 @@ function renderTeletextFile($teletextFile, $level15, $reveal) {
             break;
         case 'ast':
             parseAstFile($teletextFile, $level15, $level1Data, $x26Data);
+            break;
+        case 'tti':
+            parseTtiFile($teletextFile, $level15, $level1Data, $x26Data);
             break;
 
     }
@@ -156,6 +159,193 @@ function parseAstFile($astFilename, $level15, &$level1Data, &$x26Data) {
     if ($x26Present && EP1_DECODE_X26 && $level15) {
         $x26Data = decodeHamming2418($astRowBuffer[26]);
     }
+
+}
+
+
+function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
+
+    // Read and parse a TTI teletext file.
+    // A TTI file contains one or more subpages separated by PN records.
+    // Each subpage uses text-based OL records for row data, where
+    // teletext control codes are encoded as ESC + (0x40 + controlCode).
+    //
+    // This function picks the subpage that matches the global $subpageNum
+    // (1-based) and converts it to the 960-byte level1Data format that
+    // decodeAndRenderTeletextData() expects, identical to what parseEp1File()
+    // and parseAstFile() produce.
+
+    global $errorPageClassString, $subpageNum;
+
+    // --- sanity check ---
+    if (!file_exists($ttiFilename) || (filesize($ttiFilename) < 10)) {
+        $level1Data = str_pad(NO_PAGE_STRING, 960, ' ');
+        $errorPageClassString = ' class="errorPage"';
+        return;
+    }
+
+    // Read file in binary mode so that raw mosaic/graphic bytes
+    // (e.g. 0x7F) are never mangled by text-mode CR/LF conversion.
+    $handle = fopen($ttiFilename, 'rb');
+    $raw    = fread($handle, filesize($ttiFilename));
+    fclose($handle);
+
+    // Split on CRLF first (standard TTI), then fall back to bare LF or CR.
+    // We do NOT do a blanket str_replace of single 0x0D/0x0A bytes because
+    // those bytes can theoretically appear inside OL data as ESC-encoded
+    // control codes and we want clean line splitting without touching data.
+    if (strpos($raw, "\r\n") !== false) {
+        $lines = explode("\r\n", $raw);
+    } elseif (strpos($raw, "\r") !== false) {
+        $lines = explode("\r", $raw);
+    } else {
+        $lines = explode("\n", $raw);
+    }
+
+    // --- split file into subpage blocks ---
+    // Each block starts with a PN, record and ends just before the next one.
+
+    $subpages = [];   // array of arrays-of-lines, indexed from 0
+    $current  = null;
+
+    foreach ($lines as $line) {
+        if (strncmp($line, 'PN,', 3) === 0) {
+            if ($current !== null) {
+                $subpages[] = $current;
+            }
+            $current = [$line];
+        } elseif ($current !== null) {
+            $current[] = $line;
+        }
+    }
+    if ($current !== null) {
+        $subpages[] = $current;
+    }
+
+    if (empty($subpages)) {
+        $level1Data = str_pad(NO_PAGE_STRING, 960, ' ');
+        $errorPageClassString = ' class="errorPage"';
+        return;
+    }
+
+    // $subpageNum is 1-based (from the URL), pick the right block
+    $subpageIdx = max(0, intval($subpageNum) - 1);
+    if ($subpageIdx >= count($subpages)) {
+        $subpageIdx = 0;
+    }
+
+    $blockLines = $subpages[$subpageIdx];
+
+    // --- build row array (rows 0–23, each 40 bytes) ---
+    // Initialise all rows to spaces.
+    $rows = [];
+    for ($r = 0; $r <= 23; $r++) {
+        $rows[$r] = str_repeat(' ', 40);
+    }
+
+    $x26Raw = '';   // accumulates raw packet-26 bytes if present
+
+    foreach ($blockLines as $line) {
+
+        // Only OL lines carry row content
+        if (strncmp($line, 'OL,', 3) !== 0) {
+            continue;
+        }
+
+        // OL,<row>,<data>
+        // row and data are separated by the first two commas
+        $firstComma  = strpos($line, ',');
+        $secondComma = strpos($line, ',', $firstComma + 1);
+        if ($firstComma === false || $secondComma === false) {
+            continue;
+        }
+
+        $rowNum  = intval(substr($line, $firstComma + 1, $secondComma - $firstComma - 1));
+        $rowData = substr($line, $secondComma + 1);
+
+        // rows 0-23 go into level1Data; row 26 is X/26 data
+        if ($rowNum >= 0 && $rowNum <= 23) {
+            $rows[$rowNum] = ttiDecodeOlRow($rowData);
+        } elseif ($rowNum == 26 && EP1_DECODE_X26 && $level15) {
+            // Accumulate X/26 rows (there may be more than one per subpage).
+            // Each decoded row is exactly 40 bytes of raw (non-Hamming) data.
+            $x26Raw .= ttiDecodeOlRow($rowData);
+        }
+    }
+
+    // --- assemble 960-byte level1Data string (rows 0–23) ---
+    $level1Data = '';
+    for ($r = 0; $r <= 23; $r++) {
+        $level1Data .= $rows[$r];
+    }
+
+    // --- pass X/26 data upstream if present ---
+    if (!empty($x26Raw) && EP1_DECODE_X26 && $level15) {
+        // TTI X/26 rows are already decoded (no Hamming 24/18 wrapping),
+        // but decodeX26Chars() expects the same packet structure as AST:
+        // a packet-number byte followed by 40 data bytes.
+        // Re-frame the raw data accordingly.
+        $packets   = str_split($x26Raw, 40);
+        $x26Framed = '';
+        $pktNum    = 1;
+        foreach ($packets as $pkt) {
+            $x26Framed .= chr($pktNum) . str_pad($pkt, 40, ' ');
+            $pktNum++;
+        }
+        $x26Data = $x26Framed;
+    }
+
+}
+
+
+function ttiDecodeOlRow($rowData) {
+
+    // Convert a TTI OL row string to a 40-byte raw teletext row.
+    //
+    // In TTI files, teletext control bytes (0x00–0x1F) are encoded as
+    //   ESC (0x1B) followed by a character in the range 0x40–0x5F,
+    //   where the control byte = followingChar - 0x40.
+    //
+    // All other bytes are literal teletext G0/G1 characters and are
+    // passed through unchanged (already in the 0x20–0x7F range).
+    // Bytes outside that range (e.g. 0x7F = DEL / block mosaic in G1)
+    // are also passed through; the main decoder handles them.
+    //
+    // The result is padded with spaces (0x20) to exactly 40 bytes,
+    // or truncated if longer.
+
+    $out = '';
+    $len = strlen($rowData);
+    $i   = 0;
+
+    while ($i < $len && strlen($out) < 40) {
+        $byte = ord($rowData[$i]);
+
+        if ($byte === 0x1B && ($i + 1) < $len) {
+            // ESC sequence: next char encodes a control byte
+            $i++;
+            $followByte = ord($rowData[$i]);
+            if ($followByte >= 0x40 && $followByte <= 0x5F) {
+                $out .= chr($followByte - 0x40);
+            } else {
+                // unexpected ESC sequence — treat follow char literally
+                $out .= chr($followByte);
+            }
+        } else {
+            $out .= chr($byte);
+        }
+
+        $i++;
+    }
+
+    // pad / truncate to exactly 40 bytes
+    if (strlen($out) < 40) {
+        $out = str_pad($out, 40, ' ');
+    } else {
+        $out = substr($out, 0, 40);
+    }
+
+    return $out;
 
 }
 

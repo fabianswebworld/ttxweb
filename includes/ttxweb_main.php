@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.6.6.726 (2025-09-25)
+// version: 1.7 (2026-07-06)
 // (c) 2023, 2024, 2025 Fabian Schneider - @fabianswebworld
 
 // GLOBAL DEFINITIONS
 
-const TTXWEB_VERSION = '1.6.6.726 (2025-09-25)';       // version string
+const TTXWEB_VERSION = '1.7 (2026-07-06)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -26,12 +26,35 @@ const TTXWEB_VERSION = '1.6.6.726 (2025-09-25)';       // version string
 
 // FUNCTION DEFINITONS
 
+function getTtiSubpageCount($ttiFilename) {
+
+    // Count the number of subpages (PN, records) in a TTI file.
+    // Returns 0 if the file does not exist or cannot be read.
+
+    if (!file_exists($ttiFilename) || filesize($ttiFilename) < 10) {
+        return 0;
+    }
+
+    $count = 0;
+    $handle = fopen($ttiFilename, 'r');
+    while (($line = fgets($handle)) !== false) {
+        if (strncmp(ltrim($line), 'PN,', 3) === 0) {
+            $count++;
+        }
+    }
+    fclose($handle);
+    return $count;
+
+}
+
+
 function getPageNumbers() {
 
     // get page number and infer EP1 filename
     // also get existing pages and prev and next page
 
     global $pageNum, $subpageNum, $prevPageNum, $nextPageNum, $prevSubpageNum, $nextSubpageNum, $numSubpages, $currEp1Filename;
+    global $ttxSourcePath, $ttxSourcePattern;
 
     $pageNum = isset($_GET['page']) ? $_GET['page']:'100';
     $pageNum = sprintf('%03d', $pageNum);
@@ -49,20 +72,25 @@ function getPageNumbers() {
 
     // get all existing pages
     $cwd = getcwd();
-    chdir(EP1_PATH);
-    $filePattern = str_replace(array('%ppp%', '%ss%'), array('[1-8][0-9][0-9]', '01'), EP1_PATTERN);
+    chdir($ttxSourcePath);
+    if (strpos($ttxSourcePattern, '%ss%') !== false) {
+        $filePattern = str_replace(array('%ppp%', '%ss%'), array('[1-8][0-9][0-9]', '01'), $ttxSourcePattern);
+    } else {
+        // TTI / single-file-per-page: no subpage placeholder
+        $filePattern = str_replace('%ppp%', '[1-8][0-9][0-9]', $ttxSourcePattern);
+    }
     $ep1FileList = glob($filePattern);
     chdir($cwd);
 
     // get current page's index in page list
-    $currentIdx = array_search(str_replace(array('%ppp%', '%ss%'), array($pageNum, '01'), EP1_PATTERN), $ep1FileList);
+    $currentIdx = array_search(str_replace(array('%ppp%', '%ss%'), array($pageNum, '01'), $ttxSourcePattern), $ep1FileList);
 
     // get next and previous page index
     if ($currentIdx === false) {
         // if the current page is not in index, look up the next existing one
         // and calculate from there
         for ($i = $pageNum; (($i <= 899) && ($currentIdx === false)); $i++) {
-            $currentIdx = array_search(str_replace(array('%ppp%', '%ss%'), array(sprintf('%03d', $i), '01'), EP1_PATTERN), $ep1FileList);
+            $currentIdx = array_search(str_replace(array('%ppp%', '%ss%'), array(sprintf('%03d', $i), '01'), $ttxSourcePattern), $ep1FileList);
         }
         if ($currentIdx === false) {
             $nextIdx = 0;
@@ -82,24 +110,33 @@ function getPageNumbers() {
     }
 
     // jump over 0-byte files (needed for some Sophora installations) or corrupt (too small) files
-    for ( ; (($nextIdx < count($ep1FileList)) && (filesize(EP1_PATH . $ep1FileList[$nextIdx]) < 96)); $nextIdx++);
-    for ( ; (($prevIdx >= 0) && (filesize(EP1_PATH . $ep1FileList[$prevIdx]) < 96)); $prevIdx--);
+    for ( ; (($nextIdx < count($ep1FileList)) && (filesize($ttxSourcePath . $ep1FileList[$nextIdx]) < 96)); $nextIdx++);
+    for ( ; (($prevIdx >= 0) && (filesize($ttxSourcePath . $ep1FileList[$prevIdx]) < 96)); $prevIdx--);
 
     // extract page numbers from filenames in list
     if (isset($ep1FileList[$nextIdx])) {
-        $nextPageNum = substr($ep1FileList[$nextIdx], strpos(EP1_PATTERN, '%ppp%'), 3);
+        $nextPageNum = substr($ep1FileList[$nextIdx], strpos($ttxSourcePattern, '%ppp%'), 3);
     }
 
     if (isset($ep1FileList[$prevIdx])) {
-        $prevPageNum = substr($ep1FileList[$prevIdx], strpos(EP1_PATTERN, '%ppp%'), 3);
+        $prevPageNum = substr($ep1FileList[$prevIdx], strpos($ttxSourcePattern, '%ppp%'), 3);
     }
 
     // get number of subpages
-    $ep1SubpageFileList = glob(EP1_PATH . str_replace(array('%ppp%', '%ss%'), array($pageNum, '[0-9][0-9]'), EP1_PATTERN));
-    for ($subpageIdx = 0; $subpageIdx < count($ep1SubpageFileList); $subpageIdx++) {
-        if (filesize($ep1SubpageFileList[$subpageIdx]) == 0) unset($ep1SubpageFileList[$subpageIdx]);
+    // TTI files contain all subpages in one file (no %ss% in pattern),
+    // so count PN, records inside the file instead of globbing.
+    if (strpos($ttxSourcePattern, '%ss%') === false) {
+        // TTI / single-file-per-page format
+        $numSubpages = getTtiSubpageCount($currEp1Filename);
+        if ($numSubpages == 0) $numSubpages = 1;
+    } else {
+        // EP1 / AST: one file per subpage
+        $ep1SubpageFileList = glob($ttxSourcePath . str_replace(array('%ppp%', '%ss%'), array($pageNum, '[0-9][0-9]'), $ttxSourcePattern));
+        for ($subpageIdx = 0; $subpageIdx < count($ep1SubpageFileList); $subpageIdx++) {
+            if (filesize($ep1SubpageFileList[$subpageIdx]) == 0) unset($ep1SubpageFileList[$subpageIdx]);
+        }
+        $numSubpages = count($ep1SubpageFileList);
     }
-    $numSubpages = count($ep1SubpageFileList);
     if ($subpageNum > $numSubpages) $subpageNum = sprintf('%02d', $numSubpages);
 
     // clamp result values
@@ -117,8 +154,10 @@ function getPageNumbers() {
 
 function getEp1Filename($pageNum, $subpageNum) {
 
-    // generate path to EP1 file
-    $ep1Filename = EP1_PATH . str_replace(array('%ppp%', '%ss%'), array($pageNum, sprintf('%02d', $subpageNum)), EP1_PATTERN);
+    // generate path to the active page source file (EP1/AST or TTI,
+    // depending on TTXWEB_FORMAT - see resolveActiveSource() in ttxweb_main.php)
+    global $ttxSourcePath, $ttxSourcePattern;
+    $ep1Filename = $ttxSourcePath . str_replace(array('%ppp%', '%ss%'), array($pageNum, sprintf('%02d', $subpageNum)), $ttxSourcePattern);
     return $ep1Filename;
 
 }
@@ -126,9 +165,41 @@ function getEp1Filename($pageNum, $subpageNum) {
 
 function pageExists($pageNum, $subpageNum) {
 
-    // return whether a given page physically exists
+    // return whether a given page (and subpage) physically exists.
+    // For single-file-per-page formats (TTI), the file must exist and
+    // contain at least as many PN, records as $subpageNum.
+    global $ttxSourcePattern;
     $pageFilename = getEp1Filename($pageNum, $subpageNum);
-    return (file_exists($pageFilename) && (filesize($pageFilename) > 0));
+    if (!file_exists($pageFilename) || filesize($pageFilename) == 0) {
+        return false;
+    }
+    if (strpos($ttxSourcePattern, '%ss%') === false) {
+        // TTI: file exists; check subpage count
+        return (getTtiSubpageCount($pageFilename) >= intval($subpageNum));
+    }
+    return true;
+
+}
+
+
+function resolveActiveSource() {
+
+    // determine which page source format is active (EP1/AST or TTI),
+    // based on TTXWEB_FORMAT in ttxweb_config.php, and resolve its
+    // path and filename pattern into $ttxSourcePath / $ttxSourcePattern.
+    // Defaults to EP1/AST if TTXWEB_FORMAT is not set or unrecognized.
+
+    global $ttxSourcePath, $ttxSourcePattern;
+
+    $format = defined('TTXWEB_FORMAT') ? strtolower(TTXWEB_FORMAT) : 'ep1';
+
+    if ($format === 'tti') {
+        $ttxSourcePath    = defined('TTI_PATH')    ? TTI_PATH    : 'tti/';
+        $ttxSourcePattern = defined('TTI_PATTERN') ? TTI_PATTERN : 'P%ppp%.tti';
+    } else {
+        $ttxSourcePath    = EP1_PATH;
+        $ttxSourcePattern = EP1_PATTERN;
+    }
 
 }
 
@@ -156,6 +227,9 @@ if (file_exists('includes/' . $configFileName)) {
 else {
     die('Cannot access configuration file. ttxweb cannot continue.');
 }
+
+// resolve which page source format is active (EP1/AST vs TTI) and its path/pattern
+resolveActiveSource();
 
 // initialize some default values
 $ttxLanguage = 'en-US';
