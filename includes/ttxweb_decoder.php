@@ -1,8 +1,8 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.7 (2026-07-06)
-// (c) 2023, 2024, 2025 Fabian Schneider - @fabianswebworld
+// version: 1.7.0.770 (2026-07-07)
+// (c) 2023-2026 Fabian Schneider and Contributors - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
 
@@ -166,8 +166,8 @@ function parseAstFile($astFilename, $level15, &$level1Data, &$x26Data) {
 function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
 
     // Read and parse a TTI teletext file.
-    // A TTI file contains one or more subpages separated by PN records.
-    // Each subpage uses text-based OL records for row data, where
+    // A TTI file contains one or more subpages separated by 'PN,' records.
+    // Each subpage uses text-based 'OL,' records for row data, where
     // teletext control codes are encoded as ESC + (0x40 + controlCode).
     //
     // This function picks the subpage that matches the global $subpageNum
