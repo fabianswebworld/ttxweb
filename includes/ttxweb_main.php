@@ -26,28 +26,6 @@ const TTXWEB_VERSION = '1.7.0.770 (2026-07-07)';       // version string
 
 // FUNCTION DEFINITONS
 
-function getTtiSubpageCount($ttiFilename) {
-
-    // Count the number of subpages (PN, records) in a TTI file.
-    // Returns 0 if the file does not exist or cannot be read.
-
-    if (!file_exists($ttiFilename) || filesize($ttiFilename) < 10) {
-        return 0;
-    }
-
-    $count = 0;
-    $handle = fopen($ttiFilename, 'r');
-    while (($line = fgets($handle)) !== false) {
-        if (strncmp(ltrim($line), 'PN,', 3) === 0) {
-            $count++;
-        }
-    }
-    fclose($handle);
-    return $count;
-
-}
-
-
 function getPageNumbers() {
 
     // get page number and infer EP1 filename
@@ -75,7 +53,8 @@ function getPageNumbers() {
     chdir($ttxSourcePath);
     if (strpos($ttxSourcePattern, '%ss%') !== false) {
         $filePattern = str_replace(array('%ppp%', '%ss%'), array('[1-8][0-9][0-9]', '01'), $ttxSourcePattern);
-    } else {
+    }
+    else {
         // TTI / single-file-per-page: no subpage placeholder
         $filePattern = str_replace('%ppp%', '[1-8][0-9][0-9]', $ttxSourcePattern);
     }
@@ -124,12 +103,13 @@ function getPageNumbers() {
 
     // get number of subpages
     // TTI files contain all subpages in one file (no %ss% in pattern),
-    // so count PN, records inside the file instead of globbing.
+    // so count PN records inside the file instead of globbing
     if (strpos($ttxSourcePattern, '%ss%') === false) {
-        // TTI / single-file-per-page format
+        // TTI: single-file-per-page format
         $numSubpages = getTtiSubpageCount($currEp1Filename);
         if ($numSubpages == 0) $numSubpages = 1;
-    } else {
+    }
+    else {
         // EP1 / AST: one file per subpage
         $ep1SubpageFileList = glob($ttxSourcePath . str_replace(array('%ppp%', '%ss%'), array($pageNum, '[0-9][0-9]'), $ttxSourcePattern));
         for ($subpageIdx = 0; $subpageIdx < count($ep1SubpageFileList); $subpageIdx++) {
@@ -152,10 +132,33 @@ function getPageNumbers() {
 }
 
 
+function getTtiSubpageCount($ttiFilename) {
+
+    // count the number of subpages ('PN,' records) in a TTI file;
+    // returns 0 if the file does not exist or cannot be read.
+
+    if (!file_exists($ttiFilename) || filesize($ttiFilename) < 10) {
+        return 0;
+    }
+
+    $count = 0;
+    $handle = fopen($ttiFilename, 'r');
+    while (($line = fgets($handle)) !== false) {
+        if (strncmp(ltrim($line), 'PN,', 3) === 0) {
+            $count++;
+        }
+    }
+    fclose($handle);
+    return $count;
+
+}
+
+
 function getEp1Filename($pageNum, $subpageNum) {
 
     // generate path to the active page source file (EP1/AST or TTI,
     // depending on TTXWEB_FORMAT - see resolveActiveSource() in ttxweb_main.php)
+
     global $ttxSourcePath, $ttxSourcePattern;
     $ep1Filename = $ttxSourcePath . str_replace(array('%ppp%', '%ss%'), array($pageNum, sprintf('%02d', $subpageNum)), $ttxSourcePattern);
     return $ep1Filename;
@@ -165,9 +168,10 @@ function getEp1Filename($pageNum, $subpageNum) {
 
 function pageExists($pageNum, $subpageNum) {
 
-    // return whether a given page (and subpage) physically exists.
-    // For single-file-per-page formats (TTI), the file must exist and
-    // contain at least as many PN, records as $subpageNum.
+    // return whether a given page (and subpage) physically exists;
+    // for single-file-per-page formats (TTI), the file must exist and
+    // contain at least as many PN records as $subpageNum.
+
     global $ttxSourcePattern;
     $pageFilename = getEp1Filename($pageNum, $subpageNum);
     if (!file_exists($pageFilename) || filesize($pageFilename) == 0) {
@@ -186,8 +190,8 @@ function resolveActiveSource() {
 
     // determine which page source format is active (EP1/AST or TTI),
     // based on TTXWEB_FORMAT in ttxweb_config.php, and resolve its
-    // path and filename pattern into $ttxSourcePath / $ttxSourcePattern.
-    // Defaults to EP1/AST if TTXWEB_FORMAT is not set or unrecognized.
+    // path and filename pattern into $ttxSourcePath / $ttxSourcePattern;
+    // defaults to EP1/AST if TTXWEB_FORMAT is not set or unrecognized.
 
     global $ttxSourcePath, $ttxSourcePattern;
 
@@ -196,7 +200,8 @@ function resolveActiveSource() {
     if ($format === 'tti') {
         $ttxSourcePath    = defined('TTI_PATH')    ? TTI_PATH    : 'tti/';
         $ttxSourcePattern = defined('TTI_PATTERN') ? TTI_PATTERN : 'P%ppp%.tti';
-    } else {
+    }
+    else {
         $ttxSourcePath    = defined('EP1_PATH')    ? EP1_PATH    : 'ep1/';
         $ttxSourcePattern = defined('EP1_PATTERN') ? EP1_PATTERN : 'P%ppp%S%ss%.EP1';
     }
@@ -228,7 +233,7 @@ else {
     die('Cannot access configuration file. ttxweb cannot continue.');
 }
 
-// resolve which page source format is active (EP1/AST vs TTI) and its path/pattern
+// resolve which page source format is active (EP1/AST or TTI) and its path/pattern
 resolveActiveSource();
 
 // initialize some default values
