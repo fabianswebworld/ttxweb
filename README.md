@@ -6,7 +6,7 @@ ttxweb is a web application that brings the "old-fashioned" teletext (Videotext)
 
 Another nice feature is that the pages can update automatically at a configurable refresh interval. The update happens smoothly via XMLHttpRequest (no full page reload), so that just the teletext portion of the page is reloaded.
 
-To use ttxweb, all you have to do is install the PHP scripts including the additional files (CSS, JS etc.) on a web server and ensure that the teletext pages are synchronized as EP1 or AST files in a configurable folder that can be accessed from the PHP script (e.g. via FTP).
+To use ttxweb, all you have to do is install the PHP scripts including the additional files (CSS, JS etc.) on a web server and ensure that the teletext pages are synchronized as EP1, AST or TTI files in a configurable folder that can be accessed from the PHP script (e.g. via FTP).
 
 ## Live Demo
 
@@ -44,7 +44,7 @@ A web server with PHP >= 5.6 is required. The PHP intl extension is recommended,
 
 #### Input files
 
-The teletext pages to be displayed must be in EP1 format (Softel) or AST format (ASTET). These file formats can be processed or exported by all common teletext systems (Softel, Broadstream etc.). If required, an adaptation to other formats (TTI, TTX, ETT, etc.) is conceivable with little effort. The ttxweb EP1 parser will automatically detect the flavor of EP1 file: plain Level 1.0 files without X/26 data as well as both flavors of Softel EP1 files with X/26 data (Flair and TAP). Note: To enable X/26 export in the TAP process, you'll have to set the (undocumented) environment variable TRA_TAP_X26 to 1 on the Transmission machine which hosts TAP.EXE. For AST files, X/26 data is detected and decoded automatically as well, if it is included as a regular packet 26 inside the file (any packet/row order is possible).
+The teletext pages to be displayed must be in EP1 format (Softel), AST format (ASTET) or TTI format (MRG Systems). These file formats can be processed or exported by all common teletext systems (Softel, Broadstream etc.). If required, an adaptation to other formats (TTX, ETT, etc.) is possible with reasonable effort, as has already been done e.g. by Max de Vos with his great addition of the TTI parser in version 1.7.0 (thank you!). For EP1 files, the ttxweb EP1 parser will automatically detect the flavor of EP1 file: plain Level 1.0 files without X/26 data as well as both flavors of Softel EP1 files with X/26 data (Flair and TAP). Note: To enable X/26 export in the TAP process, you'll have to set the (undocumented) environment variable TRA_TAP_X26 to 1 on the Transmission machine which hosts TAP.EXE. For AST files, X/26 data is detected and decoded automatically as well, if it is included as a regular packet 26 inside the file (any packet/row order is possible).
 
 The input files must be suitably synchronized to a folder accessible to the PHP script in the filename format PxxxSyy.EP1 by default (where xxx = page number, yy = subpage number). The file name format can be adjusted in the script if required.
 
@@ -52,30 +52,33 @@ Files with a size of 0 bytes (e.g. used as "deletion files" in some Sophora inst
 
 ##### Important note
 
-Historically, only the EP1 file format was supported by ttxweb, so the term "EP1 file" is used synonymously with "input file" throughout this documentation and also throughout the code. This explains function names such as "getEp1Filename()" which is used to get the input filename. The same applies to some configuration parameters named "EP1_*", which apply to all input file formats as well.
+Historically, only the EP1 file format was supported by ttxweb, so the term "EP1 file" is used synonymously with "input file" throughout this documentation and also throughout the code. This explains function names such as "getEp1Filename()" which is used to get the input filename. The same applies to a number of configuration parameter names starting with "EP1_", which apply to multiple input file formats as well. Starting with version 1.7.0, thanks to the addition of the TTI file format parser by Max de Vos, some configuration parameters are specific to the TTI mode, which differs from the EP1 (or AST) mode in one important way: the TTI file format contains all subpages of a page in one single file, while EP1, AST and other formats contain only one subpage per file. These parameters have names starting with "TTI_". See the documentation below for details.
 
 ### Deployment
 
-The PHP script and all auxiliary files must be copied to the web server and configured according to the section below. The **g1.zip** file in the **g1** folder needs to be unzipped on the server (faster deployment than transferring 1024 separate files). The transfer of the EP1/AST/etc. input files must be set up. In order to prevent users from directly accessing the input files via the web server, the commented lines of the supplied .htaccess file in the ttxweb folder should be uncommented (as long as the server supports Rewrite Rules).
+The PHP script and all auxiliary files must be copied to the web server and configured according to the section below. The **g1.zip** file in the **g1** folder needs to be unzipped on the server (faster deployment than transferring 1024 separate files). The transfer of the EP1/AST/TTI/etc. input files must be set up. In order to prevent users from directly accessing the input files via the web server, the commented lines of the supplied .htaccess file in the ttxweb folder should be uncommented (as long as the server supports Rewrite Rules).
 
 ## Configuration and customizations
 
 The following configuration options are available to configure the behavior of ttxweb and adapt the output to your own website design:
 
 - **includes/ttxweb_config.php:**
-  - const **TTXWEB_TEMPLATE** - template name, i.e. folder to use for HTML templates (must be a subfolder in the **templates/** folder, default: 'default')
-  - const **TTXWEB_REFRESH** - seconds for automatic refresh via XHR (default: 0 = disabled)
-  - const **TTXWEB_TURN_RATES** - array of pages that should turn automatically, and how fast (example see file or below)  
+  - const **TTXWEB_TEMPLATE** - Template name, i.e. folder to use for HTML templates (must be a subfolder in the **templates/** folder, default: 'default')
+  - const **TTXWEB_REFRESH** - Seconds for automatic refresh via XHR (default: 0 = disabled)
+  - const **TTXWEB_TURN_RATES** - Array of pages that should turn automatically, and how fast (example see file or below)  
     **Example:**
 
     `const TTXWEB_TURN_RATES = [100 => 8, 170 => 3, 198 => 20, 220 => 6, 280 => 6];`
 
-  - const **EP1_PATH** - Path to the input files (default: 'ep1/')
-  - const **EP1_PATTERN** - pattern for the input filenames (where %ppp% = page, %ss% = subpage; a value for this *must* be provided, no default value)  
+  - const **TTXWEB_FORMAT** - Which type of source page format to use: 'ep1' (EP1/AST files, one file per subpage) or 'tti' (TTI files, one file per page, including all subpages in one single file); for AST files, specifying 'ast' is possible as well (default: 'ep1')
+  - const **EP1_PATH** - Path to the input files in single-subpage-per-file (EP1/AST) mode (default: 'ep1/')
+  - const **EP1_PATTERN** - Pattern for the EP1/AST input filenames (where %ppp% = page, %ss% = subpage; default: 'P%ppp%S%ss%.EP1')
     **Example:**
 
     `const EP1_PATTERN = 'P%ppp%S%ss%.EP1';`
 
+  - const **TTI_PATH** - Path to the input files in all-subpages-in-one-file (TTI) mode (default: 'tti/')
+  - const **TTI_PATTERN** - Pattern for the TTI input filenames (where %ppp% = page; default: 'P%ppp%.tti')
   - const **EP1_LANGUAGE** - Teletext language (default: 'en-US', possible values: 'de-DE' | 'en-GB' | 'en-US')
   - const **EP1_DECODE_X26** - Decode packet X/26 (level 1.5 characters) (default: true)
   - const **EP1_ALWAYS_REVEAL** - Always reveal concealed text on load (default: false)
