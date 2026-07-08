@@ -184,7 +184,7 @@ function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
         return;
     }
 
-    // Read file in binary mode so that raw mosaic/graphic bytes
+    // read file in binary mode so that raw mosaic/graphic bytes
     // (e.g. 0x7F) are never mangled by text-mode CR/LF conversion.
     $handle = fopen($ttiFilename, 'rb');
     $raw    = fread($handle, filesize($ttiFilename));
@@ -196,14 +196,16 @@ function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
     // control codes and we want clean line splitting without touching data.
     if (strpos($raw, "\r\n") !== false) {
         $lines = explode("\r\n", $raw);
-    } elseif (strpos($raw, "\r") !== false) {
+    }
+    elseif (strpos($raw, "\r") !== false) {
         $lines = explode("\r", $raw);
-    } else {
+    }
+    else {
         $lines = explode("\n", $raw);
     }
 
     // --- split file into subpage blocks ---
-    // Each block starts with a PN, record and ends just before the next one.
+    // each block starts with a PN record and ends just before the next one
 
     $subpages = [];   // array of arrays-of-lines, indexed from 0
     $current  = null;
@@ -214,7 +216,8 @@ function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
                 $subpages[] = $current;
             }
             $current = [$line];
-        } elseif ($current !== null) {
+        }
+        elseif ($current !== null) {
             $current[] = $line;
         }
     }
@@ -236,8 +239,8 @@ function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
 
     $blockLines = $subpages[$subpageIdx];
 
-    // --- build row array (rows 0–23, each 40 bytes) ---
-    // Initialise all rows to spaces.
+    // --- build row array (rows 0-23, each 40 bytes) ---
+    // initialize all rows to spaces
     $rows = [];
     for ($r = 0; $r <= 23; $r++) {
         $rows[$r] = str_repeat(' ', 40);
@@ -247,7 +250,7 @@ function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
 
     foreach ($blockLines as $line) {
 
-        // Only OL lines carry row content
+        // only OL lines carry row content
         if (strncmp($line, 'OL,', 3) !== 0) {
             continue;
         }
@@ -266,14 +269,15 @@ function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
         // rows 0-23 go into level1Data; row 26 is X/26 data
         if ($rowNum >= 0 && $rowNum <= 23) {
             $rows[$rowNum] = ttiDecodeOlRow($rowData);
-        } elseif ($rowNum == 26 && EP1_DECODE_X26 && $level15) {
+        }
+        elseif ($rowNum == 26 && EP1_DECODE_X26 && $level15) {
             // Accumulate X/26 rows (there may be more than one per subpage).
             // Each decoded row is exactly 40 bytes of raw (non-Hamming) data.
             $x26Raw .= ttiDecodeOlRow($rowData);
         }
     }
 
-    // --- assemble 960-byte level1Data string (rows 0–23) ---
+    // --- assemble 960-byte level1Data string (rows 0-23) ---
     $level1Data = '';
     for ($r = 0; $r <= 23; $r++) {
         $level1Data .= $rows[$r];
@@ -302,12 +306,12 @@ function ttiDecodeOlRow($rowData) {
 
     // Convert a TTI OL row string to a 40-byte raw teletext row.
     //
-    // In TTI files, teletext control bytes (0x00–0x1F) are encoded as
-    //   ESC (0x1B) followed by a character in the range 0x40–0x5F,
-    //   where the control byte = followingChar - 0x40.
+    // In TTI files, teletext control bytes (0x00-0x1F) are encoded as
+    // ESC (0x1B) followed by a character in the range 0x40-0x5F,
+    // where the control byte = followingChar - 0x40.
     //
     // All other bytes are literal teletext G0/G1 characters and are
-    // passed through unchanged (already in the 0x20–0x7F range).
+    // passed through unchanged (already in the 0x20-0x7F range).
     // Bytes outside that range (e.g. 0x7F = DEL / block mosaic in G1)
     // are also passed through; the main decoder handles them.
     //
@@ -327,11 +331,13 @@ function ttiDecodeOlRow($rowData) {
             $followByte = ord($rowData[$i]);
             if ($followByte >= 0x40 && $followByte <= 0x5F) {
                 $out .= chr($followByte - 0x40);
-            } else {
-                // unexpected ESC sequence — treat follow char literally
+            }
+            else {
+                // unexpected ESC sequence - treat follow char literally
                 $out .= chr($followByte);
             }
-        } else {
+        }
+        else {
             $out .= chr($byte);
         }
 
@@ -341,7 +347,8 @@ function ttiDecodeOlRow($rowData) {
     // pad / truncate to exactly 40 bytes
     if (strlen($out) < 40) {
         $out = str_pad($out, 40, ' ');
-    } else {
+    }
+    else {
         $out = substr($out, 0, 40);
     }
 
