@@ -72,7 +72,7 @@ The following configuration options are available to configure the behavior of t
 
   - const **TTXWEB_FORMAT** - Which type of source page format to use: 'ep1' (EP1/AST files, one file per subpage) or 'tti' (TTI files, one file per page, including all subpages in one single file); for AST files, specifying 'ast' is possible as well (default: 'ep1')
   - const **EP1_PATH** - Path to the input files in single-subpage-per-file (EP1/AST) mode (default: 'ep1/')
-  - const **EP1_PATTERN** - Pattern for the EP1/AST input filenames (where %ppp% = page, %ss% = subpage; default: 'P%ppp%S%ss%.EP1')
+  - const **EP1_PATTERN** - Pattern for the EP1/AST input filenames (where %ppp% = page, %ss% = subpage; default: 'P%ppp%S%ss%.EP1')  
     **Example:**
 
     `const EP1_PATTERN = 'P%ppp%S%ss%.EP1';`
@@ -143,7 +143,7 @@ The following configuration options are available to configure the behavior of t
 The following URL parameters are supported (if provided, they override the values configured in ttxweb_config.php where applicable):
 
 - **level15** - 0 (decode only level 1.0 characters) | 1 (also decode level 1.5 characters, **default**)
-- **header** - 0 (Show locally generated header, **default**) | 1 (Show Row 0 from EP1 file)
+- **header** - 0 (Show locally generated header, **default**) | 1 (Show Row 0 from EP1/AST/TTI file)
 - **page** - 100 (**default**) .. 899 - Page number to be displayed
 - **sub** - 1 (**default**) .. 99 - Subpage to be displayed
 - **reveal** - 0 (hide concealed text) | 1 (reveal concealed text on page load) (default: set by EP1_ALWAYS_REVEAL in ttxweb_config.php)
@@ -156,4 +156,4 @@ The following URL parameters are supported (if provided, they override the value
 
 # Contact the author
 
-Questions, suggestions, requests please send via the contact form or the other available contact means at www.fabianswebworld.de. Please also note the license terms in the LICENSE.md file (available in German only).
+Questions, suggestions, requests please send via the contact form or the other available contact means at www.fabianswebworld.de. Please also note the license terms in the LICENSE.md file (available, and authoritative, in German only).

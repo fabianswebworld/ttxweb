@@ -1,3 +1,8 @@
+1.7.1.771
+
+- Minor code formatting changes and bump of client-side script's version number to match release version
+- Adapted LICENSE.md to be more appropriate for a project with multiple contributors
+
 1.7.0.770
 
 - New: added TTI support (thanks to Max de Vos / Henkdetenk12345 for this great contribution)

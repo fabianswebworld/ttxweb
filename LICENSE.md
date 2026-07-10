@@ -8,9 +8,9 @@ Mit der Nutzung des Softwareprodukts erkennt der Nutzer bzw. (wo rechtlich anwen
 
 ## 2. Art der Lizenz
 
-Das Softwareprodukt wird als sog. "Freeware" für den nichtkommerziellen Gebrauch unentgeltlich zur Verfügung gestellt.
+Das Softwareprodukt wird als sog. "Freeware" für den nichtkommerziellen Gebrauch unentgeltlich als Quellcode zur Verfügung gestellt, nicht jedoch als vollständig "Freie Software", d.h. das Urheberrecht verbleibt beim Autor und ggf. beitragenden Dritten ("Contributors"), wie unter 5.1. weiter ausgeführt.
 
-Dies umfasst auch den Einsatz in nicht gewinnorientierten Institutionen wie z.B. öffentlichen Bildungseinrichtungen, Anstalten des öffentlichen Rechts (z.B. öffentlich-rechtliche Rundfunkanstalten), Landesmedienanstalten, Nicht-Regierungs-Organisationen (NGOs), staatlich anerkannten Universitäten usw.
+Der unentgeltlich gestattete, nichtkommerzielle Gebrauch umfasst neben dem rein persönlichen Gebrauch auch den Einsatz in nicht gewinnorientierten Institutionen wie z.B. öffentlichen Bildungseinrichtungen, Anstalten des öffentlichen Rechts (z.B. öffentlich-rechtliche Rundfunkanstalten), Landesmedienanstalten, Nicht-Regierungs-Organisationen (NGOs), staatlich anerkannten Universitäten usw.
 
 Jeglicher kommerzielle Einsatz bedarf einer Vereinbarung mit dem Autor.
 
@@ -24,13 +24,19 @@ Das Softwareprodukt wird ohne jegliche ausdrückliche oder stillschweigende Gew�
 
 Das Softwareprodukt darf zum Ziele einer Nutzung im Rahmen der unter 2. aufgeführten Bedingungen uneingeschränkt verbreitet werden, jedoch nur in - bis auf Konfigurations- und Template-Anpassungen in den Skripten - unveränderter und vollständiger Form, d.h. inklusive sämtlicher zum Produkt gehöriger Dateien und Texte, insbesondere inklusive dieses Lizenztexts.
 
+Insbesondere beim Forking muss dieser Lizenztext erhalten bleiben; die zum Zeitpunkt des Forks aus diesem Projekt übernommene Codebasis unterliegt weiterhin dieser Lizenz (insbesondere der Bedingung zur ausschließlich nichtkommerziellen Nutzung und dem Urheberrecht wie in Punkt 5.1. ausgeführt); in individueller Absprache mit dem Autor sind Abweichungen möglich.
+
 Die Verbreitung darf nur unentgeltlich erfolgen.
 
 ## 5. Urheber-, Nutzungs- und Markenrechte, Sonderbestimmungen
 
 ### 5.1. Urheberrecht
 
-Das Urheberrecht für das Softwareprodukt liegt ausschließlich beim Autor als natürlicher Person. Die Erstellung des Softwareprodukts erfolgte nicht im Rahmen eines Arbeitsverhältnisses zwischen Autor und seinem Arbeitgeber, sondern außerhalb der Arbeitszeit des Autors und ohne Verwendung dienstlicher Arbeitsmittel.
+Das Urheberrecht für das Softwareprodukt liegt ausschließlich beim Autor als natürlicher Person und den beitragenden Dritten ("Contributors", s.u.). Die Erstellung des Softwareprodukts erfolgte nicht im Rahmen eines Arbeitsverhältnisses zwischen Autor und seinem Arbeitgeber, sondern außerhalb der Arbeitszeit des Autors und ohne Verwendung dienstlicher Arbeitsmittel.
+
+Etwaige Beiträge Dritter (sog. "Contributors") zur Codebasis werden im zum Softwareprodukt gehörenden Schrifttum (z.B. Readme-Datei, Kommentarzeilen im Code) entsprechend kenntlich gemacht; das Urheberrecht für diese Beiträge verbleibt bei den jeweiligen Dritten, wobei sich diese, jeweils in individueller Absprache, mit den Bedingungen dieser Lizenz (insbesondere den unter 2., 4. und 5. getroffenen Vereinbarungen und eingeräumten Nutzungsrechten für Endnutzer) unwiderruflich und auf unbestimmte Zeit einverstanden erklären müssen, bevor ihr Beitrag in die Codebasis übernommen wird. Voraussetzung hierfür ist die unwiderrufliche und zeitlich unbefristete Übertragung der Nutzungsrechte am beigetragenen Code innerhalb des Softwareprodukts im Rahmen dieser Lizenz; eine nachträgliche Entfernung des Beitrags aus der Codebasis unter Berufung auf das Urheberrecht ist mithin ausgeschlossen.
+
+Es gelten die unter 4. getroffenen Vereinbarungen zum Forking.
 
 ### 5.2. Nutzungsrechte
 
@@ -44,7 +50,7 @@ Im Gegenzug zu den unter 5.2. eingeräumten Nutzungsrechten räumt der Arbeitgeb
 
 ### 5.4. Sonderbestimmungen
 
-Der Autor behält sich das Recht vor, das Produkt jederzeit ohne die unter 5.2. und 5.3. genannten Namenszusätze und Marken, d.h. ausschließlich unter seinem eigenen Namen, zu verbreiten (z.B. als eigenes Projekt auf GitHub).
+Der Autor behält sich das Recht vor, das Produkt jederzeit ohne die unter 5.2. und 5.3. genannten Namenszusätze und Marken, d.h. ausschließlich unter seinem eigenen Namen, zu verbreiten (z.B. als eigenes Projekt auf GitHub), wobei etwaige Beiträge Dritter jedoch als solche gekennzeichnet bleiben.
 
 ## 6. Salvatorische Klausel
 

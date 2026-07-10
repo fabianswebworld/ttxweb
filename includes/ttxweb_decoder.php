@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.7.0.770 (2026-07-07)
+// version: 1.7.1.771 (2026-07-10)
 // (c) 2023-2026 Fabian Schneider and Contributors - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
@@ -174,6 +174,8 @@ function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
     // (1-based) and converts it to the 960-byte level1Data format that
     // decodeAndRenderTeletextData() expects, identical to what parseEp1File()
     // and parseAstFile() produce.
+    //
+    // Originally contributed by: Max de Vos, @Henkdetenk12345
 
     global $errorPageClassString, $subpageNum;
 
@@ -317,6 +319,8 @@ function ttiDecodeOlRow($rowData) {
     //
     // The result is padded with spaces (0x20) to exactly 40 bytes,
     // or truncated if longer.
+    //
+    // Originally contributed by: Max de Vos, @Henkdetenk12345    
 
     $out = '';
     $len = strlen($rowData);
