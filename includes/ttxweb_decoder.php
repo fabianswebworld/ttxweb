@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.7.1.771 (2026-07-10)
+// version: 1.7.2.772 (2026-07-17)
 // (c) 2023-2026 Fabian Schneider and Contributors - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
@@ -174,8 +174,6 @@ function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
     // (1-based) and converts it to the 960-byte level1Data format that
     // decodeAndRenderTeletextData() expects, identical to what parseEp1File()
     // and parseAstFile() produce.
-    //
-    // Originally contributed by: Max de Vos, @Henkdetenk12345
 
     global $errorPageClassString, $subpageNum;
 
@@ -273,8 +271,9 @@ function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
             $rows[$rowNum] = ttiDecodeOlRow($rowData);
         }
         elseif ($rowNum == 26 && EP1_DECODE_X26 && $level15) {
-            // Accumulate X/26 rows (there may be more than one per subpage).
-            // Each decoded row is exactly 40 bytes of raw (non-Hamming) data.
+            // accumulate X/26 rows (there may be more than one per subpage),
+            // each decoded row is exactly 40 bytes of non-Hamming data, coded
+            // using a special coding scheme (see below)
             $x26Raw .= ttiDecodeOlRow($rowData);
         }
     }
@@ -286,19 +285,13 @@ function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
     }
 
     // --- pass X/26 data upstream if present ---
+    // TTI X/26 rows are not Hamming 24/18 encoded, but the 13 triplets
+    // are stuffed into an OL row using a special coding scheme (in the
+    // vbit2 code, this is referred to as CODING_13_TRIPLETS); we decode
+    // this through a special function, decode13Triplets()
+
     if (!empty($x26Raw) && EP1_DECODE_X26 && $level15) {
-        // TTI X/26 rows are already decoded (no Hamming 24/18 wrapping),
-        // but decodeX26Chars() expects the same packet structure as AST:
-        // a packet-number byte followed by 40 data bytes.
-        // Re-frame the raw data accordingly.
-        $packets   = str_split($x26Raw, 40);
-        $x26Framed = '';
-        $pktNum    = 1;
-        foreach ($packets as $pkt) {
-            $x26Framed .= chr($pktNum) . str_pad($pkt, 40, ' ');
-            $pktNum++;
-        }
-        $x26Data = $x26Framed;
+        $x26Data = decode13Triplets($x26Raw);
     }
 
 }
@@ -319,8 +312,6 @@ function ttiDecodeOlRow($rowData) {
     //
     // The result is padded with spaces (0x20) to exactly 40 bytes,
     // or truncated if longer.
-    //
-    // Originally contributed by: Max de Vos, @Henkdetenk12345    
 
     $out = '';
     $len = strlen($rowData);
@@ -894,6 +885,56 @@ function decodeHamming2418($x26Data) {
     $x26DataDecoded = $x26TripletsDecoded;
 
     return $x26DataDecoded;
+
+}
+
+
+function decode13Triplets($x26Data) {
+
+    // decode X/26 data according to the CODING_13_TRIPLETS scheme
+    // used by vbit2 when generating TTI files
+
+    $length = strlen($x26Data);
+
+    if ($length === 0 || ($length % 40) !== 0) {
+        return '';
+    }
+
+    $result = '';
+
+    $packetCount = intdiv($length, 40);
+
+    for ($p = 0; $p < $packetCount; $p++) {
+
+        $packet = substr($x26Data, $p * 40, 40);
+
+        // packet number
+        $result .= chr(ord($packet[0]) - 0x40);
+
+        // 13 triplets
+        for ($i = 0; $i < 13; $i++) {
+
+            $offset = 1 + ($i * 3);
+
+            // extract 6-bit values
+            $c1 = ord($packet[$offset])     & 0x3F;
+            $c2 = ord($packet[$offset + 1]) & 0x3F;
+            $c3 = ord($packet[$offset + 2]) & 0x3F;
+
+            // assemble new triplet
+            $triplet =
+                $c1 |
+                ($c2 << 6) |
+                ($c3 << 12);
+
+            // output triplet
+            $result .= chr($triplet         & 0x3F);
+            $result .= chr(($triplet >> 6)  & 0x1F);
+            $result .= chr(($triplet >> 11) & 0x7F);
+        }
+    }
+
+    return $result;
 
 }
 

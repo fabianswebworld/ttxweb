@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.7.1.771 (2026-07-10)
+// version: 1.7.2.772 (2026-07-17)
 // (c) 2023-2026 Fabian Schneider and Contributors - @fabianswebworld
 
 // GLOBAL DEFINITIONS
 
-const TTXWEB_VERSION = '1.7.1.771 (2026-07-10)';       // version string
+const TTXWEB_VERSION = '1.7.2.772 (2026-07-17)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -136,8 +136,6 @@ function getTtiSubpageCount($ttiFilename) {
 
     // count the number of subpages ('PN,' records) in a TTI file;
     // returns 0 if the file does not exist or cannot be read.
-    //
-    // Originally contributed by: Max de Vos, @Henkdetenk12345    
 
     if (!file_exists($ttiFilename) || filesize($ttiFilename) < 10) {
         return 0;
@@ -194,8 +192,6 @@ function resolveActiveSource() {
     // based on TTXWEB_FORMAT in ttxweb_config.php, and resolve its
     // path and filename pattern into $ttxSourcePath / $ttxSourcePattern;
     // defaults to EP1/AST if TTXWEB_FORMAT is not set or unrecognized
-    //
-    // Originally contributed by: Max de Vos, @Henkdetenk12345    
 
     global $ttxSourcePath, $ttxSourcePattern;
 
