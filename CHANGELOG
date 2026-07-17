@@ -1,3 +1,7 @@
+1.7.2.772
+
+- Decoder fix: packet X/26 data inside .TTI files is correctly decoded now
+
 1.7.1.771
 
 - Minor code formatting changes and bump of client-side script's version number to match release version
