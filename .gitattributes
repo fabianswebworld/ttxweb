@@ -1,0 +1,3 @@
+# exclude ttxweb_g1.css from language statistics...
+
+/css/ttxweb_g1.css linguist-vendored
