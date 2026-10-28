@@ -22,7 +22,7 @@ const EP1_PATTERN        = 'P%ppp%S%ss%.EP1';                 // pattern for the
 const TTI_PATH           = 'tti/';                            // relative path to TTI files
 const TTI_PATTERN        = 'P%ppp%.tti';                      // pattern for the TTI filenames (%ppp% = page) - no %ss%, subpages are inside the file
 
-const EP1_LANGUAGE       = 'de-DE';                           // teletext language (currently only 'de-DE'; 'en-GB')
+const EP1_LANGUAGE       = 'de-DE';                           // teletext language (western, eastern european and cyrillic national option sets, e.g. 'de-DE', 'en-GB', 'fr-FR', 'pl-PL'; cyrillic: 'ru-RU', 'bg-BG', 'uk-UA', 'mk-MK', 'sr-Cyrl-RS')
 const EP1_DECODE_X26     = true;                              // decode packet X/26 (level 1.5 characters)
 const EP1_ALWAYS_REVEAL  = false;                             // always reveal concealed text on load
 
