@@ -79,7 +79,7 @@ The following configuration options are available to configure the behavior of t
 
   - const **TTI_PATH** - Path to the input files in all-subpages-in-one-file (TTI) mode (default: 'tti/')
   - const **TTI_PATTERN** - Pattern for the TTI input filenames (where %ppp% = page; default: 'P%ppp%.tti')
-  - const **EP1_LANGUAGE** - Teletext language (default: 'en-US', possible values: 'de-DE' | 'en-GB' | 'en-US')
+  - const **EP1_LANGUAGE** - Teletext language (default: 'en-US', possible values: 'en-US' | 'en-GB' | 'de-DE' | 'sv-SE' | 'fi-FI' | 'hu-HU' | 'it-IT' | 'fr-FR' | 'pt-PT' | 'es-ES' | 'cs-CZ' | 'sk-SK' | 'pl-PL' | 'et-EE' | 'lt-LT' | 'lv-LV' | 'ro-RO' | 'hr-HR' | 'sr-RS' | 'sl-SI' | 'ru-RU' | 'bg-BG' | 'uk-UA' | 'mk-MK' | 'sr-Cyrl-RS')
   - const **EP1_DECODE_X26** - Decode packet X/26 (level 1.5 characters) (default: true)
   - const **EP1_ALWAYS_REVEAL** - Always reveal concealed text on load (default: false)
   - const **NO_PAGE_STRING** - String for 'Page not found' (default: empty)
