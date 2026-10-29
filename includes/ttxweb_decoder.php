@@ -696,7 +696,7 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal) {
         }
 
         // create page links (only for pages that exist)
-        $htmlBuffer = preg_replace_callback('/\b((?!155)[1-8]\d{2})\b/', 'createPageLinkIfExists', $htmlBuffer);
+        $htmlBuffer = preg_replace_callback('/(?<!&#)\b((?!155)[1-8]\d{2})\b/', 'createPageLinkIfExists', $htmlBuffer);
 
         // create web links
         $htmlBuffer = preg_replace('/((?:(?<!(?:\w|@|\)))(?=\w)|(?<=\w)(?!\w))((?:[\w-]+\.)+(?:de|com|org)(\/(?:[\/\w?&=#.\-]+)?)*)\b)|(\bhttps*:\/\/((?:[\w-]+\.)+(?:[\w-]+)(\/(?:[\/\w?&=#.\-]+)?)*)\b)/', '<a href="http://$1$4" target="_blank" title="http://$1$4">$0</a>', $htmlBuffer);
