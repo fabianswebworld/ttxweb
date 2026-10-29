@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.7.2.772 (2026-07-17)
+// version: 1.8.0.800 (2026-10-29)
 // (c) 2023-2026 Fabian Schneider and Contributors - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
@@ -696,7 +696,7 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal) {
         }
 
         // create page links (only for pages that exist)
-        $htmlBuffer = preg_replace_callback('/\b((?!155)[1-8]\d{2})\b/', 'createPageLinkIfExists', $htmlBuffer);
+        $htmlBuffer = preg_replace_callback('/(?<!&#)\b((?!155)[1-8]\d{2})\b/', 'createPageLinkIfExists', $htmlBuffer);
 
         // create web links
         $htmlBuffer = preg_replace('/((?:(?<!(?:\w|@|\)))(?=\w)|(?<=\w)(?!\w))((?:[\w-]+\.)+(?:de|com|org)(\/(?:[\/\w?&=#.\-]+)?)*)\b)|(\bhttps*:\/\/((?:[\w-]+\.)+(?:[\w-]+)(\/(?:[\/\w?&=#.\-]+)?)*)\b)/', '<a href="http://$1$4" target="_blank" title="http://$1$4">$0</a>', $htmlBuffer);
@@ -761,10 +761,19 @@ function decodeX26Chars($x26Data, &$pageBuffer) {
     $currRow = 0;
 
     // relevant characters from the latin G2 supplementary set
-    $g2SupplementaryChars = array(0x50 => '&#8212;', 0x52 => '&#174;', 0x53 => '&#x00a9;', 0x54 => '&#8482;', 0x55 => '&#9834;', 0x56 => '&#8364;', 0x69 => '&Oslash;', 0x75 => '&#x00131;', 0x79 => '&oslash;');
+    $g2SupplementaryChars = array(0x21 => '&#161;', 0x22 => '&#162;', 0x23 => '&#163;', 0x25 => '&#165;', 0x27 => '&#167;', 0x28 => '&#164;', 0x29 => '&#8216;', 0x2a => '&#8220;', 0x2b => '&#171;', 0x2c => '&#8592;', 0x2d => '&#8593;', 0x2e => '&#8594;', 0x2f => '&#8595;', 0x30 => '&#176;', 0x31 => '&#177;', 0x32 => '&#178;', 0x33 => '&#179;', 0x34 => '&#215;', 0x35 => '&#181;', 0x36 => '&#182;', 0x37 => '&#183;', 0x38 => '&#247;', 0x39 => '&#8217;', 0x3a => '&#8221;', 0x3b => '&#187;', 0x3c => '&#188;', 0x3d => '&#189;', 0x3e => '&#190;', 0x3f => '&#191;', 0x50 => '&#8212;', 0x51 => '&#185;', 0x52 => '&#174;', 0x53 => '&#169;', 0x54 => '&#8482;', 0x55 => '&#9834;', 0x56 => '&#8364;', 0x57 => '&#8240;', 0x5c => '&#8539;', 0x5d => '&#8540;', 0x5e => '&#8541;', 0x5f => '&#8542;', 0x60 => '&#8486;', 0x61 => '&#198;', 0x62 => '&#272;', 0x63 => '&#170;', 0x64 => '&#294;', 0x66 => '&#306;', 0x67 => '&#319;', 0x68 => '&#321;', 0x69 => '&#216;', 0x6a => '&#338;', 0x6b => '&#186;', 0x6c => '&#222;', 0x6d => '&#358;', 0x6e => '&#330;', 0x6f => '&#329;', 0x70 => '&#312;', 0x71 => '&#230;', 0x72 => '&#273;', 0x73 => '&#240;', 0x74 => '&#295;', 0x75 => '&#305;', 0x76 => '&#307;', 0x77 => '&#320;', 0x78 => '&#322;', 0x79 => '&#248;', 0x7a => '&#339;', 0x7b => '&#223;', 0x7c => '&#254;', 0x7d => '&#359;', 0x7e => '&#331;');
 
-    // the G2 diacritical marks according to ETSI EN 300 706 clause 15.6.3
-    $g2DiacriticalMarks = array(1 => 'grave', 2 => 'acute', 3 => 'circ', 4 => 'tilde', 6 => 'breve', 8 => 'uml', 10 => 'ring', 11 => 'cedil', 15 => 'caron');
+    $g2CyrillicChars = $g2SupplementaryChars;
+    $g2CyrillicChars[0x50] = '&#9472;';
+    $g2CyrillicChars[0x59] = '&#321;';
+    $g2CyrillicChars[0x5a] = '&#322;';
+    $g2CyrillicChars[0x5b] = '&#946;';
+    foreach (str_split('DEFGIJKLNQRSUVWZ') as $index => $letter) {
+        $g2CyrillicChars[0x60 + $index] = $letter;
+        $g2CyrillicChars[0x70 + $index] = strtolower($letter);
+    }
+
+    $activeLanguage = EP1_LANGUAGE;
 
     foreach ($x26Packets as $x26Packet) {
         $x26Triplets = array_merge(
@@ -777,56 +786,127 @@ function decodeX26Chars($x26Data, &$pageBuffer) {
 
         // main X/26 triplet decoding loop
         $currX26Function = ord(substr($x26Triplet, 1, 1));
+        $currX26Address = ord(substr($x26Triplet, 0, 1));
+        $isCyrillic = isCyrillicLanguage($activeLanguage);
 
         switch (true) {
             case ($currX26Function == 0x04):
 
                 // X/26 row select
-                $currRow = ord(substr($x26Triplet, 0, 1)) - 40;
+                $currRow = $currX26Address - 40;
+                break;
+
+            case ($currX26Function == 0x08 && $currX26Address < 40):
+
+                // X/26 modified G0 and G2 character set designation
+                $designatedLanguage = designationToLanguage(ord(substr($x26Triplet, 2, 1)));
+                if ($designatedLanguage !== null) {
+                    $activeLanguage = $designatedLanguage;
+                }
+                break;
+
+            case ($currX26Function == 0x09 && $currX26Address < 40):
+
+                // X/26 place G0 character from the designated G0 set
+                $currX26Char = substr($x26Triplet, 2, 1);
+                $pageBuffer['level15'][$currRow][$currX26Address] = g0ToHtml($currX26Char, $activeLanguage);
                 break;
 
             case ($currX26Function == 0x0f):
 
                 // X/26 place G2 supplementary character
-                $currCol = ord(substr($x26Triplet, 0, 1));
+                $currCol = $currX26Address;
                 $currX26Char = substr($x26Triplet, 2, 1);
-                if (isset($g2SupplementaryChars[ord($currX26Char)])) {
-                    $currX26Char = $g2SupplementaryChars[ord($currX26Char)];
-                    $pageBuffer['level15'][$currRow][$currCol] = $currX26Char;
+                $g2Chars = $isCyrillic ? $g2CyrillicChars : $g2SupplementaryChars;
+                if (isset($g2Chars[ord($currX26Char)])) {
+                    $currX26Char = $g2Chars[ord($currX26Char)];
                 }
-
-
                 $pageBuffer['level15'][$currRow][$currCol] = $currX26Char;
                 break;
 
             case ($currX26Function == 0x10):
 
                 // X/26 place non-diacritical G0 character
-                $currCol = ord(substr($x26Triplet, 0, 1));
+                $currCol = $currX26Address;
                 $currX26Char = substr($x26Triplet, 2, 1);
                 if (ord($currX26Char) == 0x2a) {
 
                     // special handling if @ character is encoded as 0x2a
                     // according to ETSI EN 300 706 clause 12.3.4 
-                    $currX26Char = '@';
-
+                    $pageBuffer['level15'][$currRow][$currCol] = '@';
                 }
-                // place the level 1.5 character through htmlspecialchars
-                $pageBuffer['level15'][$currRow][$currCol] = htmlspecialchars($currX26Char);
+                elseif ($isCyrillic) {
+                    $pageBuffer['level15'][$currRow][$currCol] = g0ToHtml($currX26Char, $activeLanguage);
+                }
+                else {
+                    $pageBuffer['level15'][$currRow][$currCol] = htmlspecialchars($currX26Char);
+                }
                 break;
 
             case (($currX26Function >= 0x10) && ($currX26Function <= 0x1f)):
 
                 // X/26 place G0 character with diacritical mark from G2
-                $currCol = ord(substr($x26Triplet, 0, 1));
+                $currCol = $currX26Address;
                 $currX26Char = substr($x26Triplet, 2, 1);
-                if (isset($g2DiacriticalMarks[$currX26Function - 0x10])) {
-                    $currX26Char = '&' . $currX26Char . $g2DiacriticalMarks[$currX26Function - 0x10] . ';';
-                    $pageBuffer['level15'][$currRow][$currCol] = $currX26Char;
+                $diacriticalChar = renderDiacriticalChar($currX26Char, $currX26Function - 0x10, $activeLanguage);
+                if ($diacriticalChar !== null) {
+                    $pageBuffer['level15'][$currRow][$currCol] = $diacriticalChar;
                 }
                 break;
         }
     }
+}
+
+
+function designationToLanguage($designation) {
+
+    // map a G0/G2 character set designation code (X/26 mode 0x08)
+    // to a language tag understood by getNationalSubset()
+
+    $designations = array(
+        0x00 => 'en-GB',
+        0x01 => 'de-DE',
+        0x02 => 'sv-SE',
+        0x03 => 'it-IT',
+        0x04 => 'fr-FR',
+        0x05 => 'es-ES',
+        0x06 => 'cs-CZ',
+        0x08 => 'pl-PL',
+        0x20 => 'sr-Cyrl-RS',
+        0x24 => 'ru-RU',
+        0x25 => 'uk-UA'
+    );
+
+    return isset($designations[$designation]) ? $designations[$designation] : null;
+
+}
+
+
+function renderDiacriticalChar($char, $diacriticalMark, $ttxLanguage) {
+
+    // combine a G0 character with a G2 diacritical mark
+    // (ETSI EN 300 706 clause 15.6.3), return HTML or null for unknown marks
+
+    $namedMarks = array(1 => 'grave', 2 => 'acute', 3 => 'circ', 4 => 'tilde', 5 => 'macr', 6 => 'breve', 7 => 'dot', 8 => 'uml', 10 => 'ring', 11 => 'cedil', 13 => 'dblac', 14 => 'ogon', 15 => 'caron');
+    $combiningMarks = array(1 => 768, 2 => 769, 3 => 770, 4 => 771, 5 => 772, 6 => 774, 7 => 775, 8 => 776, 9 => 803, 10 => 778, 11 => 807, 12 => 818, 13 => 779, 14 => 808, 15 => 780);
+
+    if (!isset($combiningMarks[$diacriticalMark])) {
+        return null;
+    }
+
+    if (isCyrillicLanguage($ttxLanguage)) {
+        return g0ToHtml($char, $ttxLanguage) . '&#' . $combiningMarks[$diacriticalMark] . ';';
+    }
+
+    if (isset($namedMarks[$diacriticalMark])) {
+        $namedEntity = '&' . $char . $namedMarks[$diacriticalMark] . ';';
+        if (html_entity_decode($namedEntity, ENT_QUOTES | ENT_HTML5, 'UTF-8') !== $namedEntity) {
+            return $namedEntity;
+        }
+    }
+
+    return htmlspecialchars($char) . '&#' . $combiningMarks[$diacriticalMark] . ';';
+
 }
 
 
@@ -939,32 +1019,122 @@ function decode13Triplets($x26Data) {
 }
 
 
+function getNationalSubset($ttxLanguage) {
+
+    // return the national option code points of the active G0 set
+    // as array: G0 position => Unicode code point
+
+    $subsets = array(
+        'english'    => [0xa3, 0x24, 0x40, 0x2190, 0xbd, 0x2192, 0x2191, 0x23, 0x2014, 0xbc, 0x2551, 0xbe, 0xf7],
+        'german'     => [0x23, 0x24, 0xa7, 0xc4, 0xd6, 0xdc, 0x5e, 0x5f, 0xb0, 0xe4, 0xf6, 0xfc, 0xdf],
+        'swedish'    => [0x23, 0xa4, 0xc9, 0xc4, 0xd6, 0xc5, 0xdc, 0x5f, 0xe9, 0xe4, 0xf6, 0xe5, 0xfc],
+        'italian'    => [0xa3, 0x24, 0xe9, 0xb0, 0xe7, 0x2192, 0x2191, 0x23, 0xf9, 0xe0, 0xf2, 0xe8, 0xec],
+        'french'     => [0xe9, 0xef, 0xe0, 0xeb, 0xea, 0xf9, 0xee, 0x23, 0xe8, 0xe2, 0xf4, 0xfb, 0xe7],
+        'iberian'    => [0xe7, 0x24, 0xa1, 0xe1, 0xe9, 0xed, 0xf3, 0xfa, 0xbf, 0xfc, 0xf1, 0xe8, 0xe0],
+        'czech'      => [0x23, 0x16f, 0x10d, 0x165, 0x17e, 0xfd, 0xed, 0x159, 0xe9, 0xe1, 0x11b, 0xfa, 0x161],
+        'polish'     => [0x23, 0x144, 0x105, 0x17b, 0x15a, 0x141, 0x107, 0xf3, 0x119, 0x17c, 0x15b, 0x142, 0x17a],
+        'estonian'   => [0x23, 0xf5, 0x160, 0xc4, 0xd6, 0x17d, 0xdc, 0xd5, 0x161, 0xe4, 0xf6, 0x17e, 0xfc],
+        'lithuanian' => [0x23, 0x24, 0x160, 0x117, 0x119, 0x17d, 0x10d, 0x16b, 0x161, 0x105, 0x173, 0x17e, 0x12f],
+        'romanian'   => [0x23, 0xa4, 0x162, 0xc2, 0x15e, 0x102, 0xce, 0x131, 0x163, 0xe2, 0x15f, 0x103, 0xee],
+        'croatian'   => [0x23, 0xcb, 0x10c, 0x106, 0x17d, 0x110, 0x160, 0xeb, 0x10d, 0x107, 0x17e, 0x111, 0x161]
+    );
+
+    $cyrillicSubsets = array(
+        'serbian'   => [0x427, 0x410, 0x411, 0x426, 0x414, 0x415, 0x424, 0x413, 0x425, 0x418, 0x408, 0x41a, 0x41b, 0x41c, 0x41d, 0x41e, 0x41f, 0x40c, 0x420, 0x421, 0x422, 0x423, 0x412, 0x403, 0x409, 0x40a, 0x417, 0x40b, 0x416, 0x402, 0x428, 0x40f, 0x447, 0x430, 0x431, 0x446, 0x434, 0x435, 0x444, 0x433, 0x445, 0x438, 0x458, 0x43a, 0x43b, 0x43c, 0x43d, 0x43e, 0x43f, 0x45c, 0x440, 0x441, 0x442, 0x443, 0x432, 0x453, 0x459, 0x45a, 0x437, 0x45b, 0x436, 0x452, 0x448],
+        'russian'   => [0x42e, 0x410, 0x411, 0x426, 0x414, 0x415, 0x424, 0x413, 0x425, 0x418, 0x40d, 0x41a, 0x41b, 0x41c, 0x41d, 0x41e, 0x41f, 0x42f, 0x420, 0x421, 0x422, 0x423, 0x416, 0x412, 0x42c, 0x42a, 0x417, 0x428, 0x42d, 0x429, 0x427, 0x42b, 0x44e, 0x430, 0x431, 0x446, 0x434, 0x435, 0x444, 0x433, 0x445, 0x438, 0x45d, 0x43a, 0x43b, 0x43c, 0x43d, 0x43e, 0x43f, 0x44f, 0x440, 0x441, 0x442, 0x443, 0x436, 0x432, 0x44c, 0x44a, 0x437, 0x448, 0x44d, 0x449, 0x447],
+        'ukrainian' => [0x42e, 0x410, 0x411, 0x426, 0x414, 0x415, 0x424, 0x413, 0x425, 0x418, 0x40d, 0x41a, 0x41b, 0x41c, 0x41d, 0x41e, 0x41f, 0x42f, 0x420, 0x421, 0x422, 0x423, 0x416, 0x412, 0x42c, 0x406, 0x417, 0x428, 0x404, 0x429, 0x427, 0x407, 0x44e, 0x430, 0x431, 0x446, 0x434, 0x435, 0x444, 0x433, 0x445, 0x438, 0x45d, 0x43a, 0x43b, 0x43c, 0x43d, 0x43e, 0x43f, 0x44f, 0x440, 0x441, 0x442, 0x443, 0x436, 0x432, 0x44c, 0x456, 0x437, 0x448, 0x454, 0x449, 0x447]
+    );
+
+    $cyrillicLanguages = array(
+        'ru' => 'russian',
+        'bg' => 'russian',
+        'uk' => 'ukrainian',
+        'mk' => 'serbian'
+    );
+
+    $languageSubsets = array(
+        'de' => 'german',
+        'sv' => 'swedish',
+        'fi' => 'swedish',
+        'hu' => 'swedish',
+        'it' => 'italian',
+        'fr' => 'french',
+        'pt' => 'iberian',
+        'es' => 'iberian',
+        'cs' => 'czech',
+        'sk' => 'czech',
+        'pl' => 'polish',
+        'et' => 'estonian',
+        'lt' => 'lithuanian',
+        'lv' => 'lithuanian',
+        'ro' => 'romanian',
+        'hr' => 'croatian',
+        'sr' => 'croatian',
+        'sl' => 'croatian'
+    );
+
+    $languageCode = strtolower(substr($ttxLanguage, 0, 2));
+    $latinPositions = [0x23, 0x24, 0x40, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f, 0x60, 0x7b, 0x7c, 0x7d, 0x7e];
+
+    $cyrillicName = null;
+    if (stripos($ttxLanguage, 'sr-Cyrl') === 0) $cyrillicName = 'serbian';
+    if (isset($cyrillicLanguages[$languageCode])) $cyrillicName = $cyrillicLanguages[$languageCode];
+
+    if ($cyrillicName !== null) {
+        $subset = array_combine(range(0x40, 0x7e), $cyrillicSubsets[$cyrillicName]);
+        if ($cyrillicName == 'russian') $subset[0x26] = 0x44b;
+        if ($cyrillicName == 'ukrainian') $subset[0x26] = 0x457;
+        return $subset;
+    }
+
+    if (strtolower($ttxLanguage) == 'en-gb') return array_combine($latinPositions, $subsets['english']);
+    if (isset($languageSubsets[$languageCode])) return array_combine($latinPositions, $subsets[$languageSubsets[$languageCode]]);
+
+    return null;
+
+}
+
+
+function isCyrillicLanguage($ttxLanguage) {
+
+    $subset = getNationalSubset($ttxLanguage);
+
+    return ($subset !== null) && isset($subset[0x41]);
+
+}
+
+
 function g0ToHtml($ttxString, $ttxLanguage) {
 
     // replace national G0 characters by HTML entities
 
-    switch ($ttxLanguage) {
-        case 'de-DE':
-            return str_replace(
-                ['&', chr(0x24), '@', '[', '\\', ']', '`', '{', '|', '}', '~', chr(0x7f), '<', '>', '"', '\''],
-                ['&amp;', '$', '&sect;', '&Auml;', '&Ouml;', '&Uuml;', '&deg;', '&auml;', '&ouml;', '&uuml;', '&szlig;', '&#9632;', '&lt;', '&gt;', '&quot;', '&#39;'],
-                $ttxString
-            );
-            break;
-        case 'en-GB':
-            return str_replace(
-                ['&', chr(0x23), chr(0x24), '@', '[', '\\', ']', chr(0x5e), chr(0x5f), '`', '{', '|', '}', '~', chr(0x7f), '<', '>', '"', '\''],
-                ['&amp;', '&pound;', '$', '@', '&#8592;', '&frac12;', '&#8594;', '&#8593;', '#', '&#8212;', '&frac14;', '&#9553;', '&frac34;', '&divide;', '&#9632;', '&lt;', '&gt;', '&quot;', '&#39;'],
-                $ttxString
-            );
-        default:
-            return str_replace(
-                ['&', chr(0x7f), '<', '>', '"', '\''],
-                ['&amp;', '&#9632;', '&lt;', '&gt;', '&quot;', '&#39;'],
-                $ttxString
-            );
+    static $replacements = array();
+
+    if (!isset($replacements[$ttxLanguage])) {
+
+        $map = array(
+            '&' => '&amp;',
+            chr(0x7f) => '&#9632;',
+            '<' => '&lt;',
+            '>' => '&gt;',
+            '"' => '&quot;',
+            '\'' => '&#39;'
+        );
+
+        $subset = getNationalSubset($ttxLanguage);
+
+        if ($subset !== null) {
+            foreach ($subset as $position => $codePoint) {
+                $map[chr($position)] = ($codePoint < 0x80) ? chr($codePoint) : '&#' . $codePoint . ';';
+            }
+        }
+
+        $replacements[$ttxLanguage] = $map;
+
     }
-        
+
+    return strtr($ttxString, $replacements[$ttxLanguage]);
+
 }
 
 

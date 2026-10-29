@@ -1,5 +1,5 @@
 // ttxweb client-side scripts
-// version: 1.7.2.772 (2026-07-17)
+// version: 1.8.0.800 (2026-10-29)
 // documentation: https://github.com/fabianswebworld/ttxweb
 
 function ttxReadEnv(fromXhrRefresh) {
@@ -249,7 +249,7 @@ function renderRow0() {
   if (!seqn0) mySubpageNum = subpageNum;
 
   var myRow0 = document.getElementById('ttxRow0Template').innerHTML;
-  myRow0 = myRow0.replace("%page%", pageNum).replace("%sub%", zeroPad(mySubpageNum)).replace("%weekday%", myWeekDay).replace("%month%", myMonth).replace("%day%", myDay).replace("%year%", myYear).replace("%hh%", myHours).replace("%mm%", myMinutes).replace("%ss%", mySeconds);
+  myRow0 = myRow0.replace(/%page%/g, pageNum).replace(/%sub%/g, zeroPad(mySubpageNum)).replace(/%weekday%/g, myWeekDay).replace(/%month%/g, myMonth).replace(/%day%/g, myDay).replace(/%year%/g, myYear).replace(/%hh%/g, myHours).replace(/%mm%/g, myMinutes).replace(/%ss%/g, mySeconds);
 
   document.getElementById('row0').innerHTML = myRow0;
 
@@ -262,7 +262,7 @@ function refreshPageTitle() {
 
   pageTitle = document.getElementById('ttxPageTitle').innerHTML;
   if (pageTitle !== null) {
-    document.title = pageTitle.replace("%page%", pageNum).replace("%sub%", zeroPad(subpageNum));
+    document.title = pageTitle.replace(/%page%/g, pageNum).replace(/%sub%/g, zeroPad(subpageNum));
   }
 
 }
