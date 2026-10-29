@@ -1,3 +1,7 @@
+1.8.0.800 (not yet released)
+
+- Added national options for more Western/Eastern European languages, including Cyrillic scripts
+
 1.7.2.772
 
 - Decoder fix: packet X/26 data inside .TTI files is correctly decoded now
