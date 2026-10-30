@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.8.0.800 (2026-10-29)
+// version: 1.8.0.802 (2026-10-30)
 // (c) 2023-2026 Fabian Schneider and Contributors - @fabianswebworld
 
 // GLOBAL DEFINITIONS
 
-const TTXWEB_VERSION = '1.8.0.800 (2026-10-29)';       // version string
+const TTXWEB_VERSION = '1.8.0.802 (2026-10-30)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 

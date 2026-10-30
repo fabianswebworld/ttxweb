@@ -1,6 +1,7 @@
-1.8.0.800 (not yet released)
+1.8.0.802
 
-- Added national options for more Western/Eastern European languages, including Cyrillic scripts
+- New: added national options for more Western/Eastern European languages, including Cyrillic scripts
+- New: added an updated version of the teletext-decoder font (v1.5), containing glyphs for Cyrillic scripts for the 'retro-tv' template
 
 1.7.2.772
 
