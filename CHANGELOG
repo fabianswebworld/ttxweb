@@ -1,6 +1,6 @@
 1.8.1.806
 
-- Bump teletext-decoder-font to 1.6 (align glyph widths)
+- Bump teletext-decoder-font to 2.0 (align glyph widths, add more glyphs)
 - Updated font file in 'embed-flex' template for more glyphs as well
 
 1.8.0.802
