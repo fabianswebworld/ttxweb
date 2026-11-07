@@ -1,3 +1,7 @@
+1.8.1.806
+
+- Bump teletext-decoder-font to 1.6 (align glyph widths)
+
 1.8.0.802
 
 - New: added national options for more Western/Eastern European languages, including Cyrillic scripts
