@@ -369,7 +369,6 @@ if (!empty(TTXWEB_VERSION_EXT)) { $versionString = explode(' ', $versionString)[
 
 // initialize HTML output
 header('Content-type: text/html; charset=utf-8');
-header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\'; font-src *;');
 ini_set('default_charset', 'utf-8');
 
 // get the desired page numbers

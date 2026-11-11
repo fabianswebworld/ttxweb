@@ -1,7 +1,6 @@
 1.9.0.820
 
 - New: use turn rates defined in TTI files (the first CT record is used for all subpages); a setting in TTXWEB_TURN_RATES will still take precedence
-- Added Content Security Policy header for improved security
 - Code modernizations to avoid warnings in latest PHP versions
 
 1.8.1.806
