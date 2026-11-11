@@ -65,10 +65,10 @@ The following configuration options are available to configure the behavior of t
 - **includes/ttxweb_config.php:**
   - const **TTXWEB_TEMPLATE** - Template name, i.e. folder to use for HTML templates (must be a subfolder in the **templates/** folder, default: 'default')
   - const **TTXWEB_REFRESH** - Seconds for automatic refresh via XHR (default: 0 = disabled)
-  - const **TTXWEB_TURN_RATES** - Array of pages that should turn automatically, and how fast (example see file or below)  
+  - const **TTXWEB_TURN_RATES** - Array of pages that should turn automatically, and how fast (example see file or below); in TTI file mode, the turn rates from the TTI files are used (more specifically: the first CT record from the TTI file is used for all subpages in that file); you can still override TTI pages that include CT records to use a different turn rate, or to not turn at all, by including them in the array (setting to 0 disables turning)  
     **Example:**
 
-    `const TTXWEB_TURN_RATES = [100 => 8, 170 => 3, 198 => 20, 220 => 6, 280 => 6];`
+    `const TTXWEB_TURN_RATES = [100 => 8, 170 => 3, 198 => 20, 220 => 6, 280 => 6, 300 => 0];`
 
   - const **TTXWEB_FORMAT** - Which type of source page format to use: 'ep1' (EP1/AST files, one file per subpage) or 'tti' (TTI files, one file per page, including all subpages in one single file); for AST files, specifying 'ast' is possible as well (default: 'ep1')
   - const **EP1_PATH** - Path to the input files in single-subpage-per-file (EP1/AST) mode (default: 'ep1/')
@@ -149,7 +149,7 @@ The following URL parameters are supported (if provided, they override the value
 - **reveal** - 0 (hide concealed text) | 1 (reveal concealed text on page load) (default: set by EP1_ALWAYS_REVEAL in ttxweb_config.php)
 - **refresh** - seconds for auto refresh via XHR, 0 = disabled (default: set by TTXWEB_REFRESH in ttxweb_config.php)
 - **template** - override configured template name (default: set by TTXWEB_TEMPLATE in ttxweb_config.php)
-- **turn** - 0 (do not automatically turn subpages) | 1 (turn subpage on every XHR refresh) | *not set* (turn according to TTXWEB_TURN_RATES in ttxweb_config.php, **default**)
+- **turn** - 0 (do not automatically turn subpages) | 1 (turn subpage on every XHR refresh) | *not set* (turn according to information in source file or TTXWEB_TURN_RATES in ttxweb_config.php, with the latter taking precedence, **default**)
 - **seqn0** - 0 (display actual subpage number in header) | 1 (display subpage number in header as *00*; useful for "animated" pages that otherwise have no multi-page content and would be transmitted with 0000 instead of SEQN in linear transmission) | *not set* (show subpage number as *00* only for pages defined in TTXWEB_TURN_RATES, **default**)
 - **xhr** - this parameter is used internally to implement the XMLHttpRequest refresh function. By setting it to 1 you can get only the ttxStage part of the page if you want to embed it in your own XMLHttpRequest applications.
 - **stream** - present an alternate teletext stream by loading a different config file, *ttxweb_config-**\<stream\>**.php*, possibly pointing to a different input file folder and/or using a different input filename pattern
