@@ -1,4 +1,4 @@
-1.9.0.820
+1.9.0.820 (not yet released)
 
 - New: use turn rates defined in TTI files (the first CT record is used for all subpages); a setting in TTXWEB_TURN_RATES will still take precedence
 - Code modernizations to avoid warnings in latest PHP versions
