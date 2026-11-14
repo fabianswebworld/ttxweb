@@ -25,32 +25,19 @@
 
 .ttxRow {
     font-family: 'Teletext Decoder', monospace;
-    font-size: 18px;
-    font-size: 3.4vmin;
-    line-height: 3.5vmin;
-    margin: 0px;
-    padding: 0px 0px 0px 0px;
+    font-size: var(--ttx-font-size);
+    line-height: var(--ttx-line-height);
+    margin: 0;
+    padding: 0;
     white-space: pre;
     background-color: #000000;
     position: relative;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-}
 
-@media (orientation: portrait) {
-  .ttxRow {
-      font-family: 'Teletext Decoder', monospace;
-      font-size: 18px;
-      font-size: 2.9vmin;
-      line-height: 3.0vmin;
-      margin: 0px;
-      padding: 0px 0px 0px 0px;
-      white-space: pre;
-      background-color: #000000;
-       position: relative;
-      -webkit-text-size-adjust: 100%;
-     text-size-adjust: 100%;
-  } 
+    text-rendering: optimizeSpeed;
+    font-kerning: none;
+    letter-spacing: 0;
 }
 
 .ttxRow span {
