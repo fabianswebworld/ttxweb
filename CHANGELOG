@@ -1,8 +1,10 @@
-1.9.0.824
+1.9.0.832
 
 - New: use turn rates defined in TTI files (the first CT record is used for all subpages); a setting in TTXWEB_TURN_RATES will still take precedence
 - Code modernizations to avoid warnings in latest PHP versions
 - Optimized link generation for page numbers and web/e-mail addresses
+- Updated 'retro-tv' template with improved navigation on mobile devices
+- Bump teletext-decoder-font to 2.1 (optimized font metadata and scaling)
 
 1.8.1.806
 

@@ -1,3 +1,15 @@
+:root {
+    --ttx-font-size: 3.5vmin;
+    --ttx-line-height: 3.42vmin;
+}
+
+@media (orientation: portrait) {
+    :root {
+        --ttx-font-size: 3.0vmin;
+        --ttx-line-height: 3.0vmin;
+    }
+}
+
 @font-face {
     font-family: 'Teletext Decoder';
     src: url('../fonts/teletext-decoder.eot');
@@ -11,42 +23,21 @@
 }
 
 html {
-    margin: 0px !important;
-    padding: 0px !important;
+    margin: 0 !important;
+    padding: 0 !important;
     overflow: hidden !important;
+    height: 100%;
 }
 
 body {
-    margin: 0px !important;
-    padding: 0px !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: #000000;
-}
-
-#navhint {
-    visibility: hidden;
-    opacity: 0;
-    border: 8px solid #fff;
-    border: 1vmin solid #fff;
-    background-color: #555;
-    box-shadow: 16px 16px #222;
-    box-shadow: 2vmin 2vmin #222;
-    font-family: monospace;
-    color: #fff;
-    padding: 8px;
-    padding: 1vmin;
-    width: 60em;
-    width: 80vmin;
-    max-width: 90%;
-    text-align: center;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    -webkit-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
+    height: 100%;
 }
 
 #ttxContainer {
-    margin: 0px !important;
+    margin: 0 !important;
     overflow: hidden !important;
     position: absolute;
     left: 50%;
@@ -56,55 +47,77 @@ body {
 }
 
 #ttxPage {
-    margin: 0px !important;
+    margin: 0 !important;
     padding: 1px 0 1px 0 !important;
-    overflow:hidden !important;
+    overflow: hidden !important;
 }
 
-#ttxNumPadInput, #ttxNumPadInput:focus {
+.ttxRow {
+    font-size: var(--ttx-font-size);
+    line-height: var(--ttx-line-height);
+}
+
+#ttxNumPadInput,
+#ttxNumPadInput:focus {
     position: absolute;
     font-family: 'Teletext Decoder', monospace;
-    font-size: 18px;
-    font-size: 3.4vmin;
-    line-height: 3.5vmin;
-    width: 2.3em;
-    height: 1.0em !important;
+    font-size: calc(var(--ttx-font-size) * 2);
+    line-height: calc(var(--ttx-line-height) * 2);
     text-align: left;
-    margin: 0px;
-    padding: 0px 0px 0px 0px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
     white-space: pre;
     background-color: transparent;
     color: transparent;
-    border: none;
-    border-style: none;
     caret-color: transparent;
     outline: none;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    -webkit-transform: scale(0.5);
+    transform: scale(0.5);
+    -webkit-transform-origin: top left;
+    transform-origin: top left;
+    z-index: 150;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: none;
+    transition: box-shadow 0.2s ease;
 }
 
-@media (orientation: portrait) {
-  #ttxNumPadInput, #ttxNumPadInput:focus {
-      position: absolute;
-      font-family: 'Teletext Decoder', monospace;
-      font-size: 18px;
-      font-size: 2.9vmin;
-      line-height: 3.0vmin;
-      width: 2.3em;
-      height: 1.05em !important;
-      text-align: left;
-      margin: 0px;
-      padding: 0px 0px 0px 0px;
-      white-space: pre;
-      background-color: transparent;
-      color: transparent;
-      border: none;
-      border-style: none;
-      caret-color: transparent;
-      outline: none;
-      -webkit-text-size-adjust: 100%;
-      text-size-adjust: 100%;
-  }
+@media (hover: hover) {
+    #ttxNumPadInput:hover {
+        box-shadow: inset 0 -2px 0 rgba(255, 255, 0, 0.85);
+        box-shadow: inset 0 calc(-1 * min(4px, 0.09em)) 0 rgba(255, 255, 0, 0.85);
+    }
+}
+
+#ttxNumPadInput.numpad-pulse:not(.is-active) {
+    animation: ttxNumPadPulse 1s ease-in-out 3;
+}
+
+@keyframes ttxNumPadPulse {
+    0%, 100% {
+        box-shadow: none;
+        background-color: transparent;
+    }
+    50% {
+        background-color: rgba(255, 255, 255, 0.15);
+        box-shadow: inset 0 -2px 0 #ffff00;
+        box-shadow: inset 0 calc(-1 * min(4px, 0.09em)) 0 #ffff00;
+    }
+}
+
+#ttxNumPadInput.is-active {
+    background-color: #262626;
+    color: #ffffff;
+    caret-color: #ffffff;
+    box-shadow: inset 0 -2px 0 #ffff00;
+    box-shadow: inset 0 calc(-1 * min(4px, 0.09em)) 0 #ffff00;
 }
 
 #ttxNumPadInput::selection {
@@ -114,6 +127,145 @@ body {
 
 #ttxNumPadEnv {
     display: none !important;
+}
+
+#navhint {
+    position: fixed;
+    left: 50%;
+    bottom: max(42px, 7vh);
+    -webkit-transform: translate(-50%, 42px);
+    transform: translate(-50%, 42px);
+    z-index: 200;
+    background: rgba(20, 20, 20, 0.94);
+    border: 2px solid rgba(255, 255, 255, 0.65);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
+    color: #ffffff;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: clamp(14px, 1.8vmin, 18px);
+    line-height: 1.45;
+    padding: 12px 22px;
+    width: max-content;
+    max-width: 88vw;
+    text-align: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    cursor: pointer;
+    transition: opacity 0.6s ease-in, transform 0.8s ease-in, visibility 0s linear 1.0s;
+}
+
+#navhint strong {
+    color: #ffff00;
+    font-weight: bold;
+}
+
+#navhint.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    -webkit-transform: translate(-50%, 0);
+    transform: translate(-50%, 0);
+    transition: opacity 0.25s ease-out, transform 0.25s ease-out, visibility 0s;
+}
+
+#touchRemote {
+    display: none;
+}
+
+@media (pointer: coarse) {
+    #touchRemote {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        position: fixed;
+        left: 50%;
+        bottom: max(16px, env(safe-area-inset-bottom));
+        -webkit-transform: translateX(-50%);
+        transform: translateX(-50%);
+        z-index: 190;
+        background: rgba(20, 20, 20, 0.88);
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        padding: 5px 7px;
+        border-radius: 4px;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.9s ease-out, visibility 0s linear 0.9s;
+    }
+
+    #touchRemote.is-visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transition: opacity 0.2s ease-in, visibility 0s;
+    }
+
+    #navhint {
+        display: none !important;
+    }
+
+    @media (orientation: landscape) {
+        #touchRemote {
+            left: auto;
+            right: max(12px, env(safe-area-inset-right));
+            bottom: max(10px, env(safe-area-inset-bottom));
+            -webkit-transform: none;
+            transform: none;
+        }
+    }
+
+    #touchRemote .remote-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 42px;
+        padding: 0 11px;
+        background: #111111;
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 3px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 15px;
+        line-height: 1;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+
+    #touchRemote .remote-btn:active {
+        background: #222222;
+        color: #ffffff;
+    }
+
+    #touchRemote .remote-page {
+        flex-direction: column;
+        gap: 2px;
+        color: #ffffff;
+        font-weight: bold;
+        min-width: 60px;
+        padding: 2px 10px;
+    }
+
+    #remoteSubpageNum {
+        font-size: 10px;
+        font-weight: normal;
+        color: #999999;
+        line-height: 1;
+    }
+
+    #touchRemote .remote-page:active #remoteSubpageNum {
+        color: #000000;
+    }
+
+    #touchRemote .remote-sub {
+        color: #999999;
+    }
+
+    #touchRemote .remote-sub:disabled {
+        opacity: 0.28;
+        pointer-events: none;
+    }
 }
 
 img {
