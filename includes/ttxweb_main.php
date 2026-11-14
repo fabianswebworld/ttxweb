@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.8.1.806 (2026-11-07)
+// version: 1.9.0.820 (2026-11-11)
 // (c) 2023-2026 Fabian Schneider and Contributors - @fabianswebworld
 
 // GLOBAL DEFINITIONS
 
-const TTXWEB_VERSION = '1.8.1.806 (2026-11-07)';       // version string
+const TTXWEB_VERSION = '1.9.0.820 (2026-11-11)';       // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -135,7 +135,7 @@ function getPageNumbers() {
 function getTtiSubpageCount($ttiFilename) {
 
     // count the number of subpages ('PN,' records) in a TTI file;
-    // returns 0 if the file does not exist or cannot be read.
+    // returns 0 if the file does not exist or cannot be read
 
     if (!file_exists($ttiFilename) || filesize($ttiFilename) < 10) {
         return 0;
@@ -150,6 +150,43 @@ function getTtiSubpageCount($ttiFilename) {
     }
     fclose($handle);
     return $count;
+
+}
+
+
+function getTtiTurnRate($ttiFilename, $cycleTime) {
+
+    // read the turn rate from a TTI file ('CT,' record);
+    // returns the turn rate in seconds
+    // handles 'T' (Timed in seconds) and 'C' (Cycles, multiplied by $cycleTime)
+
+    if (!file_exists($ttiFilename) || filesize($ttiFilename) < 10) {
+        return false;
+    }
+
+    $handle = fopen($ttiFilename, 'r');
+    while (($line = fgets($handle)) !== false) {
+        $trimmedLine = ltrim($line);
+        if (strncmp($trimmedLine, 'CT,', 3) === 0) {
+            $parts = explode(',', trim($trimmedLine));
+            if (count($parts) >= 3) {
+                $val = abs(intval(trim($parts[1])));
+                $mode = strtoupper(trim($parts[2]));
+                
+                fclose($handle);
+                
+                if ($mode === 'T') {
+                    return $val;
+                } elseif ($mode === 'C') {
+                    // multiply cycle count by the base refresh time (defaulting to 60 if 0)
+                    $multiplier = ($cycleTime > 0) ? $cycleTime : 60;
+                    return $val * $multiplier;
+                }
+            }
+        }
+    }
+    fclose($handle);
+    return false;
 
 }
 
@@ -213,7 +250,7 @@ function resolveActiveSource() {
 
 // determine configuration file
 if (!empty($_GET['stream'])) {
-    $streamName = str_replace('/', '', filter_var(strip_tags($_GET['stream']), FILTER_SANITIZE_SPECIAL_CHARS));
+    $streamName = str_replace('/', '', htmlspecialchars(strip_tags($_GET['stream']), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
     $configFileName = 'ttxweb_config-' . $streamName . '.php';
     if (!file_exists('includes/' . $configFileName)) {
         $configFileName = 'ttxweb_config.php';
@@ -271,7 +308,7 @@ if (isset($_GET['xhr'])) {
     if ($_GET['xhr'] == '1') $xhr = true;
 }
 if (!empty($_GET['template'])) {
-    $templateName = str_replace('/', '', filter_var(strip_tags($_GET['template']), FILTER_SANITIZE_SPECIAL_CHARS));
+    $templateName = str_replace('/', '', htmlspecialchars(strip_tags($_GET['template']), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
 }
 else {
     $templateName = TTXWEB_TEMPLATE;
@@ -340,6 +377,24 @@ getPageNumbers();
 // check if file exists and get file timestamp
 $fileTimestamp = '';
 if (pageExists($pageNum, $subpageNum)) { $fileTimestamp = date(DATE_ATOM, filemtime($currEp1Filename)); }
+
+// dynamically read turn rate from TTI file if TTI format is active
+if (strpos($ttxSourcePattern, '%ss%') === false && file_exists($currEp1Filename)) {
+    // only process TTI turnrates if the page has more than 1 subpage 
+    // and the config array hasn't explicitly defined a rule for this page
+    if ($numSubpages > 1 && !array_key_exists($pageNum, $ttxTurnRates)) {
+        // pass current $refresh (from TTXWEB_REFRESH) as the cycle time base
+        $ttiTurnRate = getTtiTurnRate($currEp1Filename, $refresh);
+        if ($ttiTurnRate !== false) {
+            $ttxTurnRates[$pageNum] = $ttiTurnRate;
+        }
+    }
+}
+
+// allow config array to explicitly disable turning (e.g. [100 => 0] or [100 => null])
+if (array_key_exists($pageNum, $ttxTurnRates) && empty($ttxTurnRates[$pageNum])) {
+    unset($ttxTurnRates[$pageNum]);
+}
 
 // determine turnrates
 $turn = false;
