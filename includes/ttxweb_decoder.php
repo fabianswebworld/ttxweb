@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.9.0.820 (2026-11-11)
+// version: 1.9.0.824 (2026-11-14)
 // (c) 2023-2026 Fabian Schneider and Contributors - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
@@ -695,15 +695,34 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal) {
             }
         }
 
-        // create page links (only for pages that exist)
-        $htmlBuffer = preg_replace_callback('/(?<!&#)\b((?!155)[1-8]\d{2})\b/', 'createPageLinkIfExists', $htmlBuffer);
+        // create page links (only for pages that exist), web and e-mail links
+        $reTag   = '(?<tag><[^>]+>)';
+        $reEmail = '(?<email>\b(?<email_user>[\w\-]+(?:\.[\w\-]+)*)(?:@|\(at\)|\(a\)|\*)(?<email_domain>(?:[\w\-]+\.)+[a-zA-Z]{2,8})\b)';
+        $reUrl   = '(?<url>(?<![@\w\)-])\b(?:https?:\/\/[\w\-]+(?:\.[\w\-]+)*|(?:[\w\-]+\.)+(?:de|com|org|net|uk|at|ch|eu|nl|dk|fi|hu))(?:\/(?:&amp;|[\w\/?=#.\-])*)?\b)';
+        $rePage  = '(?<page>(?<!&#)\b(?!155)[1-8]\d{2}\b)';
 
-        // create web links
-        $htmlBuffer = preg_replace('/((?:(?<!(?:\w|@|\)))(?=\w)|(?<=\w)(?!\w))((?:[\w-]+\.)+(?:de|com|org)(\/(?:[\/\w?&=#.\-]+)?)*)\b)|(\bhttps*:\/\/((?:[\w-]+\.)+(?:[\w-]+)(\/(?:[\/\w?&=#.\-]+)?)*)\b)/', '<a href="http://$1$4" target="_blank" title="http://$1$4">$0</a>', $htmlBuffer);
-        $htmlBuffer = preg_replace('/http:\/\/(https*):\/\//', '$1://', $htmlBuffer);
-
-        // create e-mail links
-        $htmlBuffer = preg_replace('/\b([\w\-\.]+)(?:(?:\(at{0,1}\))|@|\*)((?:[\w-]+\.)+[\w-]{2,8})/', '<a href="mailto:$1@$2" target="_blank" title="$1@$2">$0</a>', $htmlBuffer);
+        $htmlBuffer = preg_replace_callback(
+            '/' . $reTag . '|' . $reEmail . '|' . $reUrl . '|' . $rePage . '/i',
+            function($m) {
+                if (!empty($m['tag'])) {
+                    return $m['tag'];
+                }
+                if (!empty($m['email'])) {
+                    $addr = $m['email_user'] . '@' . $m['email_domain'];
+                    return '<a href="mailto:' . $addr . '" target="_blank" title="' . $addr . '">' . $m['email'] . '</a>';
+                }
+                if (!empty($m['url'])) {
+                    $href = (preg_match('/^https?:\/\//i', $m['url'])) ? $m['url'] : 'http://' . $m['url'];
+                    $safeHref = htmlspecialchars($href, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false);
+                    return '<a href="' . $safeHref . '" target="_blank" title="' . $safeHref . '">' . $m['url'] . '</a>';
+                }
+                if (!empty($m['page'])) {
+                    return createPageLinkIfExists([1 => $m['page']]);
+                }
+                return $m[0];
+            },
+            $htmlBuffer
+        );
 
         // create next subpage/page links
         if ($subpageNum < $numSubpages)  {

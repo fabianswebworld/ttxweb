@@ -1,5 +1,5 @@
 // ttxweb client-side scripts
-// version: 1.9.0.820 (2026-11-11)
+// version: 1.9.0.824 (2026-11-14)
 // documentation: https://github.com/fabianswebworld/ttxweb
 
 function ttxReadEnv(fromXhrRefresh) {
