@@ -1,3 +1,14 @@
+1.10.0.846
+
+- New: ttxweb can read and use the language code from the file headers of the individual teletext files now (supports EP1, AST and TTI), allowing for multi-language services (to use this feature, you must set EP1_USE_FILE_LANG to true); for files with no, an invalid, or an unimplemented language code, the language set by EP1_LANGUAGE is used
+- New: separate configuration options for TTI format are no longer necessary; to use TTI format with multiple subpages per file, simply specify an EP1_PATTERN option that uses the '.tti' file extension and omits the '%ss%' (subpage) placeholder (the TTI_PATH and TTI_PATTERN options are deprecated now)
+- New: the TTXWEB_FORMAT option is optional now, and if used, it will force the parser to use the format specified regardless of the file extension (this will allow e.g. TTI files with a .txt extension or similar)
+- New: TTI file format using only a single subpage per file is possible as well now, by specifying an EP1_PATTERN that uses the '.tti' file extension, but also contains the '%ss%' (subpage) placeholder
+- New: 'lang' URL parameter to temporarily override the selected/detected teletext language when viewing a page
+- New: the selected teletext language as well as the detected language of the physical teletext file and the file format are included as debug information inside the 'ttxEnv' div block
+- Many more improvements regarding to detection and selection of file formats and languages
+- General improvements and code optimizations/modernizations
+
 1.9.0.832
 
 - New: use turn rates defined in TTI files (the first CT record is used for all subpages); a setting in TTXWEB_TURN_RATES will still take precedence

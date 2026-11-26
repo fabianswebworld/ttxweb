@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.9.0.832 (2026-11-14)
+// version: 1.10.0.846 (2026-11-26)
 // (c) 2023-2026 Fabian Schneider and Contributors - @fabianswebworld
 
 // GLOBAL DEFINITIONS
 
-const TTXWEB_VERSION = '1.9.0.832 (2026-11-14)';       // version string
+const TTXWEB_VERSION = '1.10.0.846 (2026-11-26)';     // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -20,6 +20,7 @@ const TTXWEB_VERSION = '1.9.0.832 (2026-11-14)';       // version string
 // template  - temporary template name (default: set by TTXWEB_TEMPLATE in ttxweb_config.php)
 // turn      - 1 = turn subpage on XHR refresh (default: turn according to TTXWEB_TURN_RATES in ttxweb_config.php)
 // seqn0     - 1 = always display subpage 00 in custom header (default: only if page is in TTXWEB_TURN_RATES)
+// lang      - force language / national option set (e.g. 'de-DE', 'en-GB', 'fr-FR')
 // xhr       - 1 = output ttxStage only (only used internally for XMLHttpRefresh via ttxweb.js)
 // stream    - alternate teletext stream by loading a different config file ttxweb_config-<stream>.php
 
@@ -135,10 +136,18 @@ function getPageNumbers() {
 function getTtiSubpageCount($ttiFilename) {
 
     // count the number of subpages ('PN,' records) in a TTI file;
-    // returns 0 if the file does not exist or cannot be read
+    // returns 0 if the file does not exist or cannot be read;
+    // returns 1 for non-TTI formats (single subpage per file)
+
+    global $ttxForcedFormat;
 
     if (!file_exists($ttiFilename) || filesize($ttiFilename) < 10) {
         return 0;
+    }
+
+    $effectiveFormat = !empty($ttxForcedFormat) ? $ttxForcedFormat : strtolower(pathinfo($ttiFilename, PATHINFO_EXTENSION));
+    if ($effectiveFormat !== 'tti') {
+        return 1;
     }
 
     $count = 0;
@@ -194,7 +203,8 @@ function getTtiTurnRate($ttiFilename, $cycleTime) {
 function getEp1Filename($pageNum, $subpageNum) {
 
     // generate path to the active page source file (EP1/AST or TTI,
-    // depending on TTXWEB_FORMAT - see resolveActiveSource() in ttxweb_main.php)
+    // depending on the file extension given in EP1_PATTERN - refer
+    // to resolveActiveSource() in ttxweb_main.php)
 
     global $ttxSourcePath, $ttxSourcePattern;
     $ep1Filename = $ttxSourcePath . str_replace(array('%ppp%', '%ss%'), array($pageNum, sprintf('%02d', $subpageNum)), $ttxSourcePattern);
@@ -225,22 +235,30 @@ function pageExists($pageNum, $subpageNum) {
 
 function resolveActiveSource() {
 
-    // determine which page source format is active (EP1/AST or TTI),
-    // based on TTXWEB_FORMAT in ttxweb_config.php, and resolve its
-    // path and filename pattern into $ttxSourcePath / $ttxSourcePattern;
-    // defaults to EP1/AST if TTXWEB_FORMAT is not set or unrecognized
+    // determine which source path, pattern and file format are active;
+    // uses EP1_PATH / EP1_PATTERN by default (supporting EP1, AST, and
+    // TTI file extension); also checks legacy TTXWEB_FORMAT / TTI_* settings
 
-    global $ttxSourcePath, $ttxSourcePattern;
+    global $ttxSourcePath, $ttxSourcePattern, $ttxForcedFormat;
 
-    $format = defined('TTXWEB_FORMAT') ? strtolower(TTXWEB_FORMAT) : 'ep1';
+    $ttxForcedFormat = '';
+    $ep1Path    = defined('EP1_PATH')    ? EP1_PATH    : 'ep1/';
+    $ep1Pattern = defined('EP1_PATTERN') ? EP1_PATTERN : 'P%ppp%S%ss%.EP1';
 
-    if ($format === 'tti') {
-        $ttxSourcePath    = defined('TTI_PATH')    ? TTI_PATH    : 'tti/';
-        $ttxSourcePattern = defined('TTI_PATTERN') ? TTI_PATTERN : 'P%ppp%.tti';
+    if (defined('TTXWEB_FORMAT')) {
+        $format = strtolower(trim(TTXWEB_FORMAT));
+        if (in_array($format, array('ep1', 'ast', 'tti'), true)) {
+            $ttxForcedFormat = $format;
+        }
+    }
+
+    if ($ttxForcedFormat === 'tti') {
+        $ttxSourcePath    = defined('TTI_PATH')    ? TTI_PATH    : $ep1Path;
+        $ttxSourcePattern = defined('TTI_PATTERN') ? TTI_PATTERN : $ep1Pattern;
     }
     else {
-        $ttxSourcePath    = defined('EP1_PATH')    ? EP1_PATH    : 'ep1/';
-        $ttxSourcePattern = defined('EP1_PATTERN') ? EP1_PATTERN : 'P%ppp%S%ss%.EP1';
+        $ttxSourcePath    = $ep1Path;
+        $ttxSourcePattern = $ep1Pattern;
     }
 
 }
@@ -270,11 +288,14 @@ else {
     die('Cannot access configuration file. ttxweb cannot continue.');
 }
 
+// include teletext decoder functions
+include('ttxweb_decoder.php');
+
 // resolve which page source format is active (EP1/AST or TTI) and its path/pattern
 resolveActiveSource();
 
 // initialize some default values
-$ttxLanguage = 'en-US';
+$ttxLanguage = 'en-GB';
 if (defined('EP1_LANGUAGE')) {
     if (EP1_LANGUAGE != '') $ttxLanguage = EP1_LANGUAGE;
 }
@@ -303,6 +324,17 @@ if (isset($_GET['reveal'])) {
 if (isset($_GET['refresh'])) {
     if ($_GET['refresh'] != '') $refresh = abs(intval(filter_var($_GET['refresh'], FILTER_SANITIZE_NUMBER_INT)));
 }
+$langOverride = '';
+if (!empty($_GET['lang'])) {
+    $langCandidate = preg_replace('/[^a-zA-Z0-9\-]/', '', $_GET['lang']);
+    if (
+        preg_match('/^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$/', $langCandidate) &&
+        (getNationalSubset($langCandidate, false) !== null || strtolower($langCandidate) === 'en-us')
+    ) {
+        $langOverride = $langCandidate;
+        $ttxLanguage = $langOverride;
+    }
+}
 $xhr = false;
 if (isset($_GET['xhr'])) {
     if ($_GET['xhr'] == '1') $xhr = true;
@@ -322,6 +354,7 @@ if (!empty($streamName)) $queryArray['stream'] = $streamName;
 if (!$level15) $queryArray['level15'] = 0;
 if ($showHeader) $queryArray['header'] = 1;
 if ($reveal) $queryArray['reveal'] = 1;
+if (!empty($langOverride)) $queryArray['lang'] = $langOverride;
 if (isset($_GET['refresh'])) $queryArray['refresh'] = $refresh;
 if (isset($_GET['turn'])) {
     if (($_GET['turn'] == '1') || ($_GET['turn'] == '0')) $queryArray['turn'] = $_GET['turn'];
@@ -379,7 +412,8 @@ $fileTimestamp = '';
 if (pageExists($pageNum, $subpageNum)) { $fileTimestamp = date(DATE_ATOM, filemtime($currEp1Filename)); }
 
 // dynamically read turn rate from TTI file if TTI format is active
-if (strpos($ttxSourcePattern, '%ss%') === false && file_exists($currEp1Filename)) {
+$activeFormat = !empty($ttxForcedFormat) ? $ttxForcedFormat : strtolower(pathinfo($currEp1Filename, PATHINFO_EXTENSION));
+if ($activeFormat === 'tti' && file_exists($currEp1Filename)) {
     // only process TTI turnrates if the page has more than 1 subpage 
     // and the config array hasn't explicitly defined a rule for this page
     if ($numSubpages > 1 && !array_key_exists($pageNum, $ttxTurnRates)) {
@@ -440,6 +474,14 @@ if (isset($_GET['seqn0'])) {
 $pageTitle = str_replace('%page%', $pageNum, $ttxPageTitle);
 $pageTitle = str_replace('%sub%', $subpageNum, $pageTitle);
 
+// parse the given EP1 (or AST etc.) file so page metadata
+// is available for ttxEnv environment variables
+parseTeletextFile(getEp1Filename($pageNum, $subpageNum), $level15, $level1Data, $x26Data, $pageLanguage, $fileLanguage, $fileFormat);
+
+if ($langOverride !== '') {
+    $pageLanguage = $langOverride;
+}
+
 // include header template if not requested from XMLHttpRequest
 if (!($xhr)) include($templateFolder . '/header.php');
 
@@ -453,6 +495,7 @@ echo ' <div id="ttxEnv" style="display: none;">
   <pre id="ttxPageTitle">'      . $ttxPageTitle       . '</pre>
   <pre id="ttxQuery">'          . $queryString        . '</pre>
   <pre id="ttxLanguage">'       . $ttxLanguage        . '</pre>
+  <pre id="ttxPageLanguage">'   . $pageLanguage       . '</pre>
   <pre id="ttxPageNum">'        . $pageNum            . '</pre>
   <pre id="ttxPrevPageNum">'    . $prevPageNum        . '</pre>
   <pre id="ttxNextPageNum">'    . $nextPageNum        . '</pre>
@@ -462,16 +505,15 @@ echo ' <div id="ttxEnv" style="display: none;">
   <pre id="ttxRefresh">'        . $refresh            . '</pre>
   <pre id="ttxTurn">'           . intval($turn)       . '</pre>
   <pre id="ttxSeqn0">'          . intval($seqn0)      . '</pre>
+  <pre id="ttxFileLanguage">'   . $fileLanguage       . '</pre>
+  <pre id="ttxFileFormat">'     . $fileFormat         . '</pre>
   <pre id="ttxFileTimestamp">'  . $fileTimestamp      . '</pre>
  </div>
 
 ';
 
-// include teletext decoder functions
-include('ttxweb_decoder.php');
-
-// now, render the given EP1 (or AST etc.) file
-renderTeletextFile(getEp1Filename($pageNum, $subpageNum), $level15, $reveal);
+// now, decode and render the parsed teletext data
+decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal, $pageLanguage);
 
 // end ttxStage
 echo "</div>\n\n";

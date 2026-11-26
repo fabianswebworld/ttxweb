@@ -1,42 +1,88 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.9.0.832 (2026-11-14)
+// version: 1.10.0.846 (2026-11-26)
 // (c) 2023-2026 Fabian Schneider and Contributors - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
+const AST_ROW0_LANG_COL = 34;
 
-function renderTeletextFile($teletextFile, $level15, $reveal) {
+function parseTeletextFile($teletextFile, $level15, &$level1Data, &$x26Data, &$pageLanguage = null, &$fileLanguage = null, &$fileFormat = null) {
 
-    // render teletext file, select format/parser
-    // depending on file extension, this might be refined
-    // and extended to accommodate more formats/parsers
+    // select format/parser depending on file extension (or
+    // TTXWEB_FORMAT override) and parse teletext data into
+    // &$level1Data and &$x26Data; this might be refined and
+    // extended to accommodate more formats/parsers
 
-    switch (strtolower(pathinfo($teletextFile, PATHINFO_EXTENSION))) {
+    global $errorPageClassString, $ttxForcedFormat;
+
+    $errorPageClassString = '';
+    $level1Data = '';
+    $x26Data = '';
+    $fileLanguage = '';
+
+    if (!empty($ttxForcedFormat)) {
+        $format = $ttxForcedFormat;
+    }
+    elseif (defined('TTXWEB_FORMAT') && in_array(strtolower(trim(TTXWEB_FORMAT)), array('ep1', 'ast', 'tti'), true)) {
+        $format = strtolower(trim(TTXWEB_FORMAT));
+    }
+    else {
+        $format = strtolower(pathinfo($teletextFile, PATHINFO_EXTENSION));
+    }
+
+    $fileFormat = $format;
+
+    switch ($format) {
 
         case 'ep1':
-            parseEp1File($teletextFile, $level15, $level1Data, $x26Data);
+            parseEp1File($teletextFile, $level15, $level1Data, $x26Data, $fileLanguage);
             break;
         case 'ast':
-            parseAstFile($teletextFile, $level15, $level1Data, $x26Data);
+            parseAstFile($teletextFile, $level15, $level1Data, $x26Data, $fileLanguage);
             break;
         case 'tti':
-            parseTtiFile($teletextFile, $level15, $level1Data, $x26Data);
+            parseTtiFile($teletextFile, $level15, $level1Data, $x26Data, $fileLanguage);
+            break;
+        default:
+            $fileFormat = '';
             break;
 
     }
 
-    decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal);
+    if (!empty($errorPageClassString)) {
+        $fileFormat = '';
+    }
+
+    // determine effective page language
+    if (useFileLanguage() && $fileLanguage !== '' && getNationalSubset($fileLanguage, false) !== null) {
+        $pageLanguage = $fileLanguage;
+    }
+    else {
+        $pageLanguage = getDefaultPageLanguage();
+    }
 
 }
 
 
-function parseEp1File($ep1Filename, $level15, &$level1Data, &$x26Data) {
+function renderTeletextFile($teletextFile, $level15, $reveal) {
+
+    // parse and render teletext file
+
+    parseTeletextFile($teletextFile, $level15, $level1Data, $x26Data, $pageLanguage, $fileLanguage, $fileFormat);
+    decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal, $pageLanguage);
+
+}
+
+
+function parseEp1File($ep1Filename, $level15, &$level1Data, &$x26Data, &$fileLanguage = null) {
 
     // read and parse EP1 file, write unpacked output to
     // by-reference variables &$level1Data and &$x26Data
 
     global $errorPageClassString;
+
+    $fileLanguage = '';
 
     // handling of non-present or too small / 0-byte EP1 file
     if (!file_exists($ep1Filename) || (filesize($ep1Filename) < 512)) {
@@ -51,6 +97,15 @@ function parseEp1File($ep1Filename, $level15, &$level1Data, &$x26Data) {
         fclose($ep1Handle);
 
         // parse EP1 header:
+        // get language code
+
+        if (ord($ep1Contents[0]) === 0xfe && ord($ep1Contents[1]) === 0x01) {
+            $detectedLang = getEp1Language(ord($ep1Contents[2]));
+            if ($detectedLang !== null) {
+                $fileLanguage = $detectedLang;
+            }
+        }
+
         // get offset to raw level 1.0 teletext data
 
         $level1Offset = unpack('v', substr($ep1Contents, 4, 2))[1] + EP1_HEADER_LENGTH;
@@ -89,12 +144,14 @@ function parseEp1File($ep1Filename, $level15, &$level1Data, &$x26Data) {
 }
 
 
-function parseAstFile($astFilename, $level15, &$level1Data, &$x26Data) {
+function parseAstFile($astFilename, $level15, &$level1Data, &$x26Data, &$fileLanguage = null) {
 
     // read and parse ASTET file, write unpacked output to
     // by-reference variables &$level1Data and &$x26Data
 
     global $errorPageClassString;
+
+    $fileLanguage = '';
 
     // handling of non-present or too small / 0-byte AST file
     if (!file_exists($astFilename) || (filesize($astFilename) < 96)) {
@@ -144,6 +201,15 @@ function parseAstFile($astFilename, $level15, &$level1Data, &$x26Data) {
 
         ksort($astRowBuffer);
 
+        // read language letter from row 0
+
+        if (isset($astRowBuffer[0]) && strlen($astRowBuffer[0]) > AST_ROW0_LANG_COL) {
+            $detectedLang = getAstLanguage($astRowBuffer[0][AST_ROW0_LANG_COL]);
+            if ($detectedLang !== null) {
+                $fileLanguage = $detectedLang;
+            }
+        }
+
         // check if X/26 (level 1.5) data is present
 
         $x26Present = isset($astRowBuffer[26]);
@@ -163,7 +229,7 @@ function parseAstFile($astFilename, $level15, &$level1Data, &$x26Data) {
 }
 
 
-function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
+function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data, &$fileLanguage = null) {
 
     // Read and parse a TTI teletext file.
     // A TTI file contains one or more subpages separated by 'PN,' records.
@@ -176,6 +242,8 @@ function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
     // and parseAstFile() produce.
 
     global $errorPageClassString, $subpageNum;
+
+    $fileLanguage = '';
 
     // --- sanity check ---
     if (!file_exists($ttiFilename) || (filesize($ttiFilename) < 10)) {
@@ -209,6 +277,7 @@ function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
 
     $subpages = [];   // array of arrays-of-lines, indexed from 0
     $current  = null;
+    $defaultRegion = 0;
 
     foreach ($lines as $line) {
         if (strncmp($line, 'PN,', 3) === 0) {
@@ -219,6 +288,10 @@ function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
         }
         elseif ($current !== null) {
             $current[] = $line;
+        }
+        // geographic region (upper 4 bits of G0/G2 designation)
+        elseif (strncmp(ltrim($line), 'RE,', 3) === 0) {
+            $defaultRegion = intval(trim(substr(ltrim($line), 3)));
         }
     }
     if ($current !== null) {
@@ -248,7 +321,27 @@ function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
 
     $x26Raw = '';   // accumulates raw packet-26 bytes if present
 
+    $psBits = null;
+    $region = $defaultRegion;
+
     foreach ($blockLines as $line) {
+
+        $trimmedLine = ltrim($line);
+
+        // RE,<n> carries the ETSI Table 32 region (upper 4 bits of G0/G2 designation)
+        if (strncmp($trimmedLine, 'RE,', 3) === 0) {
+            $region = intval(trim(substr($trimmedLine, 3)));
+            continue;
+        }
+
+        // PS,<hex> carries the page status including 3-bit language code (bits 9..7)
+        if (strncmp($trimmedLine, 'PS,', 3) === 0) {
+            $psHex = trim(substr($trimmedLine, 3));
+            if ($psHex !== '' && ctype_xdigit($psHex)) {
+                $psBits = (hexdec($psHex) >> 7) & 0x07;
+            }
+            continue;
+        }
 
         // only OL lines carry row content
         if (strncmp($line, 'OL,', 3) !== 0) {
@@ -275,6 +368,13 @@ function parseTtiFile($ttiFilename, $level15, &$level1Data, &$x26Data) {
             // each decoded row is exactly 40 bytes of non-Hamming data, coded
             // using a special coding scheme (see below)
             $x26Raw .= ttiDecodeOlRow($rowData);
+        }
+    }
+
+    if ($psBits !== null) {
+        $detectedLang = getTtiLanguage($psBits, $region);
+        if ($detectedLang !== null) {
+            $fileLanguage = $detectedLang;
         }
     }
 
@@ -352,12 +452,16 @@ function ttiDecodeOlRow($rowData) {
 }
 
 
-function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal) {
+function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal, $pageLanguage = null) {
 
     global $queryString;
     global $errorPageClassString;
     global $showHeader;
     global $pageNum, $subpageNum, $prevPageNum, $nextPageNum, $prevSubpageNum, $nextSubpageNum, $numSubpages, $origNextSubpageNum;
+
+    if ($pageLanguage === null) {
+        $pageLanguage = getDefaultPageLanguage();
+    }
 
     echo "<div id=\"ttxContainer\">\n<div id=\"ttxPage\"" . $errorPageClassString . ">\n";
 
@@ -373,7 +477,7 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal) {
     // if present and enabled, decode X/26 data to page buffer
 
     if (!empty($x26Data) && $level15) {
-        decodeX26Chars($x26Data, $pageBuffer);
+        decodeX26Chars($x26Data, $pageBuffer, $pageLanguage);
     }
 
     // main level 1.0 decoding loop
@@ -542,7 +646,7 @@ function decodeAndRenderTeletextData($level1Data, $x26Data, $level15, $reveal) {
 
                     // G0 character
                     if (!$isLevel15) {
-                        $htmlOutChar = filter_var(g0ToHtml($currChar, EP1_LANGUAGE), FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW);
+                        $htmlOutChar = filter_var(g0ToHtml($currChar, $pageLanguage), FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW);
                     }
                     else {
                         $htmlOutChar = filter_var($currChar, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW);
@@ -769,7 +873,7 @@ function renderG1Char($g1Char, $fgColor, $g1Mode) {
 }
 
 
-function decodeX26Chars($x26Data, &$pageBuffer) {
+function decodeX26Chars($x26Data, &$pageBuffer, $pageLanguage = null) {
 
     // decode level 1.5 characters from packet X/26,
     // place the decoded HTML characters into the page buffer
@@ -792,7 +896,7 @@ function decodeX26Chars($x26Data, &$pageBuffer) {
         $g2CyrillicChars[0x70 + $index] = strtolower($letter);
     }
 
-    $activeLanguage = EP1_LANGUAGE;
+    $activeLanguage = ($pageLanguage !== null) ? $pageLanguage : getDefaultPageLanguage();
 
     foreach ($x26Packets as $x26Packet) {
         $x26Triplets = array_merge(
@@ -891,9 +995,34 @@ function designationToLanguage($designation) {
         0x05 => 'es-ES',
         0x06 => 'cs-CZ',
         0x08 => 'pl-PL',
+        0x09 => 'de-DE',
+        0x0a => 'sv-SE',
+        0x0b => 'it-IT',
+        0x0c => 'fr-FR',
+        0x0e => 'cs-CZ',
+        0x10 => 'en-GB',
+        0x11 => 'de-DE',
+        0x12 => 'sv-SE',
+        0x13 => 'it-IT',
+        0x14 => 'fr-FR',
+        0x15 => 'es-ES',
+        0x16 => 'tr-TR',
+        0x1d => 'hr-HR',
+        0x1f => 'ro-RO',
         0x20 => 'sr-Cyrl-RS',
+        0x21 => 'de-DE',
+        0x22 => 'et-EE',
+        0x23 => 'lt-LT',
         0x24 => 'ru-RU',
-        0x25 => 'uk-UA'
+        0x25 => 'uk-UA',
+        0x26 => 'cs-CZ',
+        0x36 => 'tr-TR',
+        0x37 => 'el-GR',
+        0x40 => 'en-GB',
+        0x44 => 'fr-FR',
+        0x47 => 'ar-SA',
+        0x55 => 'he-IL',
+        0x57 => 'ar-SA'
     );
 
     return isset($designations[$designation]) ? $designations[$designation] : null;
@@ -1038,10 +1167,91 @@ function decode13Triplets($x26Data) {
 }
 
 
-function getNationalSubset($ttxLanguage) {
+function useFileLanguage() {
+
+    return (defined('EP1_USE_FILE_LANG') && EP1_USE_FILE_LANG);
+
+}
+
+
+function getDefaultPageLanguage() {
+
+    if (defined('EP1_LANGUAGE') && EP1_LANGUAGE != '') {
+        return EP1_LANGUAGE;
+    }
+    return 'en-GB';
+
+}
+
+
+function getEp1Language($langCode) {
+
+    // map EP1 header byte 0x02 to a language tag,
+    // or null for 0xFF (other) / unknown codes
+
+    $languages = array(
+        0x07 => 'cs-CZ', // Czech/Slovak
+        0x08 => 'da-DK', // Danish
+        0x09 => 'en-GB', // English
+        0x0b => 'fr-FR', // French
+        0x0d => 'de-DE', // German
+        0x0e => 'el-GR', // Greek
+        0x11 => 'it-IT', // Italian
+        0x14 => 'pl-PL', // Polish
+        0x16 => 'ro-RO', // Romanian
+        0x17 => 'es-ES', // Portuguese/Spanish
+        0x18 => 'sv-SE', // Swedish/Finnish
+        0x1c => 'tr-TR', // Turkish
+        0x1e => 'hr-HR', // Serbian/Croatian/Slovenian
+        0xff => null     // Other
+    );
+
+    return isset($languages[$langCode]) ? $languages[$langCode] : null;
+
+}
+
+
+function getTtiLanguage($langBits, $region = 0) {
+
+    // combine TTI PS bits 9..7 (0..7) with optional RE region (bits 6..3)
+    // to look up ETSI EN 300 706 Table 32 in designationToLanguage()
+
+    if ($langBits < 0 || $langBits > 7 || $region < 0 || $region > 15) {
+        return null;
+    }
+
+    return designationToLanguage(($region << 3) | $langBits);
+
+}
+
+
+function getAstLanguage($codeChar) {
+
+    // map AST row 0 column 34 letter to a language tag,
+    // or null if unknown
+
+    $languages = array(
+        'Q' => 'en-GB', // English (default)
+        'D' => 'de-DE', // German
+        'E' => 'es-ES', // Spanish
+        'F' => 'fr-FR', // French
+        'H' => 'hu-HU', // Hungarian
+        'I' => 'it-IT', // Italian
+        'A' => 'ar-SA', // Arabic
+        'B' => 'hr-HR'  // Croatian
+    );
+
+    $codeChar = strtoupper((string)$codeChar);
+    return isset($languages[$codeChar]) ? $languages[$codeChar] : null;
+
+}
+
+
+function getNationalSubset($ttxLanguage, $fallback = true) {
 
     // return the national option code points of the active G0 set
-    // as array: G0 position => Unicode code point
+    // as array: G0 position => Unicode code point; if $fallback is
+    // false, returns null for unsupported/empty codes
 
     $subsets = array(
         'english'    => [0xa3, 0x24, 0x40, 0x2190, 0xbd, 0x2192, 0x2191, 0x23, 0x2014, 0xbc, 0x2551, 0xbe, 0xf7],
@@ -1092,6 +1302,7 @@ function getNationalSubset($ttxLanguage) {
         'sl' => 'croatian'
     );
 
+    $ttxLanguage = (string)$ttxLanguage;
     $languageCode = strtolower(substr($ttxLanguage, 0, 2));
     $latinPositions = [0x23, 0x24, 0x40, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f, 0x60, 0x7b, 0x7c, 0x7d, 0x7e];
 
@@ -1106,8 +1317,17 @@ function getNationalSubset($ttxLanguage) {
         return $subset;
     }
 
-    if (strtolower($ttxLanguage) == 'en-gb') return array_combine($latinPositions, $subsets['english']);
     if (isset($languageSubsets[$languageCode])) return array_combine($latinPositions, $subsets[$languageSubsets[$languageCode]]);
+
+    if (strtolower($ttxLanguage) == 'en-gb') return array_combine($latinPositions, $subsets['english']);
+
+    if (strtolower($ttxLanguage) == 'en-us') return null;
+
+    // fallback to English (GB) for null, empty, or unsupported language codes
+    // only when $fallback is true
+    if ($fallback) {
+        return array_combine($latinPositions, $subsets['english']);
+    }
 
     return null;
 
@@ -1128,8 +1348,9 @@ function g0ToHtml($ttxString, $ttxLanguage) {
     // replace national G0 characters by HTML entities
 
     static $replacements = array();
+    $cacheKey = (string)$ttxLanguage;
 
-    if (!isset($replacements[$ttxLanguage])) {
+    if (!isset($replacements[$cacheKey])) {
 
         $map = array(
             '&' => '&amp;',
@@ -1148,11 +1369,11 @@ function g0ToHtml($ttxString, $ttxLanguage) {
             }
         }
 
-        $replacements[$ttxLanguage] = $map;
+        $replacements[$cacheKey] = $map;
 
     }
 
-    return strtr($ttxString, $replacements[$ttxLanguage]);
+    return strtr($ttxString, $replacements[$cacheKey]);
 
 }
 
@@ -1184,9 +1405,20 @@ function renderRow0() {
     $myDate = new DateTime();
 
     if (class_exists('IntlDateFormatter')) {
-        $formatter = new IntlDateFormatter($ttxLanguage, IntlDateFormatter::FULL, IntlDateFormatter::FULL);
-        $formatter->setPattern('EEEEEE');
-        $myWeekDay = substr($formatter->format($myDate), 0, 2);
+        try {
+            $formatter = new IntlDateFormatter($ttxLanguage, IntlDateFormatter::FULL, IntlDateFormatter::FULL);
+            if ($formatter) {
+                $formatter->setPattern('EEEEEE');
+                $formatted = $formatter->format($myDate);
+                $myWeekDay = ($formatted !== false) ? substr($formatted, 0, 2) : substr($myDate->format('D'), 0, 2);
+            }
+            else {
+                $myWeekDay = substr($myDate->format('D'), 0, 2);
+            }
+        }
+        catch (\Throwable $e) {
+            $myWeekDay = substr($myDate->format('D'), 0, 2);
+        }
     }
     else {
         $myWeekDay = substr($myDate->format('D'), 0, 2);

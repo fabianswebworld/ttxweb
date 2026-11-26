@@ -50,9 +50,15 @@ The input files must be suitably synchronized to a folder accessible to the PHP 
 
 Files with a size of 0 bytes (e.g. used as "deletion files" in some Sophora installations) are considered non-existent; corresponding pages are treated as non-existent pages, i.e. skipped.
 
-##### Important note
+##### Important notes
 
-Historically, only the EP1 file format was supported by ttxweb, so the term "EP1 file" is used synonymously with "input file" throughout this documentation and also throughout the code. This explains function names such as "getEp1Filename()" which is used to get the input filename. The same applies to a number of configuration parameter names starting with "EP1_", which apply to multiple input file formats as well. Starting with version 1.7.0, thanks to the addition of the TTI file format parser by Max de Vos, some configuration parameters are specific to the TTI mode, which differs from the EP1 (or AST) mode in one important way: the TTI file format contains all subpages of a page in one single file, while EP1, AST and other formats contain only one subpage per file. These parameters have names starting with "TTI_". See the documentation below for details.
+Historically, only the EP1 file format was supported by ttxweb, so the term "EP1 file" is used synonymously with "input file" in some places in the documentation and also throughout the code. This explains function names such as "getEp1Filename()" which is used to get the input filename. The same applies to a number of configuration parameter names starting with `EP1_`, which apply to multiple input file formats as well.
+
+The file format actually used is inferred from the file extension given in the `EP1_PATTERN` option. Starting with version 1.7.0, thanks to the addition of the TTI file format parser by Max de Vos, ttxweb can read TTI files which normally contain multiple subpages inside one single file. For that reason, the %ss% (subpage) placeholder may be omitted from `EP1_PATTERN` if the `.tti` extension is used. Nevertheless, since version 1.10.0 it _is_ possible to use single-subpage TTI files by specifying a pattern using the `.tti` extension _and_ containing the `%ss%` placeholder, like `'P%pp%S%ss%.tti'`.
+
+**Non-standard file extensions (optional):** If your teletext exporter writes EP1, AST, or TTI files under a different extension (such as `.txt` or `.ttx`), you can optionally define `TTXWEB_FORMAT` as `'ep1'`, `'ast'`, or `'tti'` (case-insensitive) to force the corresponding parser regardless of the filename extension. Leave `TTXWEB_FORMAT` unset or empty to keep automatic extension detection.
+
+**Upgrading from versions 1.7.0 - 1.9.0:** Previously, `TTXWEB_FORMAT` was included in the default config (`'ep1'` or `'tti'`), and `TTI_PATH` / `TTI_PATTERN` were used to configure TTI sources if `TTXWEB_FORMAT` was set to `'tti'`. Both `TTI_PATH` and `TTI_PATTERN` are now deprecated and removed from the example configuration, though they still work when `TTXWEB_FORMAT` is set to `'tti'` (if omitted, `EP1_PATH` and `EP1_PATTERN` are used instead). If you keep an older config file with `TTXWEB_FORMAT = 'ep1'` while serving `.ast` files, remove `TTXWEB_FORMAT` (or update it to `'ast'` / `'tti'`), as `'ep1'` now would strictly force the EP1 parser.
 
 ### Deployment
 
@@ -70,16 +76,15 @@ The following configuration options are available to configure the behavior of t
 
     `const TTXWEB_TURN_RATES = [100 => 8, 170 => 3, 198 => 20, 220 => 6, 280 => 6, 300 => 0];`
 
-  - const **TTXWEB_FORMAT** - Which type of source page format to use: 'ep1' (EP1/AST files, one file per subpage) or 'tti' (TTI files, one file per page, including all subpages in one single file); for AST files, specifying 'ast' is possible as well (default: 'ep1')
-  - const **EP1_PATH** - Path to the input files in single-subpage-per-file (EP1/AST) mode (default: 'ep1/')
-  - const **EP1_PATTERN** - Pattern for the EP1/AST input filenames (where %ppp% = page, %ss% = subpage; default: 'P%ppp%S%ss%.EP1')  
+  - const **TTXWEB_FORMAT** - Optional and not included in the example configuration; used to override the file-extension-based selection of the parser (e.g. if you have .tti files with .txt extension, default: *not set* = infer format from file extension in `EP1_PATTERN`)
+  - const **EP1_PATH** - Path to the input files (default: 'ep1/')
+  - const **EP1_PATTERN** - Pattern for the EP1/AST/TTI input filenames (where %ppp% = page, %ss% = subpage; for multi-subpage file formats like TTI, the %ss% placeholder may be omitted; default: 'P%ppp%S%ss%.EP1')  
     **Example:**
 
     `const EP1_PATTERN = 'P%ppp%S%ss%.EP1';`
 
-  - const **TTI_PATH** - Path to the input files in all-subpages-in-one-file (TTI) mode (default: 'tti/')
-  - const **TTI_PATTERN** - Pattern for the TTI input filenames (where %ppp% = page; default: 'P%ppp%.tti')
-  - const **EP1_LANGUAGE** - Teletext language (default: 'en-US', possible values: 'en-US' | 'en-GB' | 'de-DE' | 'sv-SE' | 'fi-FI' | 'hu-HU' | 'it-IT' | 'fr-FR' | 'pt-PT' | 'es-ES' | 'cs-CZ' | 'sk-SK' | 'pl-PL' | 'et-EE' | 'lt-LT' | 'lv-LV' | 'ro-RO' | 'hr-HR' | 'sr-RS' | 'sl-SI' | 'ru-RU' | 'bg-BG' | 'uk-UA' | 'mk-MK' | 'sr-Cyrl-RS')
+  - const **EP1_LANGUAGE** - Teletext language (national option set), also used for custom row 0 (default: 'en-GB', possible values: 'en-US' | 'en-GB' | 'de-DE' | 'sv-SE' | 'fi-FI' | 'hu-HU' | 'it-IT' | 'fr-FR' | 'pt-PT' | 'es-ES' | 'cs-CZ' | 'sk-SK' | 'pl-PL' | 'et-EE' | 'lt-LT' | 'lv-LV' | 'ro-RO' | 'hr-HR' | 'sr-RS' | 'sl-SI' | 'ru-RU' | 'bg-BG' | 'uk-UA' | 'mk-MK' | 'sr-Cyrl-RS')
+  - const **EP1_USE_FILE_LANG** - Read individual page languages from EP1/TTI/AST file headers if possible, else use the language specified in EP1_LANGUAGE (default: false)
   - const **EP1_DECODE_X26** - Decode packet X/26 (level 1.5 characters) (default: true)
   - const **EP1_ALWAYS_REVEAL** - Always reveal concealed text on load (default: false)
   - const **NO_PAGE_STRING** - String for 'Page not found' (default: empty)
@@ -130,7 +135,7 @@ The following configuration options are available to configure the behavior of t
     - **$prevSubpageNum** - Previous subpage
     - **$numSubpages** - Number of subpages
     - **$pageTitle** - Page title as defined via TTXWEB_PAGE_TITLE
-    - **$fileTimestamp** - Timestamp (modification time) of the EP1/AST file currently rendered
+    - **$fileTimestamp** - Timestamp (modification time) of the EP1/AST/TTI file currently rendered
 
 - **templates/\<templatename\>/trailer.php:**
   - HTML template, which is output after the actual teletext output. The same variables apply as in **header.php**.
@@ -151,6 +156,7 @@ The following URL parameters are supported (if provided, they override the value
 - **template** - override configured template name (default: set by TTXWEB_TEMPLATE in ttxweb_config.php)
 - **turn** - 0 (do not automatically turn subpages) | 1 (turn subpage on every XHR refresh) | *not set* (turn according to information in source file or TTXWEB_TURN_RATES in ttxweb_config.php, with the latter taking precedence, **default**)
 - **seqn0** - 0 (display actual subpage number in header) | 1 (display subpage number in header as *00*; useful for "animated" pages that otherwise have no multi-page content and would be transmitted with 0000 instead of SEQN in linear transmission) | *not set* (show subpage number as *00* only for pages defined in TTXWEB_TURN_RATES, **default**)
+- **lang** - force language / national option set (e.g. 'de-DE', 'en-GB', 'fr-FR', default: set by EP1_LANGUAGE and/or EP1_USE_FILE_LANG in ttxweb_config.php)
 - **xhr** - this parameter is used internally to implement the XMLHttpRequest refresh function. By setting it to 1 you can get only the ttxStage part of the page if you want to embed it in your own XMLHttpRequest applications.
 - **stream** - present an alternate teletext stream by loading a different config file, *ttxweb_config-**\<stream\>**.php*, possibly pointing to a different input file folder and/or using a different input filename pattern
 
