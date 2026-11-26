@@ -8,21 +8,11 @@ const TTXWEB_TEMPLATE    = 'default';                         // folder to use f
 const TTXWEB_REFRESH     = 60;                                // seconds for automatic refresh via XHR, default: 0 = disabled
 const TTXWEB_TURN_RATES  = [100 => 10, 200 => 8];             // array of pages that should turn automatically, and how fast
 
-const TTXWEB_FORMAT      = 'ep1';                             // which page source to use: 'ep1' (EP1/AST files) or 'tti' (TTI files)
+const EP1_PATH           = 'ep1/';                            // relative path to EP1/AST/TTI teletext files
+const EP1_PATTERN        = 'P%ppp%S%ss%.EP1';                 // pattern for the filenames (%ppp% = page, %ss% = subpage)
 
-const EP1_PATH           = 'ep1/';                            // relative path to EP1 files
-const EP1_PATTERN        = 'P%ppp%S%ss%.EP1';                 // pattern for the EP1 filenames (%ppp% = page, %ss% = subpage)
-
-// --- TTI files (used instead of EP1/AST when TTXWEB_FORMAT is set to 'tti') ---
-// TTI files store all subpages of a page inside a single .tti file,
-// so there is no separate filename per subpage and therefore
-// no %ss% placeholder in TTI_PATTERN below. Subpages are instead
-// detected by counting the 'PN,' records inside the file.
-
-const TTI_PATH           = 'tti/';                            // relative path to TTI files
-const TTI_PATTERN        = 'P%ppp%.tti';                      // pattern for the TTI filenames (%ppp% = page) - no %ss%, subpages are inside the file
-
-const EP1_LANGUAGE       = 'de-DE';                           // teletext language (national option sets, e.g. 'de-DE', 'en-GB', 'fr-FR', 'uk-UA')
+const EP1_LANGUAGE       = 'de-DE';                           // teletext language (national option set, e.g. 'de-DE', 'en-GB'), also used for header
+const EP1_USE_FILE_LANG  = false;                             // use individual page languages from EP1/AST/TTI files if present, else use the above
 const EP1_DECODE_X26     = true;                              // decode packet X/26 (level 1.5 characters)
 const EP1_ALWAYS_REVEAL  = false;                             // always reveal concealed text on load
 
