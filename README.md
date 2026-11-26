@@ -50,7 +50,7 @@ The input files must be suitably synchronized to a folder accessible to the PHP 
 
 Files with a size of 0 bytes (e.g. used as "deletion files" in some Sophora installations) are considered non-existent; corresponding pages are treated as non-existent pages, i.e. skipped.
 
-##### Important notes
+#### Important notes
 
 Historically, only the EP1 file format was supported by ttxweb, so the term "EP1 file" is used synonymously with "input file" in some places in the documentation and also throughout the code. This explains function names such as "getEp1Filename()" which is used to get the input filename. The same applies to a number of configuration parameter names starting with `EP1_`, which apply to multiple input file formats as well.
 
