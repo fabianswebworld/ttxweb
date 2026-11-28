@@ -1,3 +1,12 @@
+1.10.1.848
+
+- Even more language codes are now recognized for the EP1 and AST file formats (e.g. Turkish)
+- Implemented Turkish national option set, completing support for Turkish language teletext
+- Fixed EP1 'American' (en-US, 0x00) file language detection being rejected when EP1_USE_FILE_LANG is enabled
+- JS fix: eliminated duplicate header refresh timers on every page turn or XHR refresh
+- Added fallback defaults for omitted configuration constants
+- Restored compatibility with older PHP versions
+
 1.10.0.846
 
 - New: ttxweb can read and use the language code from the file headers of the individual teletext files now (supports EP1, AST and TTI), allowing for multi-language services (to use this feature, you must set EP1_USE_FILE_LANG to true); for files with no, an invalid, or an unimplemented language code, the language set by EP1_LANGUAGE is used

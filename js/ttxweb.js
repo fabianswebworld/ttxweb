@@ -1,5 +1,5 @@
 // ttxweb client-side scripts
-// version: 1.10.0.846 (2026-11-26)
+// version: 1.10.1.848 (2026-11-28)
 // documentation: https://github.com/fabianswebworld/ttxweb
 
 function ttxReadEnv(fromXhrRefresh) {
@@ -109,6 +109,9 @@ function ttxReadEnv(fromXhrRefresh) {
 
   if (document.getElementById('ttxRow0Header').innerHTML != 1) {
     renderRow0();
+  }
+  else {
+    clearTimeout(row0TimeoutId);
   }
 
 }
@@ -234,6 +237,8 @@ function xhrLoadPage(page, subpage, historyMode, focusNumPad, rereadSeqn0) {
 
 function renderRow0() {
 
+  clearTimeout(row0TimeoutId);
+
   var myDate = new Date();
 
   var myWeekDay = myDate.toLocaleString(document.getElementById('ttxLanguage').innerHTML, {weekday: 'long'}).substring(0, 2);
@@ -253,7 +258,7 @@ function renderRow0() {
 
   document.getElementById('row0').innerHTML = myRow0;
 
-  setTimeout(renderRow0, 1000);
+  row0TimeoutId = setTimeout(renderRow0, 1000);
 
 }
 
@@ -451,7 +456,7 @@ String.prototype.trim = function() {
 }
 
 
-var revealState, refreshTimer, refreshState, refreshTimeoutId, updateLocationTimeoutId;
+var revealState, refreshTimer, refreshState, refreshTimeoutId, row0TimeoutId, updateLocationTimeoutId;
 var turn, seqn0, subpageIndicator, pageTitle, pageNum, subpageNum, numSubpages;
 var prevPageNum, nextPageNum, prevSubpageNum, nextSubpageNum;
 var prevPageButton, nextPageButton, prevSubpageButton, nextSubpageButton, queryUrl;

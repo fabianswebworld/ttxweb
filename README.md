@@ -40,7 +40,7 @@ See it in **production use** at:
 
 #### System requirements
 
-A web server with PHP >= 5.6 is required. The PHP intl extension is recommended, but not required (English date formats are used as a fallback). There are no other requirements (like mySQL etc.).
+A web server with PHP >= 5.6 is required. The PHP intl extension is recommended, but not required (English date formats are used as a fallback). There are _no_ other requirements (like MySQL etc.).
 
 #### Input files
 
@@ -54,7 +54,7 @@ Files with a size of 0 bytes (e.g. used as "deletion files" in some Sophora inst
 
 Historically, only the EP1 file format was supported by ttxweb, so the term "EP1 file" is used synonymously with "input file" in some places in the documentation and also throughout the code. This explains function names such as "getEp1Filename()" which is used to get the input filename. The same applies to a number of configuration parameter names starting with `EP1_`, which apply to multiple input file formats as well.
 
-The file format actually used is inferred from the file extension given in the `EP1_PATTERN` option. Starting with version 1.7.0, thanks to the addition of the TTI file format parser by Max de Vos, ttxweb can read TTI files which normally contain multiple subpages inside one single file. For that reason, the %ss% (subpage) placeholder may be omitted from `EP1_PATTERN` if the `.tti` extension is used. Nevertheless, since version 1.10.0 it _is_ possible to use single-subpage TTI files by specifying a pattern using the `.tti` extension _and_ containing the `%ss%` placeholder, like `'P%pp%S%ss%.tti'`.
+The file format actually used is inferred from the file extension given in the `EP1_PATTERN` option. Starting with version 1.7.0, thanks to the addition of the TTI file format parser by Max de Vos, ttxweb can read TTI files which normally contain multiple subpages inside one single file. For that reason, the %ss% (subpage) placeholder may be omitted from `EP1_PATTERN` if the `.tti` extension is used. Nevertheless, since version 1.10.0 it _is_ possible to use single-subpage TTI files by specifying a pattern using the `.tti` extension _and_ containing the `%ss%` placeholder, like `'P%ppp%S%ss%.tti'`.
 
 **Non-standard file extensions (optional):** If your teletext exporter writes EP1, AST, or TTI files under a different extension (such as `.txt` or `.ttx`), you can optionally define `TTXWEB_FORMAT` as `'ep1'`, `'ast'`, or `'tti'` (case-insensitive) to force the corresponding parser regardless of the filename extension. Leave `TTXWEB_FORMAT` unset or empty to keep automatic extension detection.
 
@@ -69,22 +69,22 @@ The PHP script and all auxiliary files must be copied to the web server and conf
 The following configuration options are available to configure the behavior of ttxweb and adapt the output to your own website design:
 
 - **includes/ttxweb_config.php:**
-  - const **TTXWEB_TEMPLATE** - Template name, i.e. folder to use for HTML templates (must be a subfolder in the **templates/** folder, default: 'default')
+  - const **TTXWEB_TEMPLATE** - Template name, i.e. folder to use for HTML templates; must be a subfolder in the **templates/** folder (default: 'default')
   - const **TTXWEB_REFRESH** - Seconds for automatic refresh via XHR (default: 0 = disabled)
   - const **TTXWEB_TURN_RATES** - Array of pages that should turn automatically, and how fast (example see file or below); in TTI file mode, the turn rates from the TTI files are used (more specifically: the first CT record from the TTI file is used for all subpages in that file); you can still override TTI pages that include CT records to use a different turn rate, or to not turn at all, by including them in the array (setting to 0 disables turning)  
     **Example:**
 
     `const TTXWEB_TURN_RATES = [100 => 8, 170 => 3, 198 => 20, 220 => 6, 280 => 6, 300 => 0];`
 
-  - const **TTXWEB_FORMAT** - Optional and not included in the example configuration; used to override the file-extension-based selection of the parser (e.g. if you have .tti files with .txt extension, default: *not set* = infer format from file extension in `EP1_PATTERN`)
+  - const **TTXWEB_FORMAT** - Optional and not included in the example configuration; used to override the file-extension-based selection of the parser, e.g. if you have .tti files with .ttx extension (default: *not set* = infer format from file extension in `EP1_PATTERN`)
   - const **EP1_PATH** - Path to the input files (default: 'ep1/')
-  - const **EP1_PATTERN** - Pattern for the EP1/AST/TTI input filenames (where %ppp% = page, %ss% = subpage; for multi-subpage file formats like TTI, the %ss% placeholder may be omitted; default: 'P%ppp%S%ss%.EP1')  
+  - const **EP1_PATTERN** - Pattern for the EP1/AST/TTI input filenames, where %ppp% = page, %ss% = subpage; for multi-subpage file formats like TTI, the %ss% placeholder may be omitted (default: 'P%ppp%S%ss%.EP1')  
     **Example:**
 
     `const EP1_PATTERN = 'P%ppp%S%ss%.EP1';`
 
-  - const **EP1_LANGUAGE** - Teletext language (national option set), also used for custom row 0 (default: 'en-GB', possible values: 'en-US' | 'en-GB' | 'de-DE' | 'sv-SE' | 'fi-FI' | 'hu-HU' | 'it-IT' | 'fr-FR' | 'pt-PT' | 'es-ES' | 'cs-CZ' | 'sk-SK' | 'pl-PL' | 'et-EE' | 'lt-LT' | 'lv-LV' | 'ro-RO' | 'hr-HR' | 'sr-RS' | 'sl-SI' | 'ru-RU' | 'bg-BG' | 'uk-UA' | 'mk-MK' | 'sr-Cyrl-RS')
-  - const **EP1_USE_FILE_LANG** - Read individual page languages from EP1/TTI/AST file headers if possible, else use the language specified in EP1_LANGUAGE (default: false)
+  - const **EP1_LANGUAGE** - Teletext language (national option set), also used for custom row 0; possible values: 'en-US' | 'en-GB' | 'de-DE' | 'de-AT' | 'de-CH' | 'sv-SE' | 'fi-FI' | 'hu-HU' | 'it-IT' | 'it-CH' | 'fr-FR' | 'fr-CH' | 'fr-BE' | 'pt-PT' | 'es-ES' | 'tr-TR' | 'cs-CZ' | 'sk-SK' | 'pl-PL' | 'et-EE' | 'lt-LT' | 'lv-LV' | 'ro-RO' | 'hr-HR' | 'sr-RS' | 'sl-SI' | 'ru-RU' | 'bg-BG' | 'uk-UA' | 'mk-MK' | 'sr-Cyrl-RS' (default: 'en-GB')
+  - const **EP1_USE_FILE_LANG** - Read individual page languages from EP1/TTI/AST file headers if possible, else use the language specified in EP1_LANGUAGE; applies to page content only, custom row 0 always uses EP1_LANGUAGE (default: false)
   - const **EP1_DECODE_X26** - Decode packet X/26 (level 1.5 characters) (default: true)
   - const **EP1_ALWAYS_REVEAL** - Always reveal concealed text on load (default: false)
   - const **NO_PAGE_STRING** - String for 'Page not found' (default: empty)
@@ -99,15 +99,15 @@ The following configuration options are available to configure the behavior of t
       - **%sub%** - Current subpage
       - **%weekday%** - Current day of the week (2 characters) in the configured language (see EP1_LANGUAGE)
       - **%day%** - Current day (2 digits)
-      - **%month%** - current month (2 digits)
+      - **%month%** - Current month (2 digits)
       - **%year%** - Current year (2 digits)
       - **%hh%** - Current hour (2 digits)
-      - **%mm%** - current minute (2 digits)
-      - **%ss%** - current second (2 digits)
+      - **%mm%** - Current minute (2 digits)
+      - **%ss%** - Current second (2 digits)
     - Other formats would have to be added to ttxweb.js.  
       **Example:**
       
-      `const ROW_0_CUSTOMHEADER = '<span class="bg0 fg7"><span class="fg7"> %page%.%sub% </span><span class="fg6">ttxweb  </span><span class="fg7">%weekday% %day%.%month%.%year% </span><span class="fg6">%hh%:%mm%:%ss%</span></span >';`
+      `const ROW_0_CUSTOMHEADER = '<span class="bg0 fg7"><span class="fg7"> %page%.%sub% </span><span class="fg6">ttxweb  </span><span class="fg7">%weekday% %day%.%month%.%year% </span><span class="fg6">%hh%:%mm%:%ss%</span></span>';`
  
   - const **TTXWEB_PAGE_TITLE** - Template for page title, i.e. browser window title (a value for this *must* be provided, no default value)
     - Format for **TTXWEB_PAGE_TITLE**:
@@ -135,6 +135,9 @@ The following configuration options are available to configure the behavior of t
     - **$prevSubpageNum** - Previous subpage
     - **$numSubpages** - Number of subpages
     - **$pageTitle** - Page title as defined via TTXWEB_PAGE_TITLE
+    - **$pageLanguage** - Effective teletext language used by the decoder to render this page
+    - **$fileLanguage** - Language indicated in the file header of the EP1/AST/TTI file currently rendered
+    - **$fileFormat** - File format of the currently rendered teletext page
     - **$fileTimestamp** - Timestamp (modification time) of the EP1/AST/TTI file currently rendered
 
 - **templates/\<templatename\>/trailer.php:**
@@ -148,18 +151,18 @@ The following configuration options are available to configure the behavior of t
 The following URL parameters are supported (if provided, they override the values configured in ttxweb_config.php where applicable):
 
 - **level15** - 0 (decode only level 1.0 characters) | 1 (also decode level 1.5 characters, **default**)
-- **header** - 0 (Show locally generated header, **default**) | 1 (Show Row 0 from EP1/AST/TTI file)
+- **header** - 0 (show locally generated header, **default**) | 1 (show Row 0 from EP1/AST/TTI file)
 - **page** - 100 (**default**) .. 899 - Page number to be displayed
 - **sub** - 1 (**default**) .. 99 - Subpage to be displayed
 - **reveal** - 0 (hide concealed text) | 1 (reveal concealed text on page load) (default: set by EP1_ALWAYS_REVEAL in ttxweb_config.php)
-- **refresh** - seconds for auto refresh via XHR, 0 = disabled (default: set by TTXWEB_REFRESH in ttxweb_config.php)
-- **template** - override configured template name (default: set by TTXWEB_TEMPLATE in ttxweb_config.php)
+- **refresh** - Seconds for auto refresh via XHR, 0 = disabled (default: set by TTXWEB_REFRESH in ttxweb_config.php)
+- **template** - Override configured template name (default: set by TTXWEB_TEMPLATE in ttxweb_config.php)
 - **turn** - 0 (do not automatically turn subpages) | 1 (turn subpage on every XHR refresh) | *not set* (turn according to information in source file or TTXWEB_TURN_RATES in ttxweb_config.php, with the latter taking precedence, **default**)
 - **seqn0** - 0 (display actual subpage number in header) | 1 (display subpage number in header as *00*; useful for "animated" pages that otherwise have no multi-page content and would be transmitted with 0000 instead of SEQN in linear transmission) | *not set* (show subpage number as *00* only for pages defined in TTXWEB_TURN_RATES, **default**)
-- **lang** - force language / national option set (e.g. 'de-DE', 'en-GB', 'fr-FR', default: set by EP1_LANGUAGE and/or EP1_USE_FILE_LANG in ttxweb_config.php)
-- **xhr** - this parameter is used internally to implement the XMLHttpRequest refresh function. By setting it to 1 you can get only the ttxStage part of the page if you want to embed it in your own XMLHttpRequest applications.
-- **stream** - present an alternate teletext stream by loading a different config file, *ttxweb_config-**\<stream\>**.php*, possibly pointing to a different input file folder and/or using a different input filename pattern
+- **lang** - Force language / national option set (e.g. 'de-DE', 'en-GB', 'fr-FR', default: set by EP1_LANGUAGE and/or EP1_USE_FILE_LANG in ttxweb_config.php)
+- **xhr** - This parameter is used internally to implement the XMLHttpRequest refresh function. By setting it to 1 you can get only the ttxStage part of the page if you want to embed it in your own XMLHttpRequest applications.
+- **stream** - Present an alternate teletext stream by loading a different config file, *ttxweb_config-**\<stream\>**.php*, possibly pointing to a different input file folder and/or using a different input filename pattern
 
-# Contact the author
+## Contact the author
 
 Questions, suggestions, requests please send via the contact form or the other available contact means at www.fabianswebworld.de. Please also note the license terms in the LICENSE.md file (available, and authoritative, in German only).

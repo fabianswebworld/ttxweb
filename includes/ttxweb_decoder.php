@@ -1,7 +1,7 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.10.0.846 (2026-11-26)
+// version: 1.10.1.848 (2026-11-28)
 // (c) 2023-2026 Fabian Schneider and Contributors - @fabianswebworld
 
 const EP1_HEADER_LENGTH = 6;
@@ -55,7 +55,7 @@ function parseTeletextFile($teletextFile, $level15, &$level1Data, &$x26Data, &$p
     }
 
     // determine effective page language
-    if (useFileLanguage() && $fileLanguage !== '' && getNationalSubset($fileLanguage, false) !== null) {
+    if (useFileLanguage() && $fileLanguage !== '' && (getNationalSubset($fileLanguage, false) !== null || strtolower($fileLanguage) === 'en-us')) {
         $pageLanguage = $fileLanguage;
     }
     else {
@@ -1130,7 +1130,7 @@ function decode13Triplets($x26Data) {
 
     $result = '';
 
-    $packetCount = intdiv($length, 40);
+    $packetCount = (int)($length / 40);
 
     for ($p = 0; $p < $packetCount; $p++) {
 
@@ -1190,20 +1190,38 @@ function getEp1Language($langCode) {
     // or null for 0xFF (other) / unknown codes
 
     $languages = array(
-        0x07 => 'cs-CZ', // Czech/Slovak
-        0x08 => 'da-DK', // Danish
-        0x09 => 'en-GB', // English
-        0x0b => 'fr-FR', // French
-        0x0d => 'de-DE', // German
-        0x0e => 'el-GR', // Greek
-        0x11 => 'it-IT', // Italian
-        0x14 => 'pl-PL', // Polish
-        0x16 => 'ro-RO', // Romanian
-        0x17 => 'es-ES', // Portuguese/Spanish
-        0x18 => 'sv-SE', // Swedish/Finnish
-        0x1c => 'tr-TR', // Turkish
-        0x1e => 'hr-HR', // Serbian/Croatian/Slovenian
-        0xff => null     // Other
+        0x00 => 'en-US',    // English (US)
+        0x01 => 'ar-SA',    // Arabic
+        0x02 => 'de-AT',    // German (AT)
+        0x03 => 'fr-BE',    // French (BE)
+        0x04 => 'bg-BG',    // Bulgarian
+        0x05 => 'zh-CN',    // Chinese
+        0x06 => 'ru-RU',    // Russian
+        0x07 => 'cs-CZ',    // Czech
+        0x08 => 'da-DK',    // Danish
+        0x09 => 'en-GB',    // English (GB)
+        0x0a => 'fi-FI',    // Finnish
+        0x0b => 'fr-FR',    // French
+        0x0c => 'fr-FR',    // French
+        0x0d => 'de-DE',    // German
+        0x0e => 'el-GR',    // Greek
+        0x0f => 'hu-HU',    // Hungarian
+        0x10 => 'he-IL',    // Hebrew
+        0x11 => 'it-IT',    // Italian
+        0x12 => 'ja-JP',    // Japanese
+        0x13 => 'nb-NO',    // Norwegian
+        0x14 => 'pl-PL',    // Polish
+        0x15 => 'pt-PT',    // Portuguese
+        0x16 => 'ro-RO',    // Romanian
+        0x17 => 'es-ES',    // Spanish
+        0x18 => 'sv-SE',    // Swedish
+        0x19 => 'fr-CH',    // French (CH)
+        0x1a => 'de-CH',    // German (CH)
+        0x1b => 'it-CH',    // Italian (CH)
+        0x1c => 'tr-TR',    // Turkish
+        0x1d => 'hr-HR',    // Serbian/Croatian/Slovenian
+        0x1e => 'hr-HR',    // Serbian/Croatian/Slovenian
+        0xff => null        // Other
     );
 
     return isset($languages[$langCode]) ? $languages[$langCode] : null;
@@ -1227,18 +1245,28 @@ function getTtiLanguage($langBits, $region = 0) {
 
 function getAstLanguage($codeChar) {
 
-    // map AST row 0 column 34 letter to a language tag,
+    // map AST row 0 language letter to a language tag,
     // or null if unknown
 
     $languages = array(
-        'Q' => 'en-GB', // English (default)
-        'D' => 'de-DE', // German
-        'E' => 'es-ES', // Spanish
-        'F' => 'fr-FR', // French
-        'H' => 'hu-HU', // Hungarian
-        'I' => 'it-IT', // Italian
-        'A' => 'ar-SA', // Arabic
-        'B' => 'hr-HR'  // Croatian
+        'Q' => 'en-GB',    // English (default)
+        'F' => 'fr-FR',    // French
+        'S' => 'sv-SE',    // Swedish/Finnish
+        'D' => 'de-DE',    // German
+        'E' => 'es-ES',    // Spanish
+        'I' => 'it-IT',    // Italian
+        'A' => 'ar-SA',    // Arabic
+        'X' => 'ar-SA',    // Arabic
+        'C' => 'cs-CZ',    // Czech/Slovak
+        'H' => 'hu-HU',    // Hungarian
+        'K' => 'el-GR',    // Greek
+        'L' => 'is-IS',    // Icelandic
+        'P' => 'pl-PL',    // Polish
+        'T' => 'tr-TR',    // Turkish
+        'U' => 'ru-RU',    // Russian/Bulgarian (Cyrillic)
+        'Z' => 'uk-UA',    // Ukrainian (Cyrillic)
+        'B' => 'hr-HR',    // Croatian/Serbian (Latin)
+        'W' => 'ro-RO'     // Romanian
     );
 
     $codeChar = strtoupper((string)$codeChar);
@@ -1260,6 +1288,7 @@ function getNationalSubset($ttxLanguage, $fallback = true) {
         'italian'    => [0xa3, 0x24, 0xe9, 0xb0, 0xe7, 0x2192, 0x2191, 0x23, 0xf9, 0xe0, 0xf2, 0xe8, 0xec],
         'french'     => [0xe9, 0xef, 0xe0, 0xeb, 0xea, 0xf9, 0xee, 0x23, 0xe8, 0xe2, 0xf4, 0xfb, 0xe7],
         'iberian'    => [0xe7, 0x24, 0xa1, 0xe1, 0xe9, 0xed, 0xf3, 0xfa, 0xbf, 0xfc, 0xf1, 0xe8, 0xe0],
+        'turkish'    => [0x20a4, 0x11f, 0x130, 0x15e, 0xd6, 0xc7, 0xdc, 0x11e, 0x131, 0x15f, 0xf6, 0xe7, 0xfc],
         'czech'      => [0x23, 0x16f, 0x10d, 0x165, 0x17e, 0xfd, 0xed, 0x159, 0xe9, 0xe1, 0x11b, 0xfa, 0x161],
         'polish'     => [0x23, 0x144, 0x105, 0x17b, 0x15a, 0x141, 0x107, 0xf3, 0x119, 0x17c, 0x15b, 0x142, 0x17a],
         'estonian'   => [0x23, 0xf5, 0x160, 0xc4, 0xd6, 0x17d, 0xdc, 0xd5, 0x161, 0xe4, 0xf6, 0x17e, 0xfc],
@@ -1290,6 +1319,7 @@ function getNationalSubset($ttxLanguage, $fallback = true) {
         'fr' => 'french',
         'pt' => 'iberian',
         'es' => 'iberian',
+        'tr' => 'turkish',
         'cs' => 'czech',
         'sk' => 'czech',
         'pl' => 'polish',
@@ -1417,6 +1447,9 @@ function renderRow0() {
             }
         }
         catch (\Throwable $e) {
+            $myWeekDay = substr($myDate->format('D'), 0, 2);
+        }
+        catch (\Exception $e) {
             $myWeekDay = substr($myDate->format('D'), 0, 2);
         }
     }

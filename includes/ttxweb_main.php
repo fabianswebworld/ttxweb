@@ -1,12 +1,12 @@
 <?php
 
 // ttxweb.php teletext document renderer
-// version: 1.10.0.846 (2026-11-26)
+// version: 1.10.1.848 (2026-11-28)
 // (c) 2023-2026 Fabian Schneider and Contributors - @fabianswebworld
 
 // GLOBAL DEFINITIONS
 
-const TTXWEB_VERSION = '1.10.0.846 (2026-11-26)';     // version string
+const TTXWEB_VERSION = '1.10.1.848 (2026-11-28)';     // version string
 
 // for user and template configuration see ttxweb_config.php
 
@@ -343,7 +343,7 @@ if (!empty($_GET['template'])) {
     $templateName = str_replace('/', '', htmlspecialchars(strip_tags($_GET['template']), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
 }
 else {
-    $templateName = TTXWEB_TEMPLATE;
+    $templateName = defined('TTXWEB_TEMPLATE') ? TTXWEB_TEMPLATE : 'default';
 }
 if (empty($templateName)) { $templateName = 'default'; }
 
@@ -375,6 +375,12 @@ if ($templateName != '') {
 $templateConfig = $templateFolder . '/template_config.php';
 if (file_exists($templateConfig)) {
     include($templateConfig);
+    if (!defined('EP1_DECODE_X26'))     define('EP1_DECODE_X26', true);
+    if (!defined('EP1_ALWAYS_REVEAL'))  define('EP1_ALWAYS_REVEAL', false);
+    if (!defined('NO_PAGE_STRING'))     define('NO_PAGE_STRING', '');
+    if (!defined('TO_PAGE_STRING'))     define('TO_PAGE_STRING', '');
+    if (!defined('TO_SUBPAGE_STRING'))  define('TO_SUBPAGE_STRING', '');
+    if (!defined('TTXWEB_VERSION_EXT')) define('TTXWEB_VERSION_EXT', '');
 }
 else {
     die('Cannot access template configuration. ttxweb cannot continue.');
